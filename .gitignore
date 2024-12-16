@@ -1,0 +1,12 @@
+
+node_modules
+.env
+.idea
+.env.local
+# build
+.vscode
+.DS_Store
+my-migrations/.DS_Store)
+build
+prisma/seed.ts
+prisma/seed.js
