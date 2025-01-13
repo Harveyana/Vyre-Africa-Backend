@@ -15,8 +15,8 @@ import adminAdvertController from '../controllers/admin/admin.advert.controller'
 import adminNotificationController from '../controllers/admin/admin.notification.controller';
 import adminDashboardController from '../controllers/admin/admin.dashboard.controller';
 import roleValidator from '../validators/role.validator';
-import rolesController from '../controllers/roles.controller';
-import adminRoleController from '../controllers/admin/admin.role.controller';
+// import rolesController from '../controllers/roles.controller';
+// import adminRoleController from '../controllers/admin/admin.role.controller';
 
 const adminRouter = Router();
 
@@ -171,47 +171,7 @@ adminRouter.get(
 //   adminRouter.get('/admin/dashboard', adminAuthMiddleware, adminDashboardController.get)
 
   //roles and permission
-  adminRouter.post(
-    '/admin/role',
-    roleValidator.createRole(),
-    adminAuthMiddleware,
-    middleware.handleValidationError,
-    rolesController.createRole,
-  );
-  
-  adminRouter.patch(
-    '/admin/role/:role_id',
-    roleValidator.updateAdminRole(),
-    adminAuthMiddleware,
-    middleware.handleValidationError,
-    adminRoleController.updateRole,
-  );
-  
-  adminRouter.post(
-    '/admin/role/permission',
-    roleValidator.createPermission(),
-    adminAuthMiddleware,
-    middleware.handleValidationError,
-    rolesController.createPermission,
-  );
-  
-  adminRouter.get(
-    '/admin/role/permission',
-    adminAuthMiddleware,
-    rolesController.getPermissions
-  );
-  
-  adminRouter.get(
-    '/admin/roles',
-    adminAuthMiddleware,
-    rolesController.findManyRoles,
-  );
 
-  adminRouter.get(
-    '/admin/role/:role_id',
-    adminAuthMiddleware,
-    adminRoleController.getSingleRole,
-  );
 
 
 export { adminRouter };

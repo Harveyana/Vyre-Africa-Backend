@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { UserType } from '@prisma/client';
+import { AccountType } from '@prisma/client';
 import slugify from 'slugify';
 import config from '../config/env.config';
 import prisma from '../config/prisma.config';
@@ -9,6 +9,7 @@ import { authenticator, totp } from 'otplib';
 import * as speakeasy from 'speakeasy';
 import * as qrcode from 'qrcode';
 import notificationService from '../services/notification.service';
+import { currency } from '../globals';
 import {
     OTP_CODE_EXP,
     compareHashedData,
@@ -27,14 +28,14 @@ import smsService from '../services/sms.service';
 class UserController {
     
     async register(req: Request, res: Response) {
-        const { TYPE, PERSONAL, DIRECTOR, BUSINESS } = req.body;
-
+        const { TYPE, DETAILS} = req.body;
+        console.log(req.body)
         const otpCode = generateOtp();
 
         try {
 
             const userExist = await prisma.user.findUnique({
-            where: { email: PERSONAL.email },
+            where: { email: DETAILS.email },
             });
 
             if (userExist) {
@@ -46,108 +47,35 @@ class UserController {
             }
 
             
-            if(TYPE === 'INDIVIDUAL'){
-
-                console.log('entered individual')
-                console.log('PERSONAL', PERSONAL)
-                const newUser = await prisma.user.create({
-                    data: {
-                    firstName: PERSONAL.firstName,
-                    lastName: PERSONAL.lastName,
-                    email: PERSONAL.email,
-                    phoneNumber: PERSONAL.phoneNumber,
-                    type: UserType.USER,
+            console.log('entered individual')
+            console.log('PERSONAL', DETAILS)
+            const newUser = await prisma.user.create({
+                data: {
+                    firstName: DETAILS.firstName,
+                    lastName: DETAILS.lastName,
+                    email: DETAILS.email,
+                    phoneNumber: DETAILS.phoneNumber,
+                    type: TYPE,
                     otpCode: otpCode,
                     otpCodeExpiryTime: OTP_CODE_EXP,
                     photoUrl: config.defaultPhotoUrl,
-                    // roleId: "clycs1ims0000ts0z4fdvvflp",
+                
+                },
+            });
 
-                    wallet: {
-                        create: {
-                            currency: config.defaultCurrency
-                        }
-                    }
-                    },
-                });
+            console.log('newUser',newUser)
+              
+            await walletService.createWallet(newUser.id, 'NGN')
+            // await mailService.sendMail(DETAILS.email,otpCode)
 
-                console.log('newUser',newUser)
+            await mailService.sendOtp(DETAILS.email, DETAILS.firstName, otpCode);
 
-                await mailService.sendOtp(PERSONAL.email, PERSONAL.firstName, otpCode);
+            return res.status(201).json({
+                msg: 'An otp code sent to your email',
+                success: true,
+                user: newUser,
+            });
 
-                return res.status(201).json({
-                    msg: 'An otp code sent to your email ',
-                    success: true,
-                    user: newUser,
-                });
-
-            }
-
-            if(TYPE === 'BUSINESS'){
-                const slug = slugify(BUSINESS.name);
-
-                const transaction = await prisma.$transaction(async (prisma) => {
-
-                    const newOrg = await prisma.organisation.create({
-                        data: {
-                            name: BUSINESS.name,
-                            type: BUSINESS.type,
-                            slug: slug,
-                            logo: config.defaultOrganisationUrl,
-                            regNo: BUSINESS.regNo,
-                            file: BUSINESS.file,
-                            wallet: {
-                                create: {
-                                    currency: config.defaultCurrency
-                                }
-                            }
-                        },
-                    });
-
-                    const newUsers = await prisma.user.createMany({
-                        data:[ 
-
-                            {
-                                firstName: PERSONAL.firstName,
-                                lastName: PERSONAL.lastName,
-                                email: PERSONAL.email,
-                                phoneNumber: PERSONAL.phoneNumber,
-                                organisationId: newOrg.id,
-                                type: UserType.USER,
-                                otpCode: otpCode,
-                                otpCodeExpiryTime: OTP_CODE_EXP,
-                                photoUrl: config.defaultPhotoUrl,
-                                roleId: "clycs1ims0000ts0z4fdvvflp"
-
-                            },
-                            {
-                                firstName: DIRECTOR.firstName,
-                                lastName: DIRECTOR.lastName,
-                                email: DIRECTOR.email,
-                                phoneNumber: DIRECTOR.phoneNumber,
-                                organisationId: newOrg.id,
-                                type: UserType.USER,
-                                otpCode: otpCode,
-                                otpCodeExpiryTime: OTP_CODE_EXP,
-                                photoUrl: config.defaultPhotoUrl,
-                                roleId: "clycs1ims0000ts0z4fdvvflp"
-
-                            }
-                        ]
-                    
-                    });
-
-                    return { organization: newOrg, users: newUsers };
-                });
-
-                await mailService.sendOtp(PERSONAL.email, PERSONAL.firstName, otpCode);
-
-                return res.status(201).json({
-                    msg: 'An otp code was sent to your email ',
-                    success: true,
-                    users: transaction.users
-                });
-
-            }
 
         } catch (error) {
             return res
@@ -156,81 +84,81 @@ class UserController {
         }
     }
 
-    async registerRider(req: Request, res: Response) {
-        const { email, phoneNumber, firstName, lastName } = req.body;
+    // async registerRider(req: Request, res: Response) {
+    //     const { email, phoneNumber, firstName, lastName } = req.body;
 
-        console.log('body',req.body)
+    //     console.log('body',req.body)
 
-        const otpCode = generateOtp();
+    //     const otpCode = generateOtp();
 
-        try {
+    //     try {
 
-            const userExist = await prisma.user.findUnique({
-              where: { email },
-            });
+    //         const userExist = await prisma.user.findUnique({
+    //           where: { email },
+    //         });
 
-            if (userExist) {
-                return res.status(400).json({
-                    msg: 'User already exist',
-                    success: false,
-                    user: userExist,
-                });
-            }
+    //         if (userExist) {
+    //             return res.status(400).json({
+    //                 msg: 'User already exist',
+    //                 success: false,
+    //                 user: userExist,
+    //             });
+    //         }
 
 
-            const result = await prisma.$transaction(
-                async (prisma) => {
+    //         const result = await prisma.$transaction(
+    //             async (prisma) => {
 
                     
-                    const newUser = await prisma.user.create({
-                        data: {
-                            firstName: firstName,
-                            lastName: lastName,
-                            email: email,
-                            phoneNumber: phoneNumber,
-                            type: UserType.RIDER,
-                            otpCode: otpCode,
-                            otpCodeExpiryTime: OTP_CODE_EXP,
-                            photoUrl: config.defaultPhotoUrl,
+    //                 const newUser = await prisma.user.create({
+    //                     data: {
+    //                         firstName: firstName,
+    //                         lastName: lastName,
+    //                         email: email,
+    //                         phoneNumber: phoneNumber,
+    //                         type: UserType.RIDER,
+    //                         otpCode: otpCode,
+    //                         otpCodeExpiryTime: OTP_CODE_EXP,
+    //                         photoUrl: config.defaultPhotoUrl,
         
-                            wallet: {
-                                create: {
-                                    currency: config.defaultCurrency
-                                }
-                            }
-                        },
-                    });
+    //                         wallet: {
+    //                             create: {
+    //                                 currency: config.defaultCurrency
+    //                             }
+    //                         }
+    //                     },
+    //                 });
                     
-                    await mailService.sendOtp(email, firstName, otpCode);
+    //                 await mailService.sendOtp(email, firstName, otpCode);
               
                           
-                    return {
-                      user: newUser
-                    }
-                },
-                {
-                 maxWait: 50000, // default: 2000
-                 timeout: 50000, // default: 5000
-                }
-            )
+    //                 return {
+    //                   user: newUser
+    //                 }
+    //             },
+    //             {
+    //              maxWait: 50000, // default: 2000
+    //              timeout: 50000, // default: 5000
+    //             }
+    //         )
 
-            console.log('newUser',result.user)
+    //         console.log('newUser',result.user)
 
-            // await mailService.sendOtp(email, firstName, otpCode);
+    //         // await mailService.sendOtp(email, firstName, otpCode);
 
-            return res.status(201).json({
-                msg: 'An otp code sent to your email ',
-                success: true,
-                user: result.user
-            });
+    //         return res.status(201).json({
+    //             msg: 'An otp code sent to your email ',
+    //             success: true,
+    //             user: result.user
+    //         });
 
       
-        } catch (error) {
-            return res
-            .status(500)
-            .json({ msg: 'Internal Server Error', success: false, error });
-        }
-    }
+    //     } catch (error) {
+    //         return res
+    //         .status(500)
+    //         .json({ msg: 'Internal Server Error', success: false, error });
+    //     }
+    // }
 
     async uploadKyc(req: Request, res: Response) {
         const { idType, idNumber, idFront, idBack, userId } = req.body;
@@ -314,101 +242,101 @@ class UserController {
         }
     }
 
-    async addVehicle(req: Request, res: Response) {8
-        const { vehicleInfo, documents, images, userId } = req.body;
+    // async addVehicle(req: Request, res: Response) {8
+    //     const { vehicleInfo, documents, images, userId } = req.body;
 
-        console.log('body',req.body)
+    //     console.log('body',req.body)
 
-        try {
+    //     try {
 
-            let newVehicle
+    //         let newVehicle
 
-            const userExist = await prisma.user.findUnique({
-              where: { id: userId },
-            });
+    //         const userExist = await prisma.user.findUnique({
+    //           where: { id: userId },
+    //         });
 
-            const vehicleExist = await prisma.vehicle.findFirst({
-                where: { userId },
-            });
+    //         const vehicleExist = await prisma.vehicle.findFirst({
+    //             where: { userId },
+    //         });
 
-            if (!userExist) {
-                return res.status(400).json({
-                    msg: 'User Not Found',
-                    success: false,
-                });
-            }
-            console.log('checked existed')
-
-
-            const result = await prisma.$transaction(
-                async (prisma) => {
-
-                    if(vehicleExist){
-
-                        newVehicle = await prisma.vehicle.update({
-                            where: { id: vehicleExist.id },
-                            data: {
-                                brand: vehicleInfo.brand,
-                                model: vehicleInfo.model,
-                                colour: vehicleInfo.colour,
-                                year: vehicleInfo.year,
-                                document: vehicleInfo.document,
-                                insurance: documents.insurance,
-                                ownership: documents.ownership,
-                                capacity: vehicleInfo.capacity,
-                                images,
-                                userId,
-                                plateNumber: vehicleInfo.plateNumber,
-                                type: vehicleInfo.vehicleType      
-                            },
-                        });
-
-                    }else{
-
-                        newVehicle = await prisma.vehicle.create({
-                            data: {
-                                brand: vehicleInfo.brand,
-                                model: vehicleInfo.model,
-                                colour: vehicleInfo.colour,
-                                year: vehicleInfo.year,
-                                document: vehicleInfo.document,
-                                insurance: documents.insurance,
-                                ownership: documents.ownership,
-                                capacity: vehicleInfo.capacity,
-                                images,
-                                userId,
-                                plateNumber: vehicleInfo.plateNumber,
-                                type: vehicleInfo.vehicleType      
-                            },
-                        });
-                    }
-
-                    return {
-                      vehicle: newVehicle
-                    }
-                },
-                {
-                 maxWait: 50000, // default: 2000
-                 timeout: 50000, // default: 5000
-                }
-            )
-
-            console.log('newVehicle', result.vehicle)
+    //         if (!userExist) {
+    //             return res.status(400).json({
+    //                 msg: 'User Not Found',
+    //                 success: false,
+    //             });
+    //         }
+    //         console.log('checked existed')
 
 
-            return res.status(201).json({
-                msg: 'vehicle added Successfully',
-                success: true
-            });
+    //         const result = await prisma.$transaction(
+    //             async (prisma) => {
+
+    //                 if(vehicleExist){
+
+    //                     newVehicle = await prisma.vehicle.update({
+    //                         where: { id: vehicleExist.id },
+    //                         data: {
+    //                             brand: vehicleInfo.brand,
+    //                             model: vehicleInfo.model,
+    //                             colour: vehicleInfo.colour,
+    //                             year: vehicleInfo.year,
+    //                             document: vehicleInfo.document,
+    //                             insurance: documents.insurance,
+    //                             ownership: documents.ownership,
+    //                             capacity: vehicleInfo.capacity,
+    //                             images,
+    //                             userId,
+    //                             plateNumber: vehicleInfo.plateNumber,
+    //                             type: vehicleInfo.vehicleType      
+    //                         },
+    //                     });
+
+    //                 }else{
+
+    //                     newVehicle = await prisma.vehicle.create({
+    //                         data: {
+    //                             brand: vehicleInfo.brand,
+    //                             model: vehicleInfo.model,
+    //                             colour: vehicleInfo.colour,
+    //                             year: vehicleInfo.year,
+    //                             document: vehicleInfo.document,
+    //                             insurance: documents.insurance,
+    //                             ownership: documents.ownership,
+    //                             capacity: vehicleInfo.capacity,
+    //                             images,
+    //                             userId,
+    //                             plateNumber: vehicleInfo.plateNumber,
+    //                             type: vehicleInfo.vehicleType      
+    //                         },
+    //                     });
+    //                 }
+
+    //                 return {
+    //                   vehicle: newVehicle
+    //                 }
+    //             },
+    //             {
+    //              maxWait: 50000, // default: 2000
+    //              timeout: 50000, // default: 5000
+    //             }
+    //         )
+
+    //         console.log('newVehicle', result.vehicle)
+
+
+    //         return res.status(201).json({
+    //             msg: 'vehicle added Successfully',
+    //             success: true
+    //         });
 
 
 
-        } catch (error) {
-            return res
-            .status(500)
-            .json({ msg: 'Error Try Again', success: false, error });
-        }
-    }
+    //     } catch (error) {
+    //         return res
+    //         .status(500)
+    //         .json({ msg: 'Error Try Again', success: false, error });
+    //     }
+    // }
 
     async verifyEmail(req: Request, res: Response) {
         const { code, email } = req.body;
@@ -566,8 +494,8 @@ class UserController {
 
         if (
             !user.otpCode ||
-            user?.otpCodeUsed === true ||
-            moment().isAfter(user?.otpCodeExpiryTime)
+            user?.otpCodeUsed === true
+            // moment().isAfter(user?.otpCodeExpiryTime)
         ) {
             const otpCode = generateOtp();
 
@@ -580,9 +508,11 @@ class UserController {
                 },
             });
 
-            await mailService.sendOtp(user?.email,user.firstName, otpCode);
+            await mailService.sendOtp(user?.email, user.firstName, otpCode);
+            // await mailService.sendMail(user?.email,otpCode)
         } else {
             await mailService.sendOtp(user?.email, user.firstName, user.otpCode);
+            // await mailService.sendMail(user?.email, user.otpCode)
         }
         return res.status(200).json({
             msg: 'Otp successfully sent to your email',
@@ -618,15 +548,6 @@ class UserController {
             const user = await prisma.user.findUnique({
                 where: { email: email, isDeactivated: false },
                 include: {
-                    role: {
-                        include: {
-                            permissions: {
-                                include: {
-                                    permission: true,
-                                },
-                            },
-                        },
-                    },
                     wallet: true,
                 },
             });
@@ -727,12 +648,10 @@ class UserController {
                 id: user.id,
                 firstName: user.firstName,
                 lastName: user.lastName,
-                role: user.role,
                 email: user.email,
                 phoneNumber: user.phoneNumber ?? '',
                 createdAt: user.createdAt,
                 type: user.type,
-                organisationId: user.organisationId,
                 photoUrl: user.photoUrl,
                 userStatus: user.userStatus,
             });
@@ -758,21 +677,6 @@ class UserController {
         try {
             const user = await prisma.user.findUnique({
                 where: { id: userId },
-                include: {
-                    role: {
-                        
-                        include: {
-                            permissions: {
-                                include: {
-                                    permission: true,
-                                },
-                            },
-                        },
-                        
-                    },
-
-                },
-
             });
 
             if (!user)
@@ -831,14 +735,12 @@ class UserController {
                 id: user.id,
                 firstName: user.firstName,
                 lastName: user.lastName,
-                role: user.role,
                 email: user.email,
                 phoneNumber: user.phoneNumber ?? '',
                 createdAt: user.createdAt,
                 type: user.type,
-                organisationId: user.organisationId,
                 photoUrl: user.photoUrl,
-                userStatus: user.userStatus,
+                userStatus: user.userStatus
             });
 
             return res.status(200).send({
@@ -915,24 +817,6 @@ class UserController {
                 return res.status(400).json({
                     msg: 'User not found',
                     success: false
-                });
-            }
-
-            if (userData.organisationId) {
-
-                console.log('inside the if statement', userData.type)
-
-                const organisation = await prisma.organisation.findUnique({
-                    where: { id: userData.organisationId! }
-                });
-
-                console.log('fetched', organisation)
-
-                return res.status(201).json({
-                    msg: 'Profile fetched successfully',
-                    success: true,
-                    organisation: organisation,
-                    user: userData,
                 });
             }
 
@@ -1092,6 +976,35 @@ class UserController {
         });
     }
 
+    async queryUser(req: Request, res: Response) {
+        // const banks = await paystackService.getBanks();
+        const { email } = req.body;
+
+        let users;
+
+        if (!email) {
+            return res.status(400).json({
+                msg: 'email required to find user',
+                success: false,
+            });
+        }
+
+        console.log('got in ')
+        users = await prisma.user.findMany({
+          where: { email: { startsWith: email as string } },
+        });
+
+        return res.status(201).json({
+            msg: 'users fetched successfully',
+            success: true,
+            users,
+        });
+
+
+
+       
+    }
+
     async verifyAccountDetail(req: Request & Record<string, any>, res: Response) {
         const { bankId, accountNumber } = req.body
         const user = req.user
@@ -1198,28 +1111,27 @@ class UserController {
     }
 
     async getUserWalletBalance(req: Request & Record<string, any>, res: Response) {
-        const user = req.user
+        // const user = req.user
        
 
-        try {
-            // const userBalance = await walletService.getUserbalance(user.id);
+        // try {
 
-            const wallet = await prisma.wallet.findUnique({
-                where:{userId: user.id}
-            })
-            return res.status(201).json({
-                msg: 'User Wallet balance',
-                success: true,
-                wallet: wallet
-            });
+        //     const wallet = await prisma.wallet.findUnique({
+        //         where:{userId: user?.id}
+        //     })
+        //     return res.status(201).json({
+        //         msg: 'User Wallet balance',
+        //         success: true,
+        //         wallet: wallet
+        //     });
             
-        } catch (error) {
+        // } catch (error) {
 
-            return res.status(500).json({
-                msg: 'failed to fetch balance',
-                success: false,
-            });
-        }
+        //     return res.status(500).json({
+        //         msg: 'failed to fetch balance',
+        //         success: false,
+        //     });
+        // }
         
     }
 
@@ -1671,25 +1583,25 @@ class UserController {
             }
 
             //fund wallet
-            const fundWallet = await walletService.fundUserWallet(amount, user.id)
-            if(!fundWallet){
-                return res.status(400).json({
-                    msg: 'Error funding wallet',
-                    success: false,
-                });
-            }
+            // const fundWallet = await walletService.fundUserWallet(amount, user.id)
+            // if(!fundWallet){
+            //     return res.status(400).json({
+            //         msg: 'Error funding wallet',
+            //         success: false,
+            //     });
+            // }
 
             //save transaction
-            const transaction = await transactionService.create(
-                user.id,
-                null, 
-                amount, 
-                'SUCCESSFUL', 
-                'WALLET',
-                'CREDIT',
-                'Wallet Topup',
-                []
-            )
+            // const transaction = await transactionService.create(
+            //     user.id,
+            //     null, 
+            //     amount, 
+            //     'SUCCESSFUL', 
+            //     'WALLET',
+            //     'CREDIT',
+            //     'Wallet Topup',
+            //     []
+            // )
 
             //save notification
             await notificationService.create(
@@ -1701,21 +1613,21 @@ class UserController {
             )
 
             //send push notification
-            await mobilePushService.singlePush('Wallet Funding', 'You funded your wallet with ' + amount, (userData?.pushToken as string))
+            // await mobilePushService.singlePush('Wallet Funding', 'You funded your wallet with ' + amount, (userData?.pushToken as string))
 
-            console.log(fundWallet)
-            const updatedUser = await prisma.user.findUnique({
-                where:{id: user.id},
-                include:{wallet: true}
-            })
+            // console.log(fundWallet)
+            // const updatedUser = await prisma.user.findUnique({
+            //     where:{id: user.id},
+            //     include:{wallet: true}
+            // })
 
-            return res.status(201).json({
-                msg: 'Wallet funded successfully',
-                success: true,
-                user: updatedUser,
-                wallet: fundWallet,
-                transaction
-            });
+            // return res.status(201).json({
+            //     msg: 'Wallet funded successfully',
+            //     success: true,
+            //     user: updatedUser,
+            //     wallet: fundWallet,
+            //     transaction
+            // });
             
         } catch (error) {
             console.log(error)

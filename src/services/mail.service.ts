@@ -27,13 +27,12 @@ import { SendMailClient } from 'zeptomail';
 class MailService {
     private client;
     private batchClient;
-    private url: string = 'api.zeptomail.com/v1.1/email/template';
-    private batchUrl: string = 'api.zeptomail.com/v1.1/email/template/batch';
+    private url: string = 'api.zeptomail.eu/v1.1/email/template';
+    private batchUrl: string = 'api.zeptomail.eu/v1.1/email/template/batch';
     // /v1.1/email/template
     // /v1.1/email/template/batch
-    private token: string =
-        'Zoho-enczapikey wSsVR612+RP0X68pyjCpcbo9nV5cAw//FEUo2lKh7H/9H/6Wpcc+kk2aDQHyH/lKQjRgHDAboLohzEoDhjEIjd94n18GWiiF9mqRe1U4J3x17qnvhDzJXW1alBGOLYINxAlqk2FhE8Ej+g==';
-
+    private token: string ='Zoho-enczapikey yA6KbHtS7A2lyz4BFBM015CL8Nw3pK46jSXksn/mfMMleNnmh6E9hhBod9C7LzuJ3NLStP9TbtwVId+xvItcf5UyY99ZJ5TGTuv4P2uV48xh8ciEYNYvhpSgALIVFqdKcx8hCi4yQfckWA==';
+        
     constructor() {
         this.client = new SendMailClient({ url: this.url, token: this.token });
         this.batchClient = new SendMailClient({ url: this.batchUrl, token: this.token });
@@ -62,7 +61,7 @@ class MailService {
                 mail_template_key:
                     '13ef.77aaa135805f0ced.k1.f5a87620-23ac-11ef-b963-525400b65433.18feb639682',
                 from: {
-                    address: 'noreply@helloqaya.com',
+                    address: 'noreply@vyre.africa',
                     name: 'noreply',
                 },
                 to: [
@@ -82,25 +81,56 @@ class MailService {
         }
     }
 
+    // public async sendOtp(address:string, userName:string, otp: string): Promise<void> {
+    //     try {
+    //         const response = await this.client.sendMail({
+    //             mail_template_key:
+    //                 '2d6f.26d5e25050d88a1b.k1.a43bcf30-7edd-11ef-bd93-525400f92481.19241034ba3',
+    //             from: {
+    //                 address: 'noreply@helloqaya.com',
+    //                 name: 'noreply',
+    //             },
+    //             to: [
+    //                 {
+    //                     email_address: {
+    //                         address: address,
+    //                         name: 'Qaya',
+    //                     },
+    //                 },
+    //             ],
+    //             merge_info: { 
+    //                 otp: otp, 
+    //                 user_name: userName 
+    //             },
+    //             subject: 'Verify Account',
+    //         });
+    //         console.log('success', response);
+    //     } catch (error) {
+    //         console.error('error', error);
+    //     }
+    // }
+
     public async sendOtp(address:string, userName:string, otp: string): Promise<void> {
+
+        console.log('address',address,'userName',userName,'otp',otp)
         try {
             const response = await this.client.sendMail({
-                mail_template_key:
-                    '2d6f.26d5e25050d88a1b.k1.a43bcf30-7edd-11ef-bd93-525400f92481.19241034ba3',
+                mail_template_key:'13ef.77aaa135805f0ced.k1.0cd756f0-c1c2-11ef-9408-7273078ee4fb.193f765d1df',
+                
                 from: {
-                    address: 'noreply@helloqaya.com',
+                    address: 'noreply@vyre.africa',
                     name: 'noreply',
                 },
                 to: [
                     {
                         email_address: {
                             address: address,
-                            name: 'Qaya',
+                            name: 'Vyre',
                         },
                     },
                 ],
                 merge_info: { 
-                    otp: otp, 
+                    Pin: otp, 
                     user_name: userName 
                 },
                 subject: 'Verify Account',

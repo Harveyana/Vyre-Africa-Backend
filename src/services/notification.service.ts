@@ -99,30 +99,30 @@ class NotificationService
         console.log(message)
 
         try {
-            if(userType === 'SHOPPERS' || userType === 'ALL'){
-                const shoppers = await prisma.user.findMany({
-                    where:{ type:'USER' }
-                });
+            // if(userType === 'SHOPPERS' || userType === 'ALL'){
+            //     const shoppers = await prisma.user.findMany({
+            //         where:{ type:'USER' }
+            //     });
 
-                //get push tokens
-                const userPushTokens:any = []
+            //     //get push tokens
+            //     const userPushTokens:any = []
 
-                shoppers.map((user) => {
-                    if(user.pushToken){
-                        userPushTokens.push(user.pushToken)
-                    }
-                })
+            //     shoppers.map((user) => {
+            //         if(user.pushToken){
+            //             userPushTokens.push(user.pushToken)
+            //         }
+            //     })
 
-                //send push notification
-                const response = await mobilePushService.BulkPush(title, body, userPushTokens)
-                console.log(response)
-            }
+            //     //send push notification
+            //     const response = await mobilePushService.BulkPush(title, body, userPushTokens)
+            //     console.log(response)
+            // }
             
-            if(userType === 'MALLS' || userType === 'ALL'){
-              const response = await adminBase.messaging().send(message)
-              console.log(response)
+            // if(userType === 'MALLS' || userType === 'ALL'){
+            //   const response = await adminBase.messaging().send(message)
+            //   console.log(response)
 
-            }
+            // }
 
             return true
         } catch (error:any) {

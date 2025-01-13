@@ -12,23 +12,37 @@ export interface Role {
     permissions: Array<Record<string, any>>;
 }
 
- interface userRole {
+interface userRole {
     id: string;
     name: string;
     description: string;
     permissions: Array<any>
- }
+}
+
+export enum currency {
+    NGN,
+    USD,
+    ETH,
+    BTC,
+    LTC,
+    TRON,
+    BNB,
+    XRP,
+    USDT_ETH,
+    USDT_TRON,
+    USDC
+}
 
 export interface User {
     id: string;
     firstName: string;
     lastName: string;
     userStatus?: UserStatus;
-    organisationId: string | null;
+    // organisationId: string | null;
     type: string;
     photoUrl: string | null;
     email: string;
     phoneNumber: string;
     createdAt: Date;
-    role: userRole | null;
+    // role: userRole | null;
 }

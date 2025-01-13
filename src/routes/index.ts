@@ -2,25 +2,26 @@ import { Request, Response, Router } from 'express';
 import { adminRouter } from './admin';
 import config from '../config/env.config';
 import roleValidator from '../validators/role.validator';
-import tripValidator from '../validators/trip.validator';
+import tripValidator from '../validators/wallet.validator';
 import middleware from '../middleware';
-import rolesController from '../controllers/roles.controller';
 import { Actions, RESOURCES } from '../globals';
 import { authMiddleware } from '../services/auth';
 import userController from '../controllers/user.controller';
-import tripController from '../controllers/trip.controller';
+import tripController from '../controllers/wallet.controller';
 import orderController from '../controllers/order.controller';
 import productController from '../controllers/product.controller';
 import storeController from '../controllers/store.controller';
 import organisationController from '../controllers/organisation.controller';
 import organisationValidator from '../validators/organisation.validator';
 import userValidator from '../validators/user.validator';
+import walletValidator from '../validators/wallet.validator';
 import storeValidator from '../validators/store.validator';
 import productValidator from '../validators/product.validator';
 import orderValidator from '../validators/order.validator';
 import mobileProductController from '../controllers/mobile/mobile.product.controller';
 import mobileUserController from '../controllers/mobile/mobile.user.controller';
 import mobileAdvertController from '../controllers/mobile/mobile.advert.controller';
+import walletController from '../controllers/wallet.controller';
 
 const router = Router();
 
@@ -32,63 +33,6 @@ router.get('/', (req: Request, res: Response) => {
 });
 
 // roles
-router.post(
-  '/role',
-  roleValidator.createRole(),
-  authMiddleware,
-  middleware.checkAbilities(Actions.Create, RESOURCES.roles),
-  middleware.handleValidationError,
-  rolesController.createRole,
-);
-
-router.patch(
-  '/role/user',
-  roleValidator.updateUserRole(),
-  authMiddleware,
-  middleware.checkAbilities(Actions.Update, RESOURCES.roles),
-  middleware.handleValidationError,
-  rolesController.updateUserRoles,
-);
-
-router.patch(
-  '/role/:role_id',
-  roleValidator.updateAdminRole(),
-  authMiddleware,
-  middleware.checkAbilities(Actions.Update, RESOURCES.roles),
-  middleware.handleValidationError,
-  rolesController.updateRole,
-);
-
-router.delete(
-  '/role/user',
-  roleValidator.deleteRole(),
-  authMiddleware,
-  middleware.checkAbilities(Actions.Delete, RESOURCES.roles),
-  middleware.handleValidationError,
-  rolesController.deleteUserRole,
-);
-
-router.post(
-  '/role/permission',
-  roleValidator.createPermission(),
-  authMiddleware,
-  middleware.checkAbilities(Actions.Create, RESOURCES.permission),
-  middleware.handleValidationError,
-  rolesController.createPermission,
-);
-
-router.get(
-  '/role/permission',
-  authMiddleware,
-  rolesController.getPermissions
-);
-
-router.get(
-  '/roles',
-  authMiddleware,
-  middleware.checkAbilities(Actions.Search, RESOURCES.roles),
-  rolesController.findManyRoles,
-);
 
 //User
 router.post(
@@ -98,25 +42,23 @@ router.post(
   userController.register
 );
 
+// router.post(
+//   '/rider/register',
+//   userValidator.register(),
+//   middleware.handleValidationError,
+//   userController.registerRider
+// );
+
 router.post(
-  '/rider/register',
-  userValidator.register(),
-  middleware.handleValidationError,
-  userController.registerRider
+  '/webhook',
+  walletController.verifyWebHook
 );
 
 router.post(
-  '/rider/upload_kyc',
+  '/upload_kyc',
   userValidator.uploadKyc(),
   middleware.handleValidationError,
   userController.uploadKyc
-);
-
-router.post(
-  '/rider/addVehicle',
-  // userValidator.uploadKyc,
-  // middleware.handleValidationError,
-  userController.addVehicle
 );
 
 router.post(
@@ -176,14 +118,71 @@ router.post(
 
 // router.post('/sendOTP', userController.sendVerification);
 
-// trips
+// Wallet
 router.post(
-  '/trip/recommended_Price',
+  '/wallet/create/:currency',
   authMiddleware,
-  tripValidator.getPrice(),
+  walletController.createWallet
+)
+
+router.post(
+  '/wallet/deposit',
+  authMiddleware,
+  walletValidator.initDeposit(),
   middleware.handleValidationError,
-  tripController.getPrice
-);
+  walletController.init_BankDeposit
+)
+
+router.post(
+  '/wallet/active_banks',
+  authMiddleware,
+  walletValidator.initDeposit(),
+  middleware.handleValidationError,
+  walletController.get_availableBanks
+)
+
+router.post(
+  '/wallet/vyre_tranfer',
+  authMiddleware,
+  walletValidator.initVyreTransfer(),
+  middleware.handleValidationError,
+  walletController.init_VyreTransfer
+)
+
+router.post(
+  '/wallet/blockchain_tranfer',
+  authMiddleware,
+  walletValidator.initBlockchainTransfer(),
+  middleware.handleValidationError,
+  walletController.init_BlockchainTransfer
+)
+
+router.post(
+  '/wallet/bank_tranfer',
+  authMiddleware,
+  walletValidator.initBankTransfer(),
+  middleware.handleValidationError,
+  walletController.init_BankTransfer
+)
+
+router.get(
+  '/wallet/all',
+  authMiddleware,
+  walletController.fetchWallets
+)
+
+router.get(
+  '/wallet/:id',
+  authMiddleware,
+  walletController.fetchWallet
+)
+
+router.get(
+  '/rate',
+  authMiddleware,
+  walletController.getRate
+)
+
 
 
 
@@ -200,6 +199,12 @@ router.get(
   authMiddleware,
   userController.getProfile,
 );
+
+router.post(
+  '/user/query',
+  authMiddleware,
+  userController.queryUser
+)
 
 
 router.post(

@@ -31,72 +31,16 @@ enum ProductStatus {
   DRAFTED
 }
 
-enum TripStatus {
-  PENDING
-  ONGOING
-  COMPLETED
-}
-
-enum TripType {
-  HAULAGE
-  DISPATCH
-  RIDE
-}
-
-enum TripTimeLine {
-  ORDER_RECEIVED
-  ORDER_ACCEPTED
-  PICKUP_STARTED
-  ARRIVED_AT_PICKUP
-  PICKED_UP
-  DROP_OFF_STARTED
-  DELIVERED
-}
-
-enum ItemCategory {
-  FOOD
-  DOCUMENTS
-  GADGET
-  OTHERS
-}
-
-enum ItemType {
-  PERISHABLE
-  NON_PERISHABLE
-}
-
-enum UserType {
-  USER
-  RIDER
+enum AccountType {
+  BUSINESS
+  INDIVIDUAL
   SUPERADMIN
-}
-
-enum vehicleType {
-  CAR
-  VAN
-  TRUCK
-  BIKE
-}
-
-enum BusinessType {
-  REGISTERED
-  NON_REGISTERED
-}
-
-enum OrganisationType {
-  PRIVATE
-  PUBLIC
 }
 
 enum UserStatus {
   ACTIVE
   PENDING
   DISMISSED
-}
-
-enum StoreStatus {
-  ACTIVE
-  INACTIVE
 }
 
 enum CampaignType {
@@ -130,10 +74,29 @@ enum BroadcastStatus {
   DRAFTED
 }
 
+enum walletType {
+  CRYPTO
+  FIAT
+}
+
 enum TransactionStatus {
   SUCCESSFUL
   PENDING
   FAILED
+}
+
+enum Currency {
+  NGN
+  USD
+  ETH
+  BTC
+  LTC
+  TRON
+  BNB
+  XRP
+  USDT_ETH
+  USDT_TRON
+  USDC
 }
 
 enum TransactionPaymentMethod {
@@ -142,8 +105,15 @@ enum TransactionPaymentMethod {
 }
 
 enum TransactionType {
-  CREDIT
-  DEBIT
+  FAILED
+  CREDIT_PAYMENT
+  DEBIT_PAYMENT
+  CREDIT_DEPOSIT
+  DEBIT_WITHDRAWAL
+  EXCHANGE_BUY
+  EXCHANGE_SELL
+  DEBIT_TRANSACTION
+  CREDIT_INCOMING_PAYMENT
 }
 
 enum TwoFactorAuthenticationMethod {
@@ -166,94 +136,42 @@ model Rating {
   userId    String
 }
 
-model Trip {
-  id            String                   @id @default(cuid())
-  timeline      TripTimeLine             @default(ORDER_RECEIVED)
-  userId        String
-  user          User                     @relation(fields: [userId], references: [id])
-  Status        TripStatus               @default(PENDING)
-  type          TripType                 @default(DISPATCH)
-  price         Int
-  createdAt     DateTime                 @default(now())
-  updatedAt     DateTime                 @default(now())
-  startedAt     DateTime                 @default(now())
-  endedAt       DateTime                 @default(now())
-  scheduled     Boolean                  @default(false)
-  scheduledAt   DateTime                 @default(now())
-  paymentMethod TransactionPaymentMethod @default(WALLET)
-  pickup        String
-  destination   String
-  senderPhone   String?
-  receiverPhone String?
-  Item          Item[]
-}
-
-model Item {
-  id        String       @id @default(cuid())
-  name      String
-  quantity  Int          @default(0)
-  tripId    String
-  trip      Trip         @relation(fields: [tripId], references: [id])
-  createdAt DateTime     @default(now())
-  images    String[]
-  category  ItemCategory @default(OTHERS)
-  type      ItemType     @default(NON_PERISHABLE)
-}
-
-model Vehicle {
-  id          String      @id @default(cuid())
-  brand       String
-  model       String
-  colour      String
-  year        String
-  document    String
-  insurance   String
-  ownership   String
-  capacity    String
-  images      String[]
-  userId      String
-  user        User        @relation(fields: [userId], references: [id])
-  plateNumber String
-  type        vehicleType @default(BIKE)
-  createdAt   DateTime    @default(now())
-}
-
 model kyc {
-  id        String   @id @default(cuid())
-  idType    String
-  idFront   String
-  idBack    String
+  id      String  @id @default(cuid())
+  idType  String
+  idFront String?
+  idBack  String?
+  regNo   String? @unique @db.VarChar(100)
+  file    String? @db.VarChar(600)
+
   userId    String
   user      User     @relation(fields: [userId], references: [id])
-  idNumber  String
+  idNumber  String?
   createdAt DateTime @default(now())
 }
 
 model User {
-  id                            String                        @id @default(cuid())
-  firstName                     String                        @db.VarChar(255)
-  lastName                      String                        @db.VarChar(255)
-  email                         String                        @unique @db.VarChar(255)
-  userStatus                    UserStatus                    @default(PENDING)
-  organisationId                String?
-  organisationPortflio          Portfolio?                    @default(DIRECTOR)
-  organisation                  Organisation?                 @relation(fields: [organisationId], references: [id])
-  type                          UserType                      @default(USER)
-  photoUrl                      String?                       @db.VarChar(500)
-  phoneNumber                   String?
-  password                      String?                       @db.VarChar(500)
-  emailVerified                 Boolean?                      @default(false)
-  accountVerified               Boolean?                      @default(false)
-  otpCode                       String?
-  otpCodeUsed                   Boolean                       @default(false)
-  otpCodeExpiryTime             String?
-  roleId                        String?
-  role                          Role?                         @relation(fields: [roleId], references: [id])
+  id                String      @id @default(cuid())
+  firstName         String      @db.VarChar(255)
+  lastName          String      @db.VarChar(255)
+  BusinessName      String?
+  email             String      @unique @db.VarChar(255)
+  userStatus        UserStatus  @default(ACTIVE)
+  type              AccountType @default(INDIVIDUAL)
+  photoUrl          String?     @db.VarChar(500)
+  phoneNumber       String?
+  password          String?     @db.VarChar(500)
+  emailVerified     Boolean?    @default(false)
+  accountVerified   Boolean?    @default(false)
+  otpCode           String?
+  otpCodeUsed       Boolean     @default(false)
+  otpCodeExpiryTime String?
+
   pushToken                     String?
   userBanks                     UserBank[]
   notifications                 Notification[]
   transactions                  Transaction[]
-  wallet                        Wallet?
+  wallet                        Wallet[]
   notificationSetting           NotificationSetting?
   twoFactorEnabled              Boolean                       @default(false)
   twoFactorAuthenticationMethod TwoFactorAuthenticationMethod @default(EMAIL_OTP)
@@ -261,52 +179,8 @@ model User {
   isDeactivated                 Boolean                       @default(false)
   deactivationReason            String?
   createdAt                     DateTime                      @default(now())
-  Trip                          Trip[]
-  Vehicle                       Vehicle[]
   Card                          Card?
   kyc                           kyc[]
-}
-
-model Organisation {
-  id           String         @id @default(cuid())
-  name         String         @unique @db.VarChar(255)
-  type         BusinessType   @default(NON_REGISTERED)
-  slug         String         @unique @db.VarChar(255)
-  logo         String?        @db.VarChar(600)
-  file         String?        @db.VarChar(600)
-  regNo        String         @unique @db.VarChar(100)
-  createdAt    DateTime       @default(now())
-  users        User[]
-  wallet       Wallet?
-  transactions Transaction[]
-  Notification Notification[]
-}
-
-model Role {
-  id          String           @id @default(cuid())
-  name        String           @unique
-  description String           @db.VarChar(255)
-  permissions RolePermission[]
-  users       User[]
-}
-
-model Permission {
-  id      String           @id @default(cuid())
-  action  String
-  subject String
-  roles   RolePermission[]
-
-  @@unique([action, subject])
-}
-
-model RolePermission {
-  id           String     @id @default(cuid())
-  roleId       String
-  permissionId String
-  role         Role       @relation(fields: [roleId], references: [id])
-  permission   Permission @relation(fields: [permissionId], references: [id])
-
-  @@unique([roleId, permissionId])
 }
 
 model Bank {
@@ -341,31 +215,28 @@ model NotificationSetting {
 }
 
 model Notification {
-  id             String           @id @default(cuid())
-  userId         String?
-  user           User?            @relation(fields: [userId], references: [id])
-  organisationId String?
-  organisation   Organisation?    @relation(fields: [organisationId], references: [id])
-  type           NotificationType @default(GENERAL)
-  title          String?
-  content        String
-  createdAt      DateTime         @default(now())
+  id        String           @id @default(cuid())
+  userId    String?
+  user      User?            @relation(fields: [userId], references: [id])
+  type      NotificationType @default(GENERAL)
+  title     String?
+  content   String
+  createdAt DateTime         @default(now())
 }
 
 model Transaction {
-  id             String                   @id @default(cuid())
-  tripId         String?
-  userId         String?
-  user           User?                    @relation(fields: [userId], references: [id])
-  organisationId String?
-  organisation   Organisation?            @relation(fields: [organisationId], references: [id])
-  reference      String?
-  amount         Decimal
-  status         TransactionStatus
-  paymentMethod  TransactionPaymentMethod
-  type           TransactionType
-  description    String
-  createdAt      DateTime                 @default(now())
+  id          String            @id @default(cuid())
+  walletId    String?
+  userId      String?
+  currency    Currency
+  user        User?             @relation(fields: [userId], references: [id])
+  wallet      Wallet?           @relation(fields: [walletId], references: [id])
+  reference   String?
+  amount      Decimal
+  status      TransactionStatus
+  type        TransactionType
+  description String
+  createdAt   DateTime          @default(now())
 }
 
 model Campaign {
@@ -387,15 +258,25 @@ model CampaignDraft {
 }
 
 model Wallet {
-  id             String        @id @default(cuid())
-  userId         String?       @unique
-  user           User?         @relation(fields: [userId], references: [id])
-  organisationId String?       @unique
-  organisation   Organisation? @relation(fields: [organisationId], references: [id])
-  balance        Decimal       @default(0.00)
-  currency       String
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @default(now())
+  id     String     @id @default(cuid())
+  userId String?
+  user   User?      @relation(fields: [userId], references: [id])
+  type   walletType @default(CRYPTO)
+  imgurl String
+
+  currency           Currency
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @default(now())
+  Tatum_customerId   String
+  accountingCurrency String
+  depositAddress     String?
+  destinationTag     String?
+  derivationKey      Int?
+  frozen             Boolean
+
+  accountBalance   Decimal       @default(0.00)
+  availableBalance Decimal       @default(0.00)
+  Transaction      Transaction[]
 }
 
 model Card {

@@ -6,32 +6,32 @@ import { endOfDay, startOfDay } from 'date-fns';
 
 class TransactionService
 {
-    async create(
-        userId:string|null, 
-        orderId:string|null, 
-        amount:number,
-        status:any,
-        paymentMethod:any,
-        type:any,
-        description:string,
-        customer: []
-    )
-    {
-        const reference = generateRefCode();
+    // async create(
+    //     userId:string|null, 
+    //     orderId:string|null, 
+    //     amount:number,
+    //     status:any,
+    //     // paymentMethod:any,
+    //     type:any,
+    //     description:string,
+    //     customer: []
+    // )
+    // {
+    //     const reference = generateRefCode();
 
-        return await prisma.transaction.create({
-            data: {
-                userId,
-                // orderId,
-                reference,
-                amount,
-                status,
-                paymentMethod,
-                type,
-                description,
-            }
-        });
-    }
+    //     return await prisma.transaction.create({
+    //         data: {
+    //             userId,
+    //             // orderId,
+    //             reference,
+    //             amount,
+    //             status,
+    //             // paymentMethod,
+    //             type,
+    //             description,
+    //         }
+    //     });
+    // }
 
     async get(
         userId:string|null,
@@ -43,7 +43,6 @@ class TransactionService
                 userId
             },
             include:{
-                organisation: true,
                 user: true
             },
             take: limit ? parseInt(limit as string) : 20 || 20,
@@ -67,8 +66,7 @@ class TransactionService
                 }
             },
             include:{
-                user: true,
-                organisation: true
+                user: true
             },
             take: limit ? parseInt(limit as string) : 20 || 20,
             orderBy: { createdAt: "desc" }
@@ -130,8 +128,7 @@ class TransactionService
                 status: status as TransactionStatus
             },
             include:{
-                user: true,
-                organisation: true
+                user: true
             },
             take: limit ? parseInt(limit as string) : 20 || 20,
             orderBy: { createdAt: "desc" }
@@ -148,9 +145,6 @@ class TransactionService
             where: {
                 userId,
                 type: type as TransactionType
-            },
-            include:{
-                organisation: true
             },
             take: limit ? parseInt(limit as string) : 20 || 20,
             orderBy: { createdAt: "desc" }

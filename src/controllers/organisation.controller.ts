@@ -1,4 +1,4 @@
-import { UserType } from '@prisma/client';
+// import { UserType } from '@prisma/client';
 import { Request, Response } from 'express';
 import moment from 'moment';
 import slugify from 'slugify';
