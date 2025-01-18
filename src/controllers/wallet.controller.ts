@@ -31,7 +31,7 @@ class WalletController {
       const { body } = req;
 
       console.log('body',body)
-      
+
       const signatureHeader = req.headers['x-signature'] as string; 
   
       if (!body || !signatureHeader) {
@@ -50,6 +50,12 @@ class WalletController {
       if (!isVerified) {
         return res.status(401).json({ error: 'Invalid signature' });
       }
+
+      const transaction = await prisma.transaction.findFirst({
+        where:{reference: body.id}
+      })
+
+      console.log('transaction here', transaction)
   
       // ... (your webhook processing logic here) ...
   
