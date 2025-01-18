@@ -33,6 +33,8 @@ class WalletController {
       const { body } = req; 
       const signatureHeader = req.headers['x-signature']; 
 
+      console.log('body', body)
+
       if (!body || !signatureHeader) {
         return res.status(400).json({ error: 'Missing payload or signature header' });
       }
