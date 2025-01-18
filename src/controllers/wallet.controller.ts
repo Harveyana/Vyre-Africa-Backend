@@ -27,50 +27,43 @@ class WalletController {
 
   async verifyWebHook(req: Request, res: Response) {
 
-
     try {
+      const { body } = req;
 
-      const { body } = req; 
-      const signatureHeader = req.headers['x-signature']; 
-
-      console.log('body', body)
-
+      console.log('body',body)
+      
+      const signatureHeader = req.headers['x-signature'] as string; 
+  
       if (!body || !signatureHeader) {
         return res.status(400).json({ error: 'Missing payload or signature header' });
       }
-
-      // Convert the signature from Base64 to binary
-      const signature: Buffer = Buffer.from(signatureHeader as string, 'base64');
-
-       // Create a SHA-256 hash of the body
-      const hash = crypto.createHash('sha256').update(body).digest();
-
-      // Verify the signature using the public key
+  
+      const signature = Buffer.from(signatureHeader, 'base64'); 
+  
+      // Stringify the body before hashing
+      const hash = crypto.createHash('sha256').update(JSON.stringify(body)).digest(); 
+  
       const verifier = crypto.createVerify('RSA-SHA256');
       verifier.update(hash);
-
-      const isVerified: boolean = verifier.verify({ key: config.QOREPAY_PUBLIC_KEY as string, padding: crypto.constants.RSA_PKCS1_PADDING }, signature);
-
-      if (isVerified) {
-        console.log("Signature is OK.");
-        console.log("body",body)
-      } else {
-        console.log("Signature verification failed.");
+      const isVerified = verifier.verify({ key: config.QOREPAY_PUBLIC_KEY as string, padding: crypto.constants.RSA_PKCS1_PADDING }, signature);
+  
+      if (!isVerified) {
+        return res.status(401).json({ error: 'Invalid signature' });
       }
-
-      
-
-      return res
-        .status(200)
-        .json({
-          msg:`Event verified`,
-          success: true,
-        });
-
-
+  
+      // ... (your webhook processing logic here) ...
+  
+      return res.status(200).json({
+        msg: 'Event verified',
+        success: true,
+      });
+  
     } catch (error) {
-      console.log(error);
-      res.status(500).send(error);
+      console.error('Error verifying webhook:', error);
+      return res.status(500).json({ 
+        error: 'Internal Server Error', 
+        message: (error as Error).message 
+      });
     }
   }
 
@@ -709,3 +702,5 @@ class WalletController {
 }
 
 export default new WalletController();
+
+
