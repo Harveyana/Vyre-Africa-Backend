@@ -25,37 +25,78 @@ class WalletController {
     );
   }
 
-  async verifyWebHook(req: Request, res: Response) {
+  async qorepay_WebHook(req: Request, res: Response) {
 
     try {
       const { body } = req;
 
       console.log('body',body)
 
-      const signatureHeader = req.headers['x-signature'] as string; 
+      // const signatureHeader = req.headers['x-signature'] as string;
   
-      if (!body || !signatureHeader) {
-        return res.status(400).json({ error: 'Missing payload or signature header' });
-      }
+      // if (!body || !signatureHeader) {
+      //   return res.status(400).json({ error: 'Missing payload or signature header' });
+      // }
   
-      const signature = Buffer.from(signatureHeader, 'base64'); 
+      // const signature = Buffer.from(signatureHeader, 'base64'); 
   
-      // Stringify the body before hashing
-      const hash = crypto.createHash('sha256').update(JSON.stringify(body)).digest(); 
+      // // Stringify the body before hashing
+      // const hash = crypto.createHash('sha256').update(JSON.stringify(body)).digest(); 
   
-      const verifier = crypto.createVerify('RSA-SHA256');
-      verifier.update(hash);
-      const isVerified = verifier.verify({ key: config.QOREPAY_PUBLIC_KEY as string, padding: crypto.constants.RSA_PKCS1_PADDING }, signature);
+      // const verifier = crypto.createVerify('RSA-SHA256');
+      // verifier.update(hash);
+      // const isVerified = verifier.verify({ key: config.QOREPAY_PUBLIC_KEY as string, padding: crypto.constants.RSA_PKCS1_PADDING }, signature);
   
-      if (!isVerified) {
-        return res.status(401).json({ error: 'Invalid signature' });
-      }
+      // if (!isVerified) {
+      //   return res.status(401).json({ error: 'Invalid signature' });
+      // }
 
-      const transaction = await prisma.transaction.findFirst({
-        where:{reference: body.id}
-      })
+      
 
-      console.log('transaction here', transaction)
+      // FOR FIAT DEPOSITS 
+
+
+        if(body.event_type === 'purchase.paid'){
+
+          const transaction = await prisma.transaction.findFirst({
+            where:{reference: body.id}
+          })
+    
+          console.log('transaction here', transaction)
+
+          await walletService.credit_Wallet(transaction?.amount as any, transaction?.walletId!)
+
+          const updatedTransaction = await prisma.transaction.update({
+            where:{id:transaction?.id!},
+            data:{status:'SUCCESSFUL'}
+          })
+
+        } 
+        
+        if(body.event_type === 'purchase.payment_failure'){
+
+          const transaction = await prisma.transaction.findFirst({
+            where:{reference: body.id}
+          })
+    
+          console.log('transaction here', transaction)
+
+          const updatedTransaction = await prisma.transaction.update({
+            where:{id:transaction?.id!},
+            data:{status:'FAILED'}
+          })
+
+        }
+
+      // FOR FIAT WITHDRAWAL 
+
+
+
+      
+
+      
+
+      
   
       // ... (your webhook processing logic here) ...
   
@@ -709,4 +750,8 @@ class WalletController {
 
 export default new WalletController();
 
+
+function elseif(arg0: boolean) {
+  throw new Error('Function not implemented.');
+}
 

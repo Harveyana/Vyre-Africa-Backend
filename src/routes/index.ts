@@ -51,7 +51,7 @@ router.post(
 
 router.post(
   '/webhook',
-  walletController.verifyWebHook
+  walletController.qorepay_WebHook
 );
 
 router.post(

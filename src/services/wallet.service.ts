@@ -1055,6 +1055,35 @@ class WalletService
         return paymentDetails
     }
 
+    async debit_Wallet(amount: number, accountId: string){
+
+        const data = {
+            accountId,
+            amount
+        };
+
+        const response = await tatumAxios.put('/ledger/virtualCurrency/revoke', data)
+        const responseData = response.data
+        console.log(responseData.reference)
+
+        return responseData.reference
+        
+    }
+
+    async credit_Wallet(amount: number, accountId: string){
+
+        const data = {
+            accountId,
+            amount
+        };
+
+        const response = await tatumAxios.put('/ledger/virtualCurrency/mint', data)
+        const responseData = response.data
+        console.log(responseData.reference)
+
+        return responseData.reference
+    }
+
 
     async createUserWallet(userId: string|null)
     {
@@ -1122,9 +1151,7 @@ class WalletService
     //     })
     // }
 
-    async debitUserWallet(amount: number, userId: string){
-        
-    }
+    
 
     // async debitStoreWallet(amount: number, storeId: string){
     //     const wallet =  await prisma.wallet.findFirst({
