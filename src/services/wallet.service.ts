@@ -34,6 +34,31 @@ class WalletService
         return result
     }
 
+    private subscribe_events = async(
+        accountId: string
+    )=>{
+
+        const data = {
+            type:"ACCOUNT_INCOMING_BLOCKCHAIN_TRANSACTION",
+            attr:{
+               id: accountId, // The Virtual_Account_ID
+               url:"https://webhook.tatum.io/account" //The URL of the webhook listener you are using
+               }
+            }
+
+        const subscribed = await tatumAxios.post('/subscription', data)
+
+        // const subcribed = await prisma.transaction.update({
+        //     where:{id: withdrawal_Id },
+        //     data:{
+        //       status:'SUCCESSFUL',
+        //     }
+        // })
+
+        return subscribed.data.id
+
+    }
+
     private complete_Withdrawal = async(
         withdrawal_Id: string,
         txId: string
@@ -82,7 +107,7 @@ class WalletService
                 amount,
                 status: result.completed ? 'SUCCESSFUL' : 'PENDING',
                 walletId: account_ID,
-                type:'DEBIT_WITHDRAWAL',
+                type:'DEBIT_PAYMENT',
                 description:'Bitcoin transfer'
             }
         })
@@ -123,7 +148,7 @@ class WalletService
                 amount,
                 status: result.completed ? 'SUCCESSFUL' : 'PENDING',
                 walletId: account_ID,
-                type:'DEBIT_WITHDRAWAL',
+                type:'DEBIT_PAYMENT',
                 description:'Ethereum transfer'
             }
         })
@@ -165,7 +190,7 @@ class WalletService
                 amount,
                 status: result.completed ? 'SUCCESSFUL' : 'PENDING',
                 walletId: account_ID,
-                type:'DEBIT_WITHDRAWAL',
+                type:'DEBIT_PAYMENT',
                 description:'Litecoin transfer'
             }
         })
@@ -205,7 +230,7 @@ class WalletService
                 amount,
                 status: result.completed ? 'SUCCESSFUL' : 'PENDING',
                 walletId: account_ID,
-                type:'DEBIT_WITHDRAWAL',
+                type:'DEBIT_PAYMENT',
                 description:'Tron transfer'
             }
         })
@@ -246,7 +271,7 @@ class WalletService
                 amount,
                 status: result.completed ? 'SUCCESSFUL' : 'PENDING',
                 walletId: account_ID,
-                type:'DEBIT_WITHDRAWAL',
+                type:'DEBIT_PAYMENT',
                 description:'BNB transfer'
             }
         })
@@ -289,7 +314,7 @@ class WalletService
                 amount,
                 status: result.completed ? 'SUCCESSFUL' : 'PENDING',
                 walletId: account_ID,
-                type:'DEBIT_WITHDRAWAL',
+                type:'DEBIT_PAYMENT',
                 description:'Ripple transfer'
             }
         })
@@ -330,7 +355,7 @@ class WalletService
                 amount,
                 status: result.completed ? 'SUCCESSFUL' : 'PENDING',
                 walletId: account_ID,
-                type:'DEBIT_WITHDRAWAL',
+                type:'DEBIT_PAYMENT',
                 description:'USD COIN transfer'
             }
         })
@@ -993,7 +1018,7 @@ class WalletService
                 reference: result.id,
                 status: 'PENDING',
                 walletId,
-                type:'CREDIT_DEPOSIT',
+                type:'FIAT_DEPOSIT',
                 description:`${currency} deposit`
             }
         })
@@ -1030,7 +1055,7 @@ class WalletService
                 phone
               },
               payment: {
-                amount,
+                amount: amount * 100,
                 currency,
                 description: `${currency} withdrawal `,
               },

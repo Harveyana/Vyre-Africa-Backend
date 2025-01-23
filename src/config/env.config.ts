@@ -73,6 +73,7 @@ const config = {
 
     TATUM_TEST_KEY: process.env.TATUM_TEST_KEY,
     TATUM_LIVE_KEY: process.env.TATUM_LIVE_KEY,
+    HMACSECRET: process.env.HMACSECRET,
 
     BTC_XPUB: process.env.BTC_XPUB,
     BTC_MNEMONIC: process.env.BTC_MNEMONIC,

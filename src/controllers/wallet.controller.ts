@@ -14,6 +14,7 @@ import walletService from '../services/wallet.service';
 import {Currency,walletType} from '@prisma/client';
 import { subMinutes } from 'date-fns';
 import * as crypto from 'crypto';
+import {createHmac} from 'node:crypto';
 import { generateRefCode } from '../utils';
 
 class WalletController {
@@ -96,6 +97,89 @@ class WalletController {
 
       
 
+      
+  
+      // ... (your webhook processing logic here) ...
+  
+      return res.status(200).json({
+        msg: 'Event verified',
+        success: true,
+      });
+  
+    } catch (error) {
+      console.error('Error verifying webhook:', error);
+      return res.status(500).json({ 
+        error: 'Internal Server Error', 
+        message: (error as Error).message 
+      });
+    }
+  }
+
+  async tatum_WebHook(req: Request, res: Response) {
+
+    try {
+      const { body } = req;
+
+      console.log('body',body)
+
+      // Step 3: Convert webhook body to stringify JSON
+      const stringifybody = JSON.stringify(body);
+
+      const xPayloadHash = req.headers['x-payload-hash'] as string;
+
+      // Step 4: Calculate digest as a Base64 string using the HMAC Secret, the webhook payload, and the HMAC SHA512 algorithm.
+      const base64Hash = createHmac("sha512", config.HMACSECRET as string)
+      .update(JSON.stringify(body))
+      .digest("base64");
+
+      // Step 5: Compare x-payload-hash value with calculated digest as a Base64 string
+      const checkValues = xPayloadHash == base64Hash;
+
+      console.log(`x-payload-hash and base64Hash are equal? ${checkValues}`);
+
+      // {
+      //   "date": 1619176527481,
+      //   "amount": "0.005",
+      //   "currency": "BTC",
+      //   "subscriptionType":"ACCOUNT_INCOMING_BLOCKCHAIN_TRANSACTION",
+      //   "accountId": "6082ab462936b4478117c6a0",
+      //   "reference: "c9875708-4ba3-41c9-a4cd-271048b41b9a", // the reference of the transaction in the virtual account
+      //   "txId": "45af182a0ffab58e5ba32fee57b297b2260c6e23a1de5ddc76c7ee22d72dea99",
+      //   "blockHash": "45af182a0ffab58e5ba32fee57b297b2260c6e23a1de5ddc76c7ee22d72dea99", // the hash of the block, might not be present every time
+      //   "blockHeight": 12345,
+      //   "from": "SENDER_ADDRESS", // might not be present every time; not present for UTXO-based blockchains
+      //   "to": "RECIPIENT_ADDRESS_CONNECTED_TO_LEDGER_ACCOUNT", // the blockchain address of the recipient
+      //   "index": 5 // for UTXO-based blockchains (BCH, BTC, DOGE, LTC), this is the index of the output in the transaction
+      // }
+      
+
+      
+
+      // FOR ACCOUNT_INCOMING_BLOCKCHAIN_TRANSACTION 
+
+
+      if(body.subscriptionType === 'ACCOUNT_INCOMING_BLOCKCHAIN_TRANSACTION'){
+
+        const wallet = await prisma.wallet.findUnique({
+          where:{id: body.accountId}
+        })
+
+        const transaction = await prisma.transaction.create({
+          data:{
+              userId: wallet?.userId,
+              currency: wallet?.currency!,
+              amount: body.amount,
+              reference: body.reference,
+              status: 'SUCCESSFUL',
+              walletId: wallet?.id!,
+              type:'CREDIT_PAYMENT',
+              description:`ACCOUNT_INCOMING_BLOCKCHAIN_TRANSACTION`
+            }
+        })
+    
+        console.log('transaction here', transaction)
+
+      }
       
   
       // ... (your webhook processing logic here) ...
