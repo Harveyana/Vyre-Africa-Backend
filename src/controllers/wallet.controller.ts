@@ -26,32 +26,46 @@ class WalletController {
     );
   }
 
-  async qorepay_WebHook(req: Request, res: Response) {
+  async qorepay_WebHook(req: Request | any, res: Response) {
+
+    async function verifySignature(content: any, signature: string) {
+      try {
+        // Step 1: Get the public key from the provided URL
+        const publicKey = config.QOREPAY_PUBLIC_KEY as string;
+        // Step 2: Decode the Base64-encoded signature
+        const decodedSignature = Buffer.from(signature, "base64");
+    
+        // Step 3: Create a verifier object with RSA + SHA256
+        const verifier = crypto.createVerify("RSA-SHA256");
+    
+        // Step 4: Update the verifier with the raw request body (exact form received)
+        verifier.update(content);
+    
+        // Step 5: Verify the signature using the public key
+        const isVerified = verifier.verify(publicKey, decodedSignature);
+    
+        return isVerified;
+      } catch (error) {
+        console.error("Error verifying signature:", error);
+        return false;
+      }
+    }
 
     try {
       const { body } = req;
 
       console.log('body',body)
 
-      // const signatureHeader = req.headers['x-signature'] as string;
-  
-      // if (!body || !signatureHeader) {
-      //   return res.status(400).json({ error: 'Missing payload or signature header' });
-      // }
-  
-      // const signature = Buffer.from(signatureHeader, 'base64'); 
-  
-      // // Stringify the body before hashing
-      // const hash = crypto.createHash('sha256').update(JSON.stringify(body)).digest(); 
-  
-      // const verifier = crypto.createVerify('RSA-SHA256');
-      // verifier.update(hash);
-      // const isVerified = verifier.verify({ key: config.QOREPAY_PUBLIC_KEY as string, padding: crypto.constants.RSA_PKCS1_PADDING }, signature);
-  
-      // if (!isVerified) {
-      //   return res.status(401).json({ error: 'Invalid signature' });
-      // }
+      const signatureHeader = req.headers['x-signature'] as string;
 
+      // const rawBody = JSON.stringify(req)
+      const rawBody = await req.json();
+
+      const isValid = await verifySignature(rawBody, signatureHeader);
+
+      if (!isValid) {
+        return res.status(401).json({ error: 'Invalid signature' });
+      }
       
 
       // FOR FIAT DEPOSITS 
