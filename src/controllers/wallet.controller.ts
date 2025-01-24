@@ -65,9 +65,9 @@ class WalletController {
 
       console.log(isValid)
 
-      if (!isValid) {
-        return res.status(401).json({ error: 'Invalid signature' });
-      }
+      // if (!isValid) {
+      //   return res.status(401).json({ error: 'Invalid signature' });
+      // }
       
 
       // FOR FIAT DEPOSITS 
