@@ -56,7 +56,7 @@ class WalletController {
 
       console.log('body',body)
 
-      const signatureHeader = req.headers.get("x-signature") || "";
+      const signatureHeader = req.headers["x-signature"] as string;
 
       const rawBody = JSON.stringify(req.body)
       // const rawBody = await req.json();
