@@ -58,8 +58,8 @@ class WalletController {
 
       const signatureHeader = req.headers['x-signature'] as string;
 
-      // const rawBody = JSON.stringify(req)
-      const rawBody = await req.json();
+      const rawBody = JSON.stringify(req)
+      // const rawBody = await req.json();
 
       const isValid = await verifySignature(rawBody, signatureHeader);
 
