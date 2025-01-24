@@ -46,7 +46,7 @@ class WalletController {
     
         return isVerified;
       } catch (error) {
-        console.error("Error verifying signature:", error);
+        console.log("Error verifying signature:", error);
         return false;
       }
     }
