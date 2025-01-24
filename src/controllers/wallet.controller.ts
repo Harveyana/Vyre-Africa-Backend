@@ -58,10 +58,12 @@ class WalletController {
 
       const signatureHeader = req.headers['x-signature'] as string;
 
-      // const rawBody = JSON.stringify(req.body)
+      const rawBody = JSON.stringify(req.body)
       // const rawBody = await req.json();
 
-      const isValid = await verifySignature(req.body, signatureHeader);
+      const isValid = await verifySignature(rawBody, signatureHeader);
+
+      console.log(isValid)
 
       if (!isValid) {
         return res.status(401).json({ error: 'Invalid signature' });
