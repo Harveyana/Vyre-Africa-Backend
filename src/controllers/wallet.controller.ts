@@ -440,13 +440,13 @@ class WalletController {
           });
       }
 
-      // if(amount > walletExists.availableBalance){
-      //   return res.status(400)
-      //     .json({
-      //       msg: 'Available balance not sufficient',
-      //       success: false,
-      //     });
-      // }
+      if(amount > walletExists.availableBalance){
+        return res.status(400)
+          .json({
+            msg: 'Available balance not sufficient',
+            success: false,
+          });
+      }
   
       const payment = await walletService.getBankList(currency, amount, userData?.email!, userData?.phoneNumber!)
   
