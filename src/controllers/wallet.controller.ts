@@ -108,55 +108,66 @@ class WalletController {
 
       }
 
-      // if(body.type === 'payout'){
-
-      //   if(body.event_type === 'payout.success'){
-
-      //     const transaction = await prisma.transaction.findFirst({
-      //       where:{reference: body.id}
-      //     })
-    
-      //     console.log('transaction here', transaction)
-
-      //     await walletService.debit_Wallet(transaction?.amount as any, transaction?.walletId!)
-
-      //     const updatedTransaction = await prisma.transaction.update({
-      //       where:{id:transaction?.id!},
-      //       data:{status:'SUCCESSFUL'}
-      //     })
-
-
-      //   }else{
-
-      //     const transaction = await prisma.transaction.findFirst({
-      //       where:{reference: body.id}
-      //     })
-
-      //     console.log('transaction here', transaction)
-
-      //     const updatedTransaction = await prisma.transaction.update({
-      //       where:{id:transaction?.id!},
-      //       data:{status:'FAILED'}
-      //     })
-
-      //   }
-
-      // }
-
-
-       
 
       // FOR FIAT WITHDRAWAL 
 
+      if(body.type === 'payout'){
 
+        if(body.event_type === 'payout.created'){
 
-      
-
-      
-
-      
+          const user = await prisma.user.findFirst({
+            where:{email:body.client.email}
+          })
   
-      // ... (your webhook processing logic here) ...
+          const wallet = await prisma.wallet.findFirst({
+            where:{
+              currency: body.payment.currency,
+              userId: user?.id
+            }
+          })
+          // record transaction
+          const transaction = await prisma.transaction.create({
+            data:{
+              userId: user?.id,
+              currency: wallet?.currency!,
+              amount: body?.payment.amount,
+              reference: body.id,
+              status: 'PENDING',
+              walletId: wallet?.id,
+              type:'FIAT_WITHDRAWAL',
+              description:`${wallet?.currency} withdrawal transfer`
+            }
+          })
+
+
+        }else if(body.event_type === 'payout.success'){
+
+          const transaction = await prisma.transaction.findFirst({
+            where:{reference: body.id}
+          })
+          // debit user wallet
+          await walletService.debit_Wallet(transaction?.amount as any, transaction?.walletId!)
+
+          await prisma.transaction.update({
+            where:{id:transaction?.id},
+            data:{status: 'SUCCESSFUL',}
+          })
+
+        }else{
+
+          const transaction = await prisma.transaction.findFirst({
+            where:{reference: body.id}
+          })
+          
+          await prisma.transaction.update({
+            where:{id:transaction?.id},
+            data:{status: 'FAILED',}
+          })
+
+        }
+
+      }
+      
   
       return res.status(200).json({
         msg: 'Event verified',
@@ -608,27 +619,6 @@ class WalletController {
           endpoint_url
         )
 
-        const wallet = await prisma.wallet.findFirst({
-          where:{
-            currency: result.payment.currency,
-            userId: user.id
-          }
-        })
-
-        console.log('wallet', wallet)
-
-        const transaction = await prisma.transaction.create({
-          data:{
-            userId: user.id,
-            currency: wallet?.currency!,
-            amount: result.payment.amount/100,
-            reference: result.id,
-            status: 'PENDING',
-            walletId: wallet?.id,
-            type:'FIAT_WITHDRAWAL',
-            description:`${wallet?.currency} transfer`
-          }
-        })
 
         return res
         .status(200)
