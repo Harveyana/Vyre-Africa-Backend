@@ -108,40 +108,40 @@ class WalletController {
 
       }
 
-      if(body.type === 'payout'){
+      // if(body.type === 'payout'){
 
-        if(body.event_type === 'payout.success'){
+      //   if(body.event_type === 'payout.success'){
 
-          const transaction = await prisma.transaction.findFirst({
-            where:{reference: body.id}
-          })
+      //     const transaction = await prisma.transaction.findFirst({
+      //       where:{reference: body.id}
+      //     })
     
-          console.log('transaction here', transaction)
+      //     console.log('transaction here', transaction)
 
-          await walletService.debit_Wallet(transaction?.amount as any, transaction?.walletId!)
+      //     await walletService.debit_Wallet(transaction?.amount as any, transaction?.walletId!)
 
-          const updatedTransaction = await prisma.transaction.update({
-            where:{id:transaction?.id!},
-            data:{status:'SUCCESSFUL'}
-          })
+      //     const updatedTransaction = await prisma.transaction.update({
+      //       where:{id:transaction?.id!},
+      //       data:{status:'SUCCESSFUL'}
+      //     })
 
 
-        }else{
+      //   }else{
 
-          const transaction = await prisma.transaction.findFirst({
-            where:{reference: body.id}
-          })
+      //     const transaction = await prisma.transaction.findFirst({
+      //       where:{reference: body.id}
+      //     })
 
-          console.log('transaction here', transaction)
+      //     console.log('transaction here', transaction)
 
-          const updatedTransaction = await prisma.transaction.update({
-            where:{id:transaction?.id!},
-            data:{status:'FAILED'}
-          })
+      //     const updatedTransaction = await prisma.transaction.update({
+      //       where:{id:transaction?.id!},
+      //       data:{status:'FAILED'}
+      //     })
 
-        }
+      //   }
 
-      }
+      // }
 
 
        

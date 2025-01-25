@@ -973,7 +973,7 @@ class WalletService
         }
 
         const response = await axios.post(endpoint, data)
-        console.log(response.data)
+        console.log('qorepay transfer response',response.data)
         const result = response.data
 
         return result
