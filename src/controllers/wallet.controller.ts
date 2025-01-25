@@ -130,7 +130,7 @@ class WalletController {
             data:{
               userId: user?.id,
               currency: wallet?.currency!,
-              amount: body?.payment.amount,
+              amount: body?.payment.amount/100,
               reference: body.id,
               status: 'PENDING',
               walletId: wallet?.id,
