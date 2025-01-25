@@ -42,7 +42,7 @@ class WalletService
             type:"ACCOUNT_INCOMING_BLOCKCHAIN_TRANSACTION",
             attr:{
                id: accountId, // The Virtual_Account_ID
-               url:"https://webhook.tatum.io/account" //The URL of the webhook listener you are using
+               url:"https://vyre-a33d9c003be3.herokuapp.com/api/v1/tatum/events" //The URL of the webhook listener you are using
                }
             }
 

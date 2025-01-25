@@ -55,6 +55,11 @@ router.post(
 );
 
 router.post(
+  '/tatum/events',
+  walletController.tatum_WebHook
+);
+
+router.post(
   '/upload_kyc',
   userValidator.uploadKyc(),
   middleware.handleValidationError,
