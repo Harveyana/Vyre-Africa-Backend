@@ -72,8 +72,9 @@ class WalletController {
 
       // FOR FIAT DEPOSITS 
 
+      if(body.type === 'purchase'){
 
-        if(body.event_type === 'purchase.paid'){
+         if(body.event_type === 'purchase.paid'){
 
           const transaction = await prisma.transaction.findFirst({
             where:{reference: body.id}
@@ -104,6 +105,46 @@ class WalletController {
           })
 
         }
+
+      }
+
+      if(body.type === 'payout'){
+
+        if(body.event_type === 'payout.success'){
+
+          const transaction = await prisma.transaction.findFirst({
+            where:{reference: body.id}
+          })
+    
+          console.log('transaction here', transaction)
+
+          await walletService.debit_Wallet(transaction?.amount as any, transaction?.walletId!)
+
+          const updatedTransaction = await prisma.transaction.update({
+            where:{id:transaction?.id!},
+            data:{status:'SUCCESSFUL'}
+          })
+
+
+        }else{
+
+          const transaction = await prisma.transaction.findFirst({
+            where:{reference: body.id}
+          })
+
+          console.log('transaction here', transaction)
+
+          const updatedTransaction = await prisma.transaction.update({
+            where:{id:transaction?.id!},
+            data:{status:'FAILED'}
+          })
+
+        }
+
+      }
+
+
+       
 
       // FOR FIAT WITHDRAWAL 
 
@@ -567,6 +608,28 @@ class WalletController {
           endpoint_url
         )
 
+        const wallet = await prisma.wallet.findFirst({
+          where:{
+            currency: result.payment.currency,
+            userId: user.id
+          }
+        })
+
+        console.log('wallet', wallet)
+
+        const transaction = await prisma.transaction.create({
+          data:{
+            userId: user.id,
+            currency: wallet?.currency,
+            amount: result.payment.amount/100,
+            reference: result.id,
+            status: 'PENDING',
+            walletId: wallet?.id,
+            type:'FIAT_WITHDRAWAL',
+            description:`${wallet?.currency} transfer`
+          }
+        })
+
         return res
         .status(200)
         .json({
@@ -855,3 +918,77 @@ function elseif(arg0: boolean) {
   throw new Error('Function not implemented.');
 }
 
+{
+  2025-01-24T20:55:49.219617+00:00 app[web.1]:   id: 'dd94add4-aa0c-45f5-a316-70c7e3d4aa96',
+  2025-01-24T20:55:49.219618+00:00 app[web.1]:   type: 'payout',
+  2025-01-24T20:55:49.219618+00:00 app[web.1]:   client: {
+  2025-01-24T20:55:49.219618+00:00 app[web.1]:     cc: [],
+  2025-01-24T20:55:49.219618+00:00 app[web.1]:     bcc: [],
+  2025-01-24T20:55:49.219618+00:00 app[web.1]:     city: '',
+  2025-01-24T20:55:49.219619+00:00 app[web.1]:     email: 'harveyana3@gmail.com',
+  2025-01-24T20:55:49.219619+00:00 app[web.1]:     phone: '+234 8160599030',
+  2025-01-24T20:55:49.219619+00:00 app[web.1]:     state: '',
+  2025-01-24T20:55:49.219620+00:00 app[web.1]:     country: '',
+  2025-01-24T20:55:49.219620+00:00 app[web.1]:     zip_code: '',
+  2025-01-24T20:55:49.219620+00:00 app[web.1]:     bank_code: '',
+  2025-01-24T20:55:49.219620+00:00 app[web.1]:     full_name: '',
+  2025-01-24T20:55:49.219620+00:00 app[web.1]:     brand_name: '',
+  2025-01-24T20:55:49.219620+00:00 app[web.1]:     legal_name: '',
+  2025-01-24T20:55:49.219621+00:00 app[web.1]:     tax_number: '',
+  2025-01-24T20:55:49.219621+00:00 app[web.1]:     client_type: null,
+  2025-01-24T20:55:49.219621+00:00 app[web.1]:     bank_account: '',
+  2025-01-24T20:55:49.219621+00:00 app[web.1]:     personal_code: '',
+  2025-01-24T20:55:49.219621+00:00 app[web.1]:     shipping_city: '',
+  2025-01-24T20:55:49.219621+00:00 app[web.1]:     shipping_state: '',
+  2025-01-24T20:55:49.219621+00:00 app[web.1]:     street_address: '',
+  2025-01-24T20:55:49.219622+00:00 app[web.1]:     delivery_methods: [ [Object], [Object] ],
+  2025-01-24T20:55:49.219622+00:00 app[web.1]:     shipping_country: '',
+  2025-01-24T20:55:49.219622+00:00 app[web.1]:     shipping_zip_code: '',
+  2025-01-24T20:55:49.219622+00:00 app[web.1]:     registration_number: '',
+  2025-01-24T20:55:49.219622+00:00 app[web.1]:     shipping_street_address: ''
+  2025-01-24T20:55:49.219622+00:00 app[web.1]:   },
+  2025-01-24T20:55:49.219622+00:00 app[web.1]:   status: 'success',
+  2025-01-24T20:55:49.219623+00:00 app[web.1]:   is_test: false,
+  2025-01-24T20:55:49.219623+00:00 app[web.1]:   payment: {
+  2025-01-24T20:55:49.219623+00:00 app[web.1]:     amount: 30000,
+  2025-01-24T20:55:49.219623+00:00 app[web.1]:     paid_on: 1737752148,
+  2025-01-24T20:55:49.219623+00:00 app[web.1]:     currency: 'NGN',
+  2025-01-24T20:55:49.219624+00:00 app[web.1]:     fee_amount: 5000,
+  2025-01-24T20:55:49.219624+00:00 app[web.1]:     net_amount: 25000,
+  2025-01-24T20:55:49.219624+00:00 app[web.1]:     description: 'NGN withdrawal',
+  2025-01-24T20:55:49.219624+00:00 app[web.1]:     is_outgoing: true,
+  2025-01-24T20:55:49.219624+00:00 app[web.1]:     payment_type: 'payout',
+  2025-01-24T20:55:49.219624+00:00 app[web.1]:     pending_amount: 0,
+  2025-01-24T20:55:49.219624+00:00 app[web.1]:     remote_paid_on: 1737752148,
+  2025-01-24T20:55:49.219624+00:00 app[web.1]:     owned_bank_code: null,
+  2025-01-24T20:55:49.219625+00:00 app[web.1]:     owned_bank_account: null,
+  2025-01-24T20:55:49.219625+00:00 app[web.1]:     pending_unfreeze_on: null,
+  2025-01-24T20:55:49.219625+00:00 app[web.1]:     owned_bank_account_id: null
+  2025-01-24T20:55:49.219625+00:00 app[web.1]:   },
+  2025-01-24T20:55:49.219625+00:00 app[web.1]:   user_id: null,
+  2025-01-24T20:55:49.219626+00:00 app[web.1]:   brand_id: '11c27940-bb5d-4065-afc3-78cb6af74e4f',
+  2025-01-24T20:55:49.219626+00:00 app[web.1]:   reference: '',
+  2025-01-24T20:55:49.219626+00:00 app[web.1]:   company_id: '71186b5f-e2d0-4e39-88ec-fd487ed0f64f',
+  2025-01-24T20:55:49.219626+00:00 app[web.1]:   created_on: 1737752008,
+  2025-01-24T20:55:49.219626+00:00 app[web.1]:   event_type: 'payout.success',
+  2025-01-24T20:55:49.219626+00:00 app[web.1]:   updated_on: 1737752148,
+  2025-01-24T20:55:49.219626+00:00 app[web.1]:   sender_name: 'Vyre Africa',
+  2025-01-24T20:55:49.219627+00:00 app[web.1]:   execution_url: 'https://gate.qorepay.com/po/dd94add4-aa0c-45f5-a316-70c7e3d4aa96/sarepay_payouts/',
+  2025-01-24T20:55:49.219637+00:00 app[web.1]:   status_history: [
+  2025-01-24T20:55:49.219637+00:00 app[web.1]:     { status: 'initialized', timestamp: 1737752008 },
+  2025-01-24T20:55:49.219637+00:00 app[web.1]:     { status: 'pending', timestamp: 1737752008 },
+  2025-01-24T20:55:49.219637+00:00 app[web.1]:     { status: 'pending', timestamp: 1737752139 },
+  2025-01-24T20:55:49.219637+00:00 app[web.1]:     { status: 'success', timestamp: 1737752148 }
+  2025-01-24T20:55:49.219637+00:00 app[web.1]:   ],
+  2025-01-24T20:55:49.219638+00:00 app[web.1]:   transaction_data: {
+  2025-01-24T20:55:49.219638+00:00 app[web.1]:     flow: 'server_to_server',
+  2025-01-24T20:55:49.219638+00:00 app[web.1]:     extra: {},
+  2025-01-24T20:55:49.219638+00:00 app[web.1]:     country: '',
+  2025-01-24T20:55:49.219638+00:00 app[web.1]:     attempts: [ [Object] ],
+  2025-01-24T20:55:49.219638+00:00 app[web.1]:     payment_method: 'QP_SarePay_Payout'
+  2025-01-24T20:55:49.219638+00:00 app[web.1]:   },
+  2025-01-24T20:55:49.219638+00:00 app[web.1]:   reference_generated: '79',
+  2025-01-24T20:55:49.219639+00:00 app[web.1]:   recipient_card_brand: 'QP_SarePay_Payout',
+  2025-01-24T20:55:49.219639+00:00 app[web.1]:   recipient_card_country: '',
+  2025-01-24T20:55:49.219639+00:00 app[web.1]:   payout_method_whitelist: null
+  2025-01-24T20:55:49.219639+00:00 app[web.1]: }
