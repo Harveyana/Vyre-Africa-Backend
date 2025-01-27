@@ -1459,22 +1459,23 @@ class UserController {
         const user = req.user
         const { limit } = req.query;
 
-        try {
+        // try {
             
-            const transactions = await transactionService.get(user.id, limit as string);
+        //     const transactions = await transactionService.get(user.id, limit as string);
 
-            return res.status(201).json({
-                msg: 'Transactions fetched successfully',
-                success: true,
-                transactions
-            });
+        //     return res.status(201).json({
+        //         msg: 'Transactions fetched successfully',
+        //         success: true,
+        //         transactions
+        //     });
 
-        } catch (error) {
-            console.log(error)
-            return res
-                .status(500)
-                .json({ msg: 'Internal Server Error', success: false, error });
-        }
+        // } catch (error) {
+        //     console.log(error)
+        //     return res
+        //         .status(500)
+        //         .json({ msg: 'Internal Server Error', success: false, error });
+        // }
+
     }
 
     // async filterTransactions(req: Request & Record<string, any>, res: Response) {
