@@ -188,6 +188,12 @@ router.get(
   walletController.getRate
 )
 
+router.get(
+  '/transactions',
+  authMiddleware,
+  walletController.fetchTransactions
+)
+
 
 
 

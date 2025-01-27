@@ -33,7 +33,7 @@ class TransactionService
     //     });
     // }
 
-    async get(
+    async getUserRecords(
         userId:string|null,
         limit: string,
     )
@@ -42,13 +42,26 @@ class TransactionService
             where: {
                 userId
             },
-            include:{
-                user: true
-            },
             take: limit ? parseInt(limit as string) : 20 || 20,
             orderBy: { createdAt: "desc" }
         });
     }
+
+    async getwalletRecords(
+        walletId:string|null,
+        limit: number,
+    )
+    {
+        return await prisma.transaction.findMany({
+            where: {
+              walletId
+            },
+            take: limit ? limit : 20 || 20,
+            orderBy: { createdAt: "desc" }
+        });
+    }
+
+
 
     async filterByDate(
         userId:string|null,

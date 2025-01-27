@@ -16,6 +16,7 @@ import { subMinutes } from 'date-fns';
 import * as crypto from 'crypto';
 import {createHmac} from 'node:crypto';
 import { generateRefCode } from '../utils';
+import transactionService from '../services/transaction.service';
 
 class WalletController {
   paystack: Paystack;
@@ -891,6 +892,38 @@ class WalletController {
             available: Available_Balance_rate
           }
           
+        });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).send({ msg: 'Internal Server Error', success: false, error });
+    }
+  }
+
+  async fetchTransactions(req: Request & Record<string, any>, res: Response) {
+    const { user } = req;
+    const { walletId } = req.query;
+
+    let transactions;
+
+    try {
+
+      if(walletId){
+
+        transactions = await transactionService.getwalletRecords(walletId as string,20)
+        
+      }else{
+        transactions = await transactionService.getwalletRecords(user.id as string,20)
+      }
+      
+
+      console.log('Fetched transactions: ', transactions);
+
+      return res
+        .status(200)
+        .json({
+          msg: 'transactions fetched Successfully',
+          success: true,
+          transactions
         });
     } catch (error) {
       console.log(error);
