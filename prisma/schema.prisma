@@ -43,6 +43,17 @@ enum UserStatus {
   DISMISSED
 }
 
+enum OrderType {
+  BUY
+  SELL
+}
+
+enum OrderStatus {
+  OPEN
+  CLOSED
+  CANCELED
+}
+
 enum CampaignType {
   EMAIL
   PUSH
@@ -179,6 +190,7 @@ model User {
   createdAt                     DateTime                      @default(now())
   Card                          Card?
   kyc                           kyc[]
+  Order                         Order[]
 }
 
 model Bank {
@@ -226,6 +238,7 @@ model Transaction {
   id          String            @id @default(cuid())
   walletId    String?
   userId      String?
+  orderId     String?
   currency    Currency
   user        User?             @relation(fields: [userId], references: [id])
   wallet      Wallet?           @relation(fields: [walletId], references: [id])
@@ -235,24 +248,6 @@ model Transaction {
   type        TransactionType
   description String
   createdAt   DateTime          @default(now())
-}
-
-model Campaign {
-  id        String       @id @default(cuid())
-  type      CampaignType @default(EMAIL)
-  title     String
-  content   String
-  createdAt DateTime     @default(now())
-  readAt    DateTime?
-}
-
-model CampaignDraft {
-  id        String       @id @default(cuid())
-  type      CampaignType @default(EMAIL)
-  title     String?
-  content   String?
-  createdAt DateTime     @default(now())
-  readAt    DateTime?
 }
 
 model Wallet {
@@ -275,6 +270,54 @@ model Wallet {
   accountBalance   Decimal       @default(0.00)
   availableBalance Decimal       @default(0.00)
   Transaction      Transaction[]
+  Block            Block[]
+  basePairs        Pair[]   @relation("BaseWallet")  // Reverse relation for `baseWallet`
+  quotePairs       Pair[]   @relation("QuoteWallet") // Reverse relation for `quoteWallet`
+}
+
+model Order {
+  id                  String      @id @default(cuid())
+  type                OrderType   @default(BUY)
+  baseWalletId        String?
+  quoteWalletId       String?
+  blockId             String?
+  userId              String?
+  pairId              String
+  user                User?       @relation(fields: [userId], references: [id])
+  pair                Pair        @relation(fields: [pairId], references: [id])
+  block               Block?      @relation(fields: [blockId], references: [id])
+  amount              Float
+  amountProcessed     Float       @default(0.0) // Amount of the order that has been filled
+  percentageProcessed Float       @default(0.0) // Percentage of the order that has been filled
+  price               Float
+  status              OrderStatus @default(OPEN)
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+}
+
+model Pair {
+  id                 String      @id @default(cuid())
+  name               String
+  base                String
+  quote               String
+  baseWalletId        String?
+  baseWallet          Wallet?       @relation("BaseWallet", fields: [baseWalletId], references: [id])
+
+  quoteWalletId       String?
+  quoteWallet         Wallet?       @relation("QuoteWallet", fields: [quoteWalletId], references: [id])
+  createdAt           DateTime      @default(now())
+  Order               Order[]
+}
+
+model Block {
+  id          String   @id @default(cuid())
+  active      Boolean  @default(true)
+  walletId    String?
+  wallet      Wallet?  @relation(fields: [walletId], references: [id])
+  amount      Float
+  description String
+  createdAt   DateTime @default(now())
+  Order       Order[]
 }
 
 model Card {

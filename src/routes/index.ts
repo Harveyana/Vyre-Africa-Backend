@@ -197,10 +197,33 @@ router.get(
 
 
 
-//get adverts
+//orders
 router.get(
-  '/adverts',
-  mobileAdvertController.get,
+  '/orders',
+  authMiddleware,
+  orderController.fetchOrders
+);
+
+router.post(
+  '/orders/create',
+  authMiddleware,
+  orderValidator.createOrder(),
+  middleware.handleValidationError,
+  orderController.fetchOrders
+);
+
+router.post(
+  '/orders/process',
+  authMiddleware,
+  orderValidator.processOrder(),
+  middleware.handleValidationError,
+  orderController.processOrder
+);
+
+router.get(
+  '/orders/pairs',
+  authMiddleware,
+  orderController.fetchPairs
 );
 
 // //update user profile

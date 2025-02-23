@@ -10,6 +10,7 @@ import config from '../config/env.config';
 import smsService from '../services/sms.service';
 import mobilePushService from '../services/mobilePush.service';
 import { subMinutes } from 'date-fns';
+import {Currency,walletType} from '@prisma/client';
 import { generateRefCode } from '../utils';
 
 class OrderController {
@@ -22,95 +23,365 @@ class OrderController {
   }
 
 
-  // async createOrder(req: Request & Record<string, any>, res: Response) {
-  //   const { user } = req;
-  //   const { storeId } = req.body;
-  //   let result: any
-  //   let Amount = 0
+  async createOrder(req: Request & Record<string, any>, res: Response) {
+    const { user } = req;
+    const { price, amount, type, pairId } = req.body;
+   
 
-  //   // console.log(storeId)
+    const userData = await prisma.user.findUnique({
+      where: { id: user.id }
+    })
 
-  //   const userData = await prisma.user.findUnique({
-  //     where: { id: user.id }
-  //   })
+    // fetch pair
+    // check the base currency balance if its sufficient
+    // block the amount for the order
+    // create the order using a prisma transaction
 
-  //   const cart = await prisma.cart.findUnique({
-  //     where: { userId: user.id },
-  //     include: {
-  //       products: {
-  //         include: {
-  //           product: true,
-  //           variants: true
-  //         }
-  //       }
-  //     }
-  //   })
+    const pair = await prisma.pair.findFirst({
+      where:{id: pairId}
+    })
 
-  //   if (!cart) {
-  //     return res.status(500)
-  //       .json({
-  //         msg: 'Your Cart Empty',
-  //         success: false,
-  //       });
-  //   }
+    const baseWalletExists = await prisma.wallet.findFirst({
+      where: {
+        userId: user.id,
+        currency: pair?.base as Currency
+      }
+    });
 
-  //   cart.products.forEach((cartProduct: any) => {
-  //     let variantsPrice = 0;
-  //     if (cartProduct.variants && cartProduct.variants.length) {
-  //       variantsPrice = cartProduct.variants.reduce((acc: number, variant: any) => acc + variant.price, 0);
-  //     }
-  //     Amount += (cartProduct.product.price + variantsPrice) * cartProduct.quantity;
-  //   });
+    const quoteWalletExists = await prisma.wallet.findFirst({
+      where: {
+        userId: user.id,
+        currency: pair?.quote as Currency
+      }
+    });
 
-  //   const userMessage = 'Your Order has been placed successfully. You will be updated'
+    if(!baseWalletExists || !quoteWalletExists){
+      return res.status(400)
+        .json({
+          msg: 'User wallet does not exist',
+          success: false,
+        });
+    }
 
-  //   try {
+    if(type === 'SELL' && amount > baseWalletExists.availableBalance){
+      return res.status(400)
+        .json({
+          msg: 'Available balance not sufficient',
+          success: false,
+        });
+    }
+
+    if(type === 'BUY' && amount > quoteWalletExists.availableBalance){
+      return res.status(400)
+        .json({
+          msg: 'Available balance not sufficient',
+          success: false,
+        });
+    }
+
+    const result = await prisma.$transaction(
+              async (prisma) => {
+
+                // Calculate the fee (1.2% of the amount)
+                const fee = amount * 0.012;
+                const adjustedAmount = amount - fee;
+
+                // deduct fee amount
+                await walletService.offchain_Transfer(
+                  user.id,
+                  type === 'SELL'? pair?.baseWalletId as string: pair?.quoteWalletId as string,
+                  type === 'SELL'? pair?.base as Currency: pair?.quote as Currency,
+                  fee,
+                  type === 'SELL'? baseWalletExists.id: quoteWalletExists.id
+                )
+
+                // block adjustedAmount
+                const blockId = await walletService.block_Amount(adjustedAmount, type === 'SELL'? baseWalletExists.id: quoteWalletExists.id)
+    
+                const order = await prisma.order.create({
+                  data:{
+                    userId: userData?.id,
+                    baseWalletId: baseWalletExists.id,
+                    quoteWalletId: quoteWalletExists.id,
+                    blockId,
+                    amount,
+                    type,
+                    pairId,
+                    price
+                  }
+                })
+    
+                return {
+                  order
+                }
+              },
+              {
+                maxWait: 50000, // default: 2000
+                timeout: 50000, // default: 5000
+              }
+
+    )
+
+    try {
 
 
-  //     const order = await prisma.order.create({
-  //       data: {
-  //         price: Amount,
-  //         userId: user.id,
-  //         storeId: storeId,
-  //         products: {
-  //           create: cart?.products.map((cartProduct: any) => ({
-  //             productId: cartProduct.product.id,
-  //             storeId: cartProduct.product.storeId,
-  //             name: cartProduct.product.name,
-  //             SKU: cartProduct.product.SKU,
-  //             price: cartProduct.product.price,
-  //             cart_Quantity: cartProduct.quantity,
-  //             images: cartProduct.images,
-  //             categories: [],
-  //             Variants: {
-  //               create: cartProduct.variants.map((variant: any) => ({
-  //                 name: variant.name,
-  //                 value: variant.value,
-  //                 price: variant.price,
-  //               })),
-  //             },
-  //           })),
-  //         },
-  //       },
-  //     })
+      return res
+        .status(200)
+        .json({
+          msg: 'Order created Successfully',
+          success: true,
+          order: result.order
+        });
 
-  //     return res
-  //       .status(200)
-  //       .json({
-  //         msg: 'Order created Successfully',
-  //         success: true,
-  //         order
-  //       });
+    } catch (error) {
+      console.log(error)
+      res.status(500)
+        .json({
+          msg: 'Internal Server Error',
+          success: false,
+        });
+    }
+  }
 
-  //   } catch (error) {
-  //     console.log(error)
-  //     res.status(500)
-  //       .json({
-  //         msg: 'Internal Server Error',
-  //         success: false,
-  //       });
-  //   }
-  // }
+  async processOrder(req: Request & Record<string, any>, res: Response) {
+    const { user } = req;
+    const {amount, orderId } = req.body;
+   
+
+    const userData = await prisma.user.findUnique({
+      where: { id: user.id }
+    })
+
+    const order = await prisma.order.findUnique({
+      where:{id: orderId}
+    })
+
+    const pair = await prisma.pair.findFirst({
+      where:{id: order?.pairId}
+    })
+
+    const userBaseWallet = await prisma.wallet.findFirst({
+      where:{
+        currency: pair?.base as Currency,
+        userId: user.id
+      }
+    })
+
+    const userQuoteWallet = await prisma.wallet.findFirst({
+      where:{
+        currency: pair?.quote as Currency,
+        userId: user.id
+      }
+    })
+
+    if (!userBaseWallet || !userQuoteWallet) {
+      return res.status(400)
+        .json({
+          msg: 'User wallet does not exist',
+          success: false,
+        });
+    }
+
+    const orderBaseWallet = await prisma.wallet.findUnique({
+      where:{
+        id: order?.baseWalletId as string
+      }
+    })
+
+    const orderQuoteWallet = await prisma.wallet.findUnique({
+      where:{
+        id: order?.quoteWalletId as string
+      }
+    })
+
+    if (!orderBaseWallet || !orderQuoteWallet) {
+      return res.status(400)
+        .json({
+          msg: 'Order wallet not found',
+          success: false,
+      });
+    }
+
+    if (order?.status !== "OPEN") {
+      return res.status(400)
+        .json({
+          msg: 'Order is not open',
+          success: false,
+      });
+    }
+
+    // Validate user balances
+    if (order?.type === "BUY" && userBaseWallet.availableBalance < amount) {
+      return res.status(400)
+        .json({
+          msg: 'Insufficient base currency balance.',
+          success: false,
+      });
+    }
+
+    if (order?.type === "SELL" && userQuoteWallet.availableBalance < amount) {
+      return res.status(400)
+        .json({
+          msg: 'Insufficient quote currency balance.',
+          success: false,
+      });
+    }
+
+
+    try {
+
+      const result = await prisma.$transaction(
+        async (prisma) => {
+
+          let amountToProcess: number;
+
+          amountToProcess = order?.type === "BUY"
+          ? amount / order.price // User is sending base, calculate quote amount
+          : amount * order.price; // User is sending quote, calculate base amount
+
+          const amountLeft = order?.amount - (order?.amountProcessed + amount)
+
+          let orderTransfer;
+          let newBlockId;
+          let userTransfer;
+
+          if (order?.type === "BUY"){
+            // User sends base currency, order sends quote currency
+
+            // order sends quote currency
+            orderTransfer = await walletService.unblock_Transfer(amountToProcess, order?.blockId as string, userQuoteWallet.id)
+            newBlockId = await walletService.block_Amount(amountLeft, orderQuoteWallet.id)
+            // user sends base currency
+            userTransfer = await walletService.offchain_Transfer(user.id, orderBaseWallet.id, pair?.base as Currency, amount, userBaseWallet.id)
+
+          } else {
+            // User sends quote currency, order sends base currency
+
+            // order sends base currency
+            orderTransfer = await walletService.unblock_Transfer(amountToProcess, order?.blockId as string, userBaseWallet.id)
+            newBlockId = await walletService.block_Amount(amountLeft, orderBaseWallet.id)
+            // user sends quote currency
+            userTransfer = await walletService.offchain_Transfer(user.id, orderQuoteWallet.id, pair?.quote as Currency, amount, userQuoteWallet.id)
+
+          }
+
+          const updatedOrder = await prisma.order.update({
+            where:{id: order.id },
+            data:{
+              blockId: newBlockId,
+              amountProcessed: order?.amountProcessed + amountToProcess,
+              percentageProcessed: ((order?.amountProcessed + amountToProcess) / order?.amount) * 100,
+              status: (order.amountProcessed + amountToProcess) >= order?.amount ? 'CLOSED' :'OPEN'
+            }
+          })
+
+          
+          return {
+            order: updatedOrder
+          }
+        },
+        {
+          maxWait: 50000, // default: 2000
+          timeout: 50000, // default: 5000
+        }
+
+      )
+
+
+      return res
+        .status(200)
+        .json({
+          msg: 'Order Processed Successfully',
+          success: true,
+          order: result.order
+        });
+
+    } catch (error) {
+      console.log(error)
+      res.status(500)
+        .json({
+          msg: 'Internal Server Error',
+          success: false,
+        });
+    }
+  }
+
+  async fetchOrders(req: Request | any, res: Response) {
+    const { limit, page, type, pairId } = req.query;
+
+    try {
+
+      const totalCount = await prisma.order.count();
+
+      const itemLimit = (limit ? parseInt(limit as string) : 20) || 20;
+      console.log(limit)
+      const totalPages = Math.ceil(totalCount / itemLimit);
+
+      const currentPage = page ? Math.max(parseInt(page as string), 1) : 1;
+      const skip = (currentPage - 1) * itemLimit;
+
+      const orders = await prisma.order.findMany({
+        where:{
+          ...(type && { type }),
+          ...(pairId && { pairId })
+        },
+        skip: skip,
+        take: itemLimit || 20
+      })
+
+      return res
+        .status(200)
+        .json({
+          msg: 'Successful',
+          success: true,
+          totalCount: totalCount,
+          totalPages: totalPages,
+          limit: itemLimit,
+          currentPage: currentPage,
+          orders,
+        });
+
+    } catch (error) {
+      console.error(error);
+      return res.status(500).send({ msg: 'Internal Server Error', success: false, error });
+    }
+  }
+
+  async fetchPairs(req: Request | any, res: Response) {
+    // const { limit, page, type, pairId } = req.query;
+
+    try {
+
+      const totalCount = await prisma.order.count();
+
+      // const itemLimit = (limit ? parseInt(limit as string) : 20) || 20;
+      // console.log(limit)
+      // const totalPages = Math.ceil(totalCount / itemLimit);
+
+      // const currentPage = page ? Math.max(parseInt(page as string), 1) : 1;
+      // const skip = (currentPage - 1) * itemLimit;
+
+      const pairs = await prisma.pair.findMany({
+        include:{
+          baseWallet: true,
+          quoteWallet: true
+        }
+      })
+
+      return res
+        .status(200)
+        .json({
+          msg: 'Successful',
+          success: true,
+          totalCount: totalCount,
+          pairs,
+        });
+
+    } catch (error) {
+      console.error(error);
+      return res.status(500).send({ msg: 'Internal Server Error', success: false, error });
+    }
+  }
 
   // async updateOrder(req: Request & Record<string, any>, res: Response) {
   //   const user = req.user;

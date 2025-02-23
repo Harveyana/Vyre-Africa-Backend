@@ -24,8 +24,17 @@ class OrderValidator {
       //   .isFloat()
       //   .withMessage('Invalid product price'),
       // body('products.*.SKU').notEmpty().withMessage('Product SKU is required'),
-      // body('method').notEmpty().withMessage('payment method is required'),
-      body('storeId').notEmpty().withMessage('store ID is required'),
+      body('price').notEmpty().withMessage('price is required'),
+      body('amount').notEmpty().withMessage('order amount is required'),
+      body('type').notEmpty().withMessage('order type is required'),
+      body('pairId').notEmpty().withMessage('pairId is required'),
+    ];
+  }
+
+  processOrder() {
+    return [
+      body('amount').notEmpty().withMessage('amount is required'),
+      body('orderId').notEmpty().withMessage('orderId is required')
     ];
   }
 }

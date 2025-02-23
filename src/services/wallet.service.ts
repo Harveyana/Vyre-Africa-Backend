@@ -1109,6 +1109,62 @@ class WalletService
         return responseData.reference
     }
 
+    async block_Amount(amount: number, accountId: string){
+
+        const data = {
+            amount,
+            type:'ORDER_BLOCK',
+            description:'order amount blocked',
+            ensureSufficientBalance: true
+        };
+
+        const response = await tatumAxios.post(`https://api.tatum.io/v3/ledger/account/block/${accountId}`, data)
+        const responseData = response.data
+        console.log(responseData.id)
+
+        const record = await prisma.block.create({
+            data:{
+                id: responseData.id,
+                walletId: accountId,
+                amount,
+                description:'order amount blocked'
+            }
+        })
+
+        console.log('amount blocked')
+
+        return responseData.id
+        
+    }
+
+    async unblock_Transfer(amount:number, blockId:string, recipientAccountId:string){
+
+        const data = {
+            recipientAccountId,
+            amount,
+            anonymous: true,
+            compliant: false
+        };
+
+        const response = await tatumAxios.put(`https://api.tatum.io/v3/ledger/account/block/${blockId}`, data)
+        const responseData = response.data
+        console.log(responseData.reference)
+
+        // const record = await prisma.block.create({
+        //     data:{
+        //         id: responseData.id,
+        //         walletId: accountId,
+        //         amount,
+        //         description:'order amount blocked'
+        //     }
+        // })
+
+        console.log('amount transferred')
+
+        return responseData.reference
+        
+    }
+
 
     async createUserWallet(userId: string|null)
     {
