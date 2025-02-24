@@ -383,13 +383,14 @@ class OrderController {
     }
   }
 
-  async fetchPairWallet(req: Request & Record<string, any>, res: Response) {
+  async fetchPairWallets(req: Request & Record<string, any>, res: Response) {
     const { user } = req;
     const { orderType, pairId } = req.query;
 
     try {
 
-      let wallet;
+      let baseWallet;
+      let quoteWallet;
 
       const pair = await prisma.pair.findFirst({
         where:{id: pairId as string}
@@ -403,26 +404,34 @@ class OrderController {
           });
       }
 
-      wallet = await prisma.wallet.findFirst({
+      baseWallet = await prisma.wallet.findFirst({
         where:{
           userId: user.id, 
-          currency: orderType == 'BUY' ? pair.quote as Currency : pair.base as Currency
+          currency: pair.base as Currency
+        }
+      })
+      quoteWallet = await prisma.wallet.findFirst({
+        where:{
+          userId: user.id, 
+          currency: pair.quote as Currency
         }
       })
 
-      wallet = await walletService.getAccount(wallet?.id as string)
-      console.log('main wallet data', wallet)
+      baseWallet = await walletService.getAccount(baseWallet?.id as string)
+      quoteWallet = await walletService.getAccount(quoteWallet?.id as string)
+      // console.log('main wallet data', wallet)
       
 
-      console.log('Fetched wallets: ', wallet);
+      // console.log('Fetched wallets: ', wallet);
 
 
       return res
         .status(200)
         .json({
-          msg: 'wallet fetched Successfully',
+          msg: 'wallets fetched Successfully',
           success: true,
-          wallet
+          baseWallet,
+          quoteWallet
         });
     } catch (error) {
       console.log(error);
