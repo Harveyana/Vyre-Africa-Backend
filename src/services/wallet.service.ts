@@ -1044,7 +1044,19 @@ class WalletService
         const response = await tatumAxios.get(`/ledger/account/${id}`)
         // console.log(response)
         const result = response.data
-        return result
+
+        const wallet = await prisma.wallet.update({
+            where: {
+              id
+            },
+            data:{
+              frozen: result.frozen,
+              accountBalance:result.balance.accountBalance,
+              availableBalance:result.balance.availableBalance
+            }
+        });
+
+        return wallet
     }
 
     async getBankList(currency: string,amount:number, email:string,phone:string)

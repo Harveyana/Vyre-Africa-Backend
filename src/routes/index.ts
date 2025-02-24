@@ -226,6 +226,12 @@ router.get(
   orderController.fetchPairs
 );
 
+router.get(
+  '/orders/getPairWallet',
+  authMiddleware,
+  orderController.fetchPairWallet
+);
+
 // //update user profile
 
 router.get(

@@ -383,6 +383,53 @@ class OrderController {
     }
   }
 
+  async fetchPairWallet(req: Request & Record<string, any>, res: Response) {
+    const { user } = req;
+    const { orderType, pairId } = req.query;
+
+    try {
+
+      let wallet;
+
+      const pair = await prisma.pair.findFirst({
+        where:{id: pairId as string}
+      })
+
+      if (!pair) {
+        return res.status(400)
+          .json({
+            msg: 'pair not found',
+            success: false,
+          });
+      }
+
+      wallet = await prisma.wallet.findFirst({
+        where:{
+          userId: user.id, 
+          currency: orderType == 'BUY' ? pair.quote as Currency : pair.base as Currency
+        }
+      })
+
+      wallet = await walletService.getAccount(wallet?.id as string)
+      console.log('main wallet data', wallet)
+      
+
+      console.log('Fetched wallets: ', wallet);
+
+
+      return res
+        .status(200)
+        .json({
+          msg: 'wallet fetched Successfully',
+          success: true,
+          wallet
+        });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).send({ msg: 'Internal Server Error', success: false, error });
+    }
+  }
+
   // async updateOrder(req: Request & Record<string, any>, res: Response) {
   //   const user = req.user;
   //   const { orderId, method } = req.body;

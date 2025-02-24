@@ -296,8 +296,8 @@ model Order {
 }
 
 model Pair {
-  id                 String      @id @default(cuid())
-  name               String
+  id                  String      @id @default(cuid())
+  name                String
   base                String
   quote               String
   baseWalletId        String?

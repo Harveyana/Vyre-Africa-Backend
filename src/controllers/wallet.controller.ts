@@ -846,24 +846,24 @@ class WalletController {
 
     try {
 
-      const result = await walletService.getAccount(walletId)
-      console.log('main wallet data', result)
+      const wallet = await walletService.getAccount(walletId)
+      console.log('main wallet data', wallet)
       //  const wallet = await prisma.wallet.findUnique({
       //     where: {
       //       id: walletId
       //     }
       //   });
 
-      const wallet = await prisma.wallet.update({
-        where: {
-          id: walletId
-        },
-        data:{
-          frozen: result.frozen,
-          accountBalance:result.balance.accountBalance,
-          availableBalance:result.balance.availableBalance
-        }
-      });
+      // const wallet = await prisma.wallet.update({
+      //   where: {
+      //     id: walletId
+      //   },
+      //   data:{
+      //     frozen: result.frozen,
+      //     accountBalance:result.balance.accountBalance,
+      //     availableBalance:result.balance.availableBalance
+      //   }
+      // });
       
 
       console.log('Fetched wallets: ', wallet);
