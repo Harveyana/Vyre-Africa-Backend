@@ -209,7 +209,7 @@ router.post(
   authMiddleware,
   orderValidator.createOrder(),
   middleware.handleValidationError,
-  orderController.fetchOrders
+  orderController.createOrder
 );
 
 router.post(

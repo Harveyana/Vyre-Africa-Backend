@@ -41,6 +41,8 @@ class OrderController {
       where:{id: pairId}
     })
 
+    console.log('pair', pair)
+
     const baseWalletExists = await prisma.wallet.findFirst({
       where: {
         userId: user.id,
@@ -48,12 +50,16 @@ class OrderController {
       }
     });
 
+    console.log('baseWalletExists', baseWalletExists)
+
     const quoteWalletExists = await prisma.wallet.findFirst({
       where: {
         userId: user.id,
         currency: pair?.quote as Currency
       }
     });
+
+    console.log('quoteWalletExists', quoteWalletExists)
 
     if(!baseWalletExists || !quoteWalletExists){
       return res.status(400)
@@ -71,6 +77,8 @@ class OrderController {
         });
     }
 
+    console.log('checked amount sufficiency')
+
     if(type === 'BUY' && amount > quoteWalletExists.availableBalance){
       return res.status(400)
         .json({
@@ -79,6 +87,8 @@ class OrderController {
         });
     }
 
+    console.log('entering prisma transaction')
+    
     const result = await prisma.$transaction(
               async (prisma) => {
 
