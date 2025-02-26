@@ -11,7 +11,7 @@ import smsService from '../services/sms.service';
 import mobilePushService from '../services/mobilePush.service';
 import { subMinutes } from 'date-fns';
 import {Currency,walletType} from '@prisma/client';
-import { generateRefCode } from '../utils';
+import { hasSufficientBalance } from '../utils';
 
 class OrderController {
   paystack: Paystack;
@@ -26,6 +26,8 @@ class OrderController {
   async createOrder(req: Request & Record<string, any>, res: Response) {
     const { user } = req;
     const { price, amount, type, pairId } = req.body;
+
+    console.log(price, amount, type, pairId)
    
 
     const userData = await prisma.user.findUnique({
@@ -69,7 +71,7 @@ class OrderController {
         });
     }
 
-    if(type === 'SELL' && amount > baseWalletExists.availableBalance){
+    if(type === 'SELL' && !hasSufficientBalance(baseWalletExists.availableBalance,amount)){
       return res.status(400)
         .json({
           msg: 'Available balance not sufficient',
@@ -79,7 +81,8 @@ class OrderController {
 
     console.log('checked amount sufficiency')
 
-    if(type === 'BUY' && amount > quoteWalletExists.availableBalance){
+
+    if(type === 'BUY' && !hasSufficientBalance(quoteWalletExists.availableBalance,amount)){
       return res.status(400)
         .json({
           msg: 'Available balance not sufficient',
@@ -87,15 +90,19 @@ class OrderController {
         });
     }
 
+    console.log('checked amount sufficiency')
+
     console.log('entering prisma transaction')
-    
-    const result = await prisma.$transaction(
-              async (prisma) => {
+
+    // const result = await prisma.$transaction(
+    //           async (prisma) => {
 
                 // Calculate the fee (1.2% of the amount)
                 const fee = amount * 0.012;
                 const adjustedAmount = amount - fee;
 
+
+                console.log('inside transaction')
                 // deduct fee amount
                 await walletService.offchain_Transfer(
                   user.id,
@@ -105,8 +112,13 @@ class OrderController {
                   type === 'SELL'? baseWalletExists.id: quoteWalletExists.id
                 )
 
+                console.log('done with offchain transfer')
+
                 // block adjustedAmount
                 const blockId = await walletService.block_Amount(adjustedAmount, type === 'SELL'? baseWalletExists.id: quoteWalletExists.id)
+
+                console.log('done with offchain transfer',blockId)
+                // 
     
                 const order = await prisma.order.create({
                   data:{
@@ -121,16 +133,16 @@ class OrderController {
                   }
                 })
     
-                return {
-                  order
-                }
-              },
-              {
-                maxWait: 50000, // default: 2000
-                timeout: 50000, // default: 5000
-              }
+    //             return {
+    //               order
+    //             }
+    //           },
+    //           {
+    //             maxWait: 50000, // default: 2000
+    //             timeout: 50000, // default: 5000
+    //           }
 
-    )
+    // )
 
     try {
 
@@ -140,7 +152,7 @@ class OrderController {
         .json({
           msg: 'Order created Successfully',
           success: true,
-          order: result.order
+          order: order
         });
 
     } catch (error) {

@@ -27,7 +27,7 @@ class WalletService
 
     private generate_Address = async(Account_ID:string)=>{
     
-        const response = await tatumAxios.post(`/offchain/account/${Account_ID}/address?index=1`)
+        const response = await tatumAxios.post(`/offchain/account/${Account_ID}/address`)
         const result = response.data
         console.log(result)
 

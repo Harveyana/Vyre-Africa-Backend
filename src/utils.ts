@@ -3,11 +3,24 @@ import jwt from 'jsonwebtoken';
 import moment from 'moment';
 import config from './config/env.config';
 import { User } from './globals';
+import Decimal from 'decimal.js';
 import crypto from 'crypto';
 
 const algorithm: string = 'aes-256-cbc';
 const key: Buffer = crypto.randomBytes(32);
 const iv: Buffer = crypto.randomBytes(16);
+
+
+export const hasSufficientBalance = (
+    availableBalance: any, // Store balance as string
+    amount: string
+  ): boolean => {
+    const balanceDecimal = new Decimal(availableBalance);
+    const amountDecimal = new Decimal(amount);
+  
+    return amountDecimal.lte(balanceDecimal); // Use lte (less than or equal)
+}
+
 
 export const generateSku = () => {
     const randomPart = Math.floor(Math.random() * 1000000)
