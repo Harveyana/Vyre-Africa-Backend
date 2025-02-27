@@ -921,7 +921,7 @@ class WalletService
         const data = {
             senderAccountId: user_Wallet?.id!,
             recipientAccountId: receipient_Wallet?.id!,
-            amount,
+            amount: `${amount}`,
             anonymous: false,
             compliant: false
         };
