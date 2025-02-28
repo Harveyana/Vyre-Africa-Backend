@@ -508,8 +508,8 @@ class WalletController {
           user.id,
           receipient_id,
           currency,
-          amount,
-          walletExists.id,
+          amount
+          // walletExists.id,
         )
 
         return res

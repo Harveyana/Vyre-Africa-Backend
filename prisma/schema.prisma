@@ -278,8 +278,6 @@ model Wallet {
 model Order {
   id                  String      @id @default(cuid())
   type                OrderType   @default(BUY)
-  baseWalletId        String?
-  quoteWalletId       String?
   blockId             String?
   userId              String?
   pairId              String
