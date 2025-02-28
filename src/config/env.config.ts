@@ -21,6 +21,7 @@ const config = {
         secret: process.env.JWT_SECRET || '',
         expiry: process.env.JWT_EXPIRY || '',
     },
+
     refreshJwt: {
         secret: process.env.JWT_REFRESH_SECRET || '',
         expiry: process.env.JWT_REFRESH_EXPIRY || '',
@@ -61,6 +62,7 @@ const config = {
     paystack: {
         secretKey: process.env.PAYSTACK_SECRET || ''
     },
+    Admin_Id: process.env.Admin_Id || '',
     defaultCurrency: process.env.DEFAULT_CURRENCY || 'NGN',
     termiiBaseUrl: process.env.TERMII_BASE_URL || 'https://v3.api.termii.com',
     termiiLiveKey: process.env.TERMII_LIVE_KEY || '',
