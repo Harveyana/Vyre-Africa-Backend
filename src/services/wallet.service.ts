@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import prisma from '../config/prisma.config';
 import config from '../config/env.config';
 import axios from "axios";
-import {Currency} from '@prisma/client';
+import {Currency,walletType} from '@prisma/client';
 import { currency as baseCurrency } from '../globals';
 import { hasSufficientBalance } from '../utils';
 
@@ -894,24 +894,22 @@ class WalletService
         receipientId: string, 
         currency: Currency, 
         amount: number
-        // walletId: string
     )
     {
-        let receipient_Wallet;
-        let user_Wallet;
+        let receipient_Wallet: any;
+        let user_Wallet: any;
 
         console.log('transfer data passed',
             userId,
             receipientId, 
             currency, 
             amount
-            // walletId
         )
 
         receipient_Wallet = await prisma.wallet.findFirst({
             where:{
                 userId: receipientId,
-                currency
+                currency: currency
             }
         })
 
