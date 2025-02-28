@@ -94,8 +94,8 @@ class OrderController {
 
     console.log('entering prisma transaction')
 
-    // const result = await prisma.$transaction(
-    //           async (prisma) => {
+    const result = await prisma.$transaction(
+              async (prisma) => {
 
                 // Calculate the fee (1.2% of the amount)
                 const fee = amount * 0.012;
@@ -132,16 +132,16 @@ class OrderController {
                   }
                 })
     
-    //             return {
-    //               order
-    //             }
-    //           },
-    //           {
-    //             maxWait: 50000, // default: 2000
-    //             timeout: 50000, // default: 5000
-    //           }
+                return {
+                  order
+                }
+              },
+              {
+                maxWait: 50000, // default: 2000
+                timeout: 50000, // default: 5000
+              }
 
-    // )
+    )
 
     try {
 
@@ -151,7 +151,7 @@ class OrderController {
         .json({
           msg: 'Order created Successfully',
           success: true,
-          order: order
+          order: result.order
         });
 
     } catch (error) {
