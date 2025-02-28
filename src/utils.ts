@@ -13,7 +13,7 @@ const iv: Buffer = crypto.randomBytes(16);
 
 export const hasSufficientBalance = (
     availableBalance: any, // Store balance as string
-    amount: string
+    amount: string|number
   ): boolean => {
     const balanceDecimal = new Decimal(availableBalance);
     const amountDecimal = new Decimal(amount);

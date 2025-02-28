@@ -94,8 +94,8 @@ class OrderController {
 
     console.log('entering prisma transaction')
 
-    const result = await prisma.$transaction(
-              async (prisma) => {
+    // const result = await prisma.$transaction(
+    //           async (prisma) => {
 
                 // Calculate the fee (1.2% of the amount)
                 const fee = amount * 0.012;
@@ -109,8 +109,8 @@ class OrderController {
                   user.id,
                   config.Admin_Id,
                   type === 'SELL'? pair?.base as Currency: pair?.quote as Currency,
-                  fee,
-                  type === 'SELL'? baseWalletExists.id: quoteWalletExists.id
+                  fee
+                  // type === 'SELL'? baseWalletExists.id: quoteWalletExists.id
                 )
 
                 console.log('done with offchain transfer')
@@ -124,8 +124,6 @@ class OrderController {
                 const order = await prisma.order.create({
                   data:{
                     userId: userData?.id,
-                    baseWalletId: baseWalletExists.id,
-                    quoteWalletId: quoteWalletExists.id,
                     blockId,
                     amount,
                     type,
@@ -134,16 +132,16 @@ class OrderController {
                   }
                 })
     
-                return {
-                  order
-                }
-              },
-              {
-                maxWait: 50000, // default: 2000
-                timeout: 50000, // default: 5000
-              }
+    //             return {
+    //               order
+    //             }
+    //           },
+    //           {
+    //             maxWait: 50000, // default: 2000
+    //             timeout: 50000, // default: 5000
+    //           }
 
-    )
+    // )
 
     try {
 
@@ -153,7 +151,7 @@ class OrderController {
         .json({
           msg: 'Order created Successfully',
           success: true,
-          order: result.order
+          order: order
         });
 
     } catch (error) {
@@ -205,15 +203,17 @@ class OrderController {
         });
     }
 
-    const orderBaseWallet = await prisma.wallet.findUnique({
+    const orderBaseWallet = await prisma.wallet.findFirst({
       where:{
-        id: order?.baseWalletId as string
+        currency: pair?.base as Currency,
+        userId: order?.userId as string
       }
     })
 
-    const orderQuoteWallet = await prisma.wallet.findUnique({
+    const orderQuoteWallet = await prisma.wallet.findFirst({
       where:{
-        id: order?.quoteWalletId as string
+        currency: pair?.quote as Currency,
+        userId: order?.userId as string
       }
     })
 
@@ -234,7 +234,7 @@ class OrderController {
     }
 
     // Validate user balances
-    if (order?.type === "BUY" && userBaseWallet.availableBalance < amount) {
+    if (order?.type === "BUY" && !hasSufficientBalance(userBaseWallet.availableBalance,amount)) {
       return res.status(400)
         .json({
           msg: 'Insufficient base currency balance.',
@@ -242,7 +242,7 @@ class OrderController {
       });
     }
 
-    if (order?.type === "SELL" && userQuoteWallet.availableBalance < amount) {
+    if (order?.type === "SELL" && !hasSufficientBalance(userQuoteWallet.availableBalance,amount)) {
       return res.status(400)
         .json({
           msg: 'Insufficient quote currency balance.',
@@ -275,7 +275,7 @@ class OrderController {
             orderTransfer = await walletService.unblock_Transfer(amountToProcess, order?.blockId as string, userQuoteWallet.id)
             newBlockId = await walletService.block_Amount(amountLeft, orderQuoteWallet.id)
             // user sends base currency
-            userTransfer = await walletService.offchain_Transfer(user.id, orderBaseWallet.id, pair?.base as Currency, amount, userBaseWallet.id)
+            userTransfer = await walletService.offchain_Transfer(user.id, order?.userId as string, pair?.base as Currency, amount)
 
           } else {
             // User sends quote currency, order sends base currency
@@ -284,7 +284,7 @@ class OrderController {
             orderTransfer = await walletService.unblock_Transfer(amountToProcess, order?.blockId as string, userBaseWallet.id)
             newBlockId = await walletService.block_Amount(amountLeft, orderBaseWallet.id)
             // user sends quote currency
-            userTransfer = await walletService.offchain_Transfer(user.id, orderQuoteWallet.id, pair?.quote as Currency, amount, userQuoteWallet.id)
+            userTransfer = await walletService.offchain_Transfer(user.id, order?.userId as string, pair?.quote as Currency, amount)
 
           }
 

@@ -4,6 +4,7 @@ import config from '../config/env.config';
 import axios from "axios";
 import {Currency} from '@prisma/client';
 import { currency as baseCurrency } from '../globals';
+import { hasSufficientBalance } from '../utils';
 
     const tatumAxios = axios.create({
         baseURL: 'https://api.tatum.io/v3',
@@ -892,12 +893,20 @@ class WalletService
         userId: string,
         receipientId: string, 
         currency: Currency, 
-        amount: number,
-        walletId: string
+        amount: number
+        // walletId: string
     )
     {
         let receipient_Wallet;
         let user_Wallet;
+
+        console.log('transfer data passed',
+            userId,
+            receipientId, 
+            currency, 
+            amount
+            // walletId
+        )
 
         receipient_Wallet = await prisma.wallet.findFirst({
             where:{
@@ -912,11 +921,14 @@ class WalletService
         }
 
         user_Wallet = await prisma.wallet.findFirst({
-            where:{id: walletId}
+            where:{
+                userId,
+                currency
+            }
         })
 
         // check if user balance is sufficient enough
-        if(amount > (user_Wallet?.availableBalance! as any))return
+        if(!hasSufficientBalance(user_Wallet?.availableBalance,amount))return
 
         const data = {
             senderAccountId: user_Wallet?.id!,
@@ -925,6 +937,7 @@ class WalletService
             anonymous: false,
             compliant: false
         };
+        console.log('transfer Data',data)
         const response = await tatumAxios.post('/ledger/transaction', data)
         const paymentData = response.data
         console.log(paymentData)
@@ -1124,7 +1137,7 @@ class WalletService
     async block_Amount(amount: number, accountId: string){
 
         const data = {
-            amount,
+            amount: `${amount}`,
             type:'ORDER_BLOCK',
             description:'order amount blocked',
             ensureSufficientBalance: true
