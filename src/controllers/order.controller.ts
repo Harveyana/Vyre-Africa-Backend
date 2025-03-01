@@ -350,9 +350,48 @@ class OrderController {
           ...(type && { type }),
           ...(pairId && { pairId })
         },
+        select:{
+          id: true,
+          type: true,
+          user:{
+            select:{
+              firstName: true,
+              lastName: true,
+              photoUrl: true,
+            }
+          },
+          pair:{
+            select:{
+              name: true,
+              base: true,
+              quote: true,
+              baseWallet:{
+                select:{
+                 imgurl: true,
+                 currency: true 
+                }
+              },
+              quoteWallet:{
+                select:{
+                  imgurl: true,
+                  currency: true
+                }
+                
+              }
+            }
+            
+          },
+          amount: true,
+          amountProcessed: true, // Amount of the order that has been filled
+          percentageProcessed: true, // Percentage of the order that has been filled
+          price: true,
+          status: true,
+          createdAt: true
+        },
         skip: skip,
         take: itemLimit || 20
       })
+
 
       return res
         .status(200)
