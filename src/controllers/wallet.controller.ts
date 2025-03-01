@@ -899,6 +899,63 @@ class WalletController {
     }
   }
 
+  async fetchWalletByName(req: Request & Record<string, any>, res: Response) {
+    const { user } = req;
+    const name = req.params.name;
+
+    try {
+
+      let wallet:any;
+
+      wallet = await prisma.wallet.findFirst({
+        where: {
+          userId: user.id,
+          currency: name as Currency
+        }
+      });
+
+      if(!wallet){
+        return res.status(400)
+          .json({
+            msg: 'wallet not found',
+            success: false,
+        });
+      }
+
+      wallet = await walletService.getAccount(wallet.id)
+      console.log('main wallet data', wallet)
+      
+
+      console.log('Fetched wallets: ', wallet);
+
+      let Balance_rate: any | undefined;
+      let Available_Balance_rate: any | undefined;
+
+      if(wallet?.type === 'CRYPTO' ){
+        const response = await walletService.getRate(wallet?.currency, 'NGN')
+      
+        Balance_rate = `${wallet.accountingCurrency} ${(Number(wallet?.accountBalance) * response.value).toFixed(2)}`;
+        Available_Balance_rate = `${wallet.accountingCurrency} ${(Number(wallet?.availableBalance) * response.value).toFixed(2)}`;
+      }
+
+      return res
+        .status(200)
+        .json({
+          msg: 'wallet fetched Successfully',
+          success: true,
+          wallet,
+          rate:{
+            balance: Balance_rate,
+            available: Available_Balance_rate
+          }
+          
+        });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).send({ msg: 'Internal Server Error', success: false, error });
+    }
+  }
+
   async fetchTransactions(req: Request & Record<string, any>, res: Response) {
     const { user } = req;
     const { walletId } = req.query;

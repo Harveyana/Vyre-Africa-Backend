@@ -183,6 +183,12 @@ router.get(
 )
 
 router.get(
+  '/wallet/:name',
+  authMiddleware,
+  walletController.fetchWalletByName
+)
+
+router.get(
   '/rate',
   authMiddleware,
   walletController.getRate
