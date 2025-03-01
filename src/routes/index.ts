@@ -204,6 +204,12 @@ router.get(
   orderController.fetchOrders
 );
 
+router.get(
+  '/order/:id',
+  authMiddleware,
+  orderController.fetchOrder
+)
+
 router.post(
   '/orders/create',
   authMiddleware,

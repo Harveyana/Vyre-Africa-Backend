@@ -331,6 +331,78 @@ class OrderController {
     }
   }
 
+  async fetchOrder(req: Request | any, res: Response) {
+    const orderId = req.params.id
+
+    if (!orderId) {
+      return res.status(400)
+        .json({
+          msg: 'order Id required',
+          success: false,
+        });
+    }
+
+    try {
+
+      const order = await prisma.order.findUnique({
+        where:{
+          id: orderId
+        },
+        select:{
+          id: true,
+          type: true,
+          user:{
+            select:{
+              firstName: true,
+              lastName: true,
+              photoUrl: true,
+            }
+          },
+          pair:{
+            select:{
+              name: true,
+              base: true,
+              quote: true,
+              baseWallet:{
+                select:{
+                 imgurl: true,
+                 currency: true 
+                }
+              },
+              quoteWallet:{
+                select:{
+                  imgurl: true,
+                  currency: true
+                }
+                
+              }
+            }
+            
+          },
+          amount: true,
+          amountProcessed: true, // Amount of the order that has been filled
+          percentageProcessed: true, // Percentage of the order that has been filled
+          price: true,
+          status: true,
+          createdAt: true
+        },
+      })
+
+
+      return res
+        .status(200)
+        .json({
+          msg: 'Successful',
+          success: true,
+          order,
+        });
+
+    } catch (error) {
+      console.error(error);
+      return res.status(500).send({ msg: 'Internal Server Error', success: false, error });
+    }
+  }
+
   async fetchOrders(req: Request | any, res: Response) {
     const { limit, page, type, pairId } = req.query;
 
