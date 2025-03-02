@@ -252,6 +252,19 @@ class OrderController {
       });
     }
 
+    // Prevent user exceeding maximum order amount
+    const maxAmount = order?.type === "BUY"
+    ? (order?.amount - order?.amountProcessed) / order?.price // User is sending base, calculate quote amount
+    : (order?.amount! - order?.amountProcessed!) * order?.price!
+
+    if (maxAmount < amount) {
+      return res.status(400)
+        .json({
+          msg: 'Max amount exceeded',
+          success: false,
+      });
+    }
+
 
     try {
 
