@@ -11,7 +11,7 @@ import smsService from '../services/sms.service';
 import mobilePushService from '../services/mobilePush.service';
 import { subMinutes } from 'date-fns';
 import {Currency,walletType} from '@prisma/client';
-import { hasSufficientBalance } from '../utils';
+import { hasSufficientBalance, amountSufficient } from '../utils';
 
 class OrderController {
   paystack: Paystack;
@@ -77,6 +77,23 @@ class OrderController {
             });
         }
 
+        // check for minimum BUY or SELL amount required
+        if(type === 'SELL' && !amountSufficient(amount, pair?.baseMinimum as number)){
+          return res.status(400)
+            .json({
+              msg: 'Amount not sufficient',
+              success: false,
+            });
+        }
+        if(type === 'BUY' && !amountSufficient(amount, pair?.quoteMinimum as number)){
+          return res.status(400)
+            .json({
+              msg: 'Amount not sufficient',
+              success: false,
+            });
+        }
+
+        // check for account balance sufficiency
         if(type === 'SELL' && !hasSufficientBalance(baseWalletExists.availableBalance,amount)){
           return res.status(400)
             .json({
@@ -84,10 +101,7 @@ class OrderController {
               success: false,
             });
         }
-
         console.log('checked amount sufficiency')
-
-
         if(type === 'BUY' && !hasSufficientBalance(quoteWalletExists.availableBalance,amount)){
           return res.status(400)
             .json({

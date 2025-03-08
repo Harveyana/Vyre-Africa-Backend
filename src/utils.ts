@@ -21,6 +21,16 @@ export const hasSufficientBalance = (
     return amountDecimal.lte(balanceDecimal); // Use lte (less than or equal)
 }
 
+export const amountSufficient = (
+    amount1: string|number,
+    amount2: string|number
+  ): boolean => {
+    const amount1Decimal = new Decimal(amount1);
+    const amount2Decimal = new Decimal(amount2);
+  
+    return amount1Decimal.greaterThanOrEqualTo(amount2Decimal); // Use greater than or equal to
+}
+
 
 export const generateSku = () => {
     const randomPart = Math.floor(Math.random() * 1000000)

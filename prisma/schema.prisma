@@ -298,6 +298,9 @@ model Pair {
   name                String
   base                String
   quote               String
+  baseMinimum         Float    // minimum amount required for to place a sell order
+  quoteMinimum        Float    // minimum amount required for to place a buy order
+
   baseWalletId        String?
   baseWallet          Wallet?       @relation("BaseWallet", fields: [baseWalletId], references: [id])
 
