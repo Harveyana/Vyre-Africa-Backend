@@ -164,6 +164,8 @@ model User {
   firstName         String      @db.VarChar(255)
   lastName          String      @db.VarChar(255)
   BusinessName      String?
+  referralId        String?
+  referreeId        String?
   email             String      @unique @db.VarChar(255)
   userStatus        UserStatus  @default(ACTIVE)
   type              AccountType @default(INDIVIDUAL)
