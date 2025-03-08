@@ -157,7 +157,7 @@ class OrderController {
           amount: parseFloat(amount),
           type,
           pairId,
-          price
+          price: parseFloat(price)
         }
       })
 
