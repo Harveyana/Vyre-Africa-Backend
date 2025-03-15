@@ -16,10 +16,10 @@ class UserValidator {
                 .withMessage('user email address is required'),
             body('DETAILS.phoneNumber')
                 .notEmpty()
-                .withMessage('user phone number is required'),
-            body('DETAILS.referreeId')
-                .optional()
-                .withMessage('referral id is optional'),
+                .withMessage('user phone number is required')
+            // body('DETAILS.referreeId')
+            //     .optional()
+            //     .withMessage('referral id is optional'),
         ];
     }
 
