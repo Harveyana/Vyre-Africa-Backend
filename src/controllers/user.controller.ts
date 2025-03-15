@@ -34,10 +34,19 @@ class UserController {
 
         try {
 
+            let referree:any;
+
             const userExist = await prisma.user.findUnique({
-            where: { email: DETAILS.email },
+              where: { email: DETAILS.email },
             });
 
+            if(DETAILS.referreeId){
+                referree = await prisma.user.findFirst({
+                    where:{referralId: DETAILS.referreeId}
+                })
+            }
+
+            
             if (userExist) {
                 return res.status(400).json({
                     msg: 'User already exist',
@@ -55,6 +64,7 @@ class UserController {
                     lastName: DETAILS.lastName,
                     email: DETAILS.email,
                     phoneNumber: DETAILS.phoneNumber,
+                    ...(referree && { referreeId: referree.referralId }),
                     type: TYPE,
                     otpCode: otpCode,
                     otpCodeExpiryTime: OTP_CODE_EXP,

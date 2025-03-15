@@ -37,8 +37,8 @@ router.get('/', (req: Request, res: Response) => {
 //User
 router.post(
   '/register',
-  // userValidator.register(),
-  // middleware.handleValidationError,
+  userValidator.register(),
+  middleware.handleValidationError,
   userController.register
 );
 

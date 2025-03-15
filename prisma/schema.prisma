@@ -115,6 +115,16 @@ enum TransactionPaymentMethod {
   TRANSFER
 }
 
+enum ActivityType {
+  REFERRAL
+  NOTIFICATION
+}
+
+enum ActivityStatus {
+  CLOSED
+  OPEN
+}
+
 enum TransactionType {
   FAILED
   CREDIT_PAYMENT
@@ -193,6 +203,7 @@ model User {
   Card                          Card?
   kyc                           kyc[]
   Order                         Order[]
+  PendingActivity               PendingActivity[]
 }
 
 model Bank {
@@ -273,8 +284,8 @@ model Wallet {
   availableBalance Decimal       @default(0.00)
   Transaction      Transaction[]
   Block            Block[]
-  basePairs        Pair[]   @relation("BaseWallet")  // Reverse relation for `baseWallet`
-  quotePairs       Pair[]   @relation("QuoteWallet") // Reverse relation for `quoteWallet`
+  basePairs        Pair[]        @relation("BaseWallet") // Reverse relation for `baseWallet`
+  quotePairs       Pair[]        @relation("QuoteWallet") // Reverse relation for `quoteWallet`
 }
 
 model Order {
@@ -296,20 +307,20 @@ model Order {
 }
 
 model Pair {
-  id                  String      @id @default(cuid())
-  name                String
-  base                String
-  quote               String
-  baseMinimum         Float    // minimum amount required for to place a sell order
-  quoteMinimum        Float    // minimum amount required for to place a buy order
+  id           String @id @default(cuid())
+  name         String
+  base         String
+  quote        String
+  baseMinimum  Float // minimum amount required for to place a sell order
+  quoteMinimum Float // minimum amount required for to place a buy order
 
-  baseWalletId        String?
-  baseWallet          Wallet?       @relation("BaseWallet", fields: [baseWalletId], references: [id])
+  baseWalletId String?
+  baseWallet   Wallet? @relation("BaseWallet", fields: [baseWalletId], references: [id])
 
-  quoteWalletId       String?
-  quoteWallet         Wallet?       @relation("QuoteWallet", fields: [quoteWalletId], references: [id])
-  createdAt           DateTime      @default(now())
-  Order               Order[]
+  quoteWalletId String?
+  quoteWallet   Wallet?  @relation("QuoteWallet", fields: [quoteWalletId], references: [id])
+  createdAt     DateTime @default(now())
+  Order         Order[]
 }
 
 model Block {
@@ -321,6 +332,18 @@ model Block {
   description String
   createdAt   DateTime @default(now())
   Order       Order[]
+}
+
+model PendingActivity {
+  id          String         @id @default(cuid())
+  type        ActivityType   @default(REFERRAL)
+  userId      String?
+  user        User?          @relation(fields: [userId], references: [id])
+  amount      Float?
+  orderAmount Float?
+  status      ActivityStatus @default(OPEN)
+  createdAt   DateTime       @default(now())
+  executedAt  DateTime
 }
 
 model Card {

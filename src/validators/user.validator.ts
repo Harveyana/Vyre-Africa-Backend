@@ -4,10 +4,22 @@ class UserValidator {
 
     register() {
         return [
-            body('firstName').notEmpty().withMessage('first name is required'),
-            body('lastName').notEmpty().withMessage('lastName is required'),
-            body('email').notEmpty().withMessage('Email address is required').isEmail(),
-            body('phoneNumber').notEmpty(),
+            body('DETAILS').isObject(),
+            body('DETAILS.firstName')
+                .notEmpty()
+                .withMessage('user first name is required'),
+            body('DETAILS.lastName')
+                .notEmpty()
+                .withMessage('user last name is required'),
+            body('DETAILS.email')
+                .notEmpty()
+                .withMessage('user email address is required'),
+            body('DETAILS.phoneNumber')
+                .notEmpty()
+                .withMessage('user phone number is required'),
+            body('DETAILS.referreeId')
+                .optional()
+                .withMessage('referral id is optional'),
         ];
     }
 
