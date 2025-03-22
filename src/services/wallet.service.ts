@@ -1090,19 +1090,19 @@ class WalletService
         console.log(response.data)
         const result = response.data
 
-        if(result?.status == 'error') return
+        if(result?.status === 'error') return
 
         const registered = await axios.get(result?.execution_url)
         const payment = registered.data
 
         console.log(payment)
 
-        const paymentDetails ={
-            banks: payment?.detail.data,
-            url: payment?.payout_url,
-        }
+        // const paymentDetails ={
+        //     banks: payment?.detail.data,
+        //     url: payment?.payout_url,
+        // }
 
-        return paymentDetails
+        return payment?.payout_url
     }
 
     async debit_Wallet(amount: number, accountId: string){

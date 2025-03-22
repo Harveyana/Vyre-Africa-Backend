@@ -449,16 +449,21 @@ class WalletController {
           });
       }
   
-      const payment = await walletService.getBankList(currency, amount, userData?.email!, userData?.phoneNumber!)
-  
-      return res
+      const payUrl = await walletService.getBankList(currency, amount, userData?.email!, userData?.phoneNumber!)
+
+      if(payUrl){
+
+        return res
         .status(200)
         .json({
-          msg: 'Banks fetched Successfully',
+          msg: 'Execution Url fetched Successfully',
           success: true,
-          banks: payment?.banks,
-          url: payment?.url
+          url: payUrl
         });
+
+      }
+  
+      
 
     } catch (error) {
       console.log(error)
