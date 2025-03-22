@@ -1070,7 +1070,7 @@ class WalletService
         return wallet
     }
 
-    async getBankList(currency: string,amount:number, email:string,phone:string)
+    async getBankList(currency: string,amount:number, email:string, phone:string)
     {
         const data = {
             client: {
@@ -1090,14 +1090,16 @@ class WalletService
         console.log(response.data)
         const result = response.data
 
-        const registered = await axios.get(result.execution_url)
+        if(result?.status == 'error') return
+
+        const registered = await axios.get(result?.execution_url)
         const payment = registered.data
 
         console.log(payment)
 
         const paymentDetails ={
-            banks: payment.detail.data,
-            url: payment.payout_url,
+            banks: payment?.detail.data,
+            url: payment?.payout_url,
         }
 
         return paymentDetails

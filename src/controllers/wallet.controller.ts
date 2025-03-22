@@ -456,8 +456,8 @@ class WalletController {
         .json({
           msg: 'Banks fetched Successfully',
           success: true,
-          banks: payment.banks,
-          url: payment.url
+          banks: payment?.banks,
+          url: payment?.url
         });
 
     } catch (error) {
