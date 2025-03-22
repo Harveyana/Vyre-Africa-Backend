@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { AccountType } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import slugify from 'slugify';
 import config from '../config/env.config';
 import prisma from '../config/prisma.config';
@@ -958,25 +959,22 @@ class UserController {
 
     async getAllBanks(req: Request, res: Response) {
         // const banks = await paystackService.getBanks();
-        const { name } = req.query;
+        const { search, limit = 20 } = req.query;
 
-        let banks;
+        let banks:any;
 
-        if (name) {
-            console.log('got in ')
-            banks = await prisma.bank.findMany({
-                where: { name: { startsWith: name as string } },
-            });
+        const where = search ? { name: { contains: search as string, mode: 'insensitive' as Prisma.QueryMode } }: {};
 
-            return res.status(201).json({
-                msg: 'Banks fetched successfully',
-                success: true,
-                banks,
-            });
-        }
+        console.log('got in ')
 
         banks = await prisma.bank.findMany({
-            take: 30
+          where,
+          take: Number(limit),
+          select: {
+            id: true,
+            name: true,
+            code: true,
+           },
         });
 
         return res.status(201).json({
@@ -984,6 +982,7 @@ class UserController {
             success: true,
             banks,
         });
+        
     }
 
     async queryUser(req: Request, res: Response) {
