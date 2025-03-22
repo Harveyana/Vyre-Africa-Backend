@@ -461,6 +461,13 @@ class WalletController {
           url: payUrl
         });
 
+      }else{
+        return res
+        .status(400)
+        .json({
+          msg: 'Operation Failed',
+          success: false,
+        });
       }
   
       

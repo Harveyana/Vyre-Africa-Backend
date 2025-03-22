@@ -1087,20 +1087,20 @@ class WalletService
         }
 
         const response = await qorepayAxios.post(`/payouts/`, data)
-        console.log(response.data)
+        console.log('first response',response.data)
         const result = response.data
-
-        if(result?.status === 'error') return
 
         const registered = await axios.get(result?.execution_url)
         const payment = registered.data
-
-        console.log(payment)
 
         // const paymentDetails ={
         //     banks: payment?.detail.data,
         //     url: payment?.payout_url,
         // }
+
+        if(payment?.status === 'error'){
+            return null
+        }
 
         return payment?.payout_url
     }
