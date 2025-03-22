@@ -1018,9 +1018,13 @@ class UserController {
         const { bankId, accountNumber } = req.body
         const user = req.user
 
+        console.log(req.body)
+
         const bank = await prisma.bank.findUnique({
             where: { id: bankId }
         });
+
+        console.log(bank)
 
         if (!bank) {
             return res.status(400).json({
@@ -1031,6 +1035,8 @@ class UserController {
 
         const verifyDetails = await paystackService.resolveAccount(bank.code, accountNumber)
         // const verifyDetails = await paystackService.resolveAccount("999992", "8138152101")
+
+        console.log(verifyDetails)
 
         if (!verifyDetails?.status) {
             return res.status(400).json({
