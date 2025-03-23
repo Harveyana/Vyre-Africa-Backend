@@ -35,14 +35,14 @@ class TransactionService
 
     async getUserRecords(
         userId:string|null,
-        limit: string,
+        limit: number,
     )
     {
         return await prisma.transaction.findMany({
             where: {
-                userId
+              userId
             },
-            take: limit ? parseInt(limit as string) : 20 || 20,
+            take: limit ? limit : 20 || 20,
             orderBy: { createdAt: "desc" }
         });
     }

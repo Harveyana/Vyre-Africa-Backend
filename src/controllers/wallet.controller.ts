@@ -981,7 +981,7 @@ class WalletController {
         transactions = await transactionService.getwalletRecords(walletId as string,20)
         
       }else{
-        transactions = await transactionService.getwalletRecords(user.id as string,20)
+        transactions = await transactionService.getUserRecords(user.id as string,20)
       }
       
 
