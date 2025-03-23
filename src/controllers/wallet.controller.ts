@@ -406,7 +406,7 @@ class WalletController {
     }
   }
 
-  async get_availableBanks(req: Request & Record<string, any>, res: Response) {
+  async authorize_fiat_Withdrawal(req: Request & Record<string, any>, res: Response) {
     const { user } = req;
     const {currency, amount} = req.body
 
@@ -449,14 +449,14 @@ class WalletController {
           });
       }
   
-      const payUrl = await walletService.getBankList(currency, amount, userData?.email!, userData?.phoneNumber!)
+      const payUrl = await walletService.authorize_Withdrawal(currency, amount, userData?.email!, userData?.phoneNumber!)
 
       if(payUrl){
 
         return res
         .status(200)
         .json({
-          msg: 'Execution Url fetched Successfully',
+          msg: 'Authorised Successfully',
           success: true,
           url: payUrl
         });

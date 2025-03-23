@@ -1070,7 +1070,7 @@ class WalletService
         return wallet
     }
 
-    async getBankList(currency: string,amount:number, email:string, phone:string)
+    async authorize_Withdrawal(currency: string,amount:number, email:string, phone:string)
     {
         const data = {
             client: {

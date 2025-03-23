@@ -139,11 +139,11 @@ router.post(
 )
 
 router.post(
-  '/wallet/active_banks',
+  '/wallet/authorize_fiat_withdrawal',
   authMiddleware,
   walletValidator.initDeposit(),
   middleware.handleValidationError,
-  walletController.get_availableBanks
+  walletController.authorize_fiat_Withdrawal
 )
 
 router.post(
