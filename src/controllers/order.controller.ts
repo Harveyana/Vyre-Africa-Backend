@@ -41,7 +41,8 @@ class OrderController {
         })
 
         // fetch pair
-        // check the base currency balance if its sufficient
+        // check if user has both wallets
+        // check the base currency balance of the user if its sufficient for the order
         // block the amount for the order
         // create the order using a prisma transaction
 
@@ -77,21 +78,21 @@ class OrderController {
             });
         }
 
-        // check for minimum BUY or SELL amount required
-        if(type === 'SELL' && !amountSufficient(amount, pair?.baseMinimum as number)){
-          return res.status(400)
-            .json({
-              msg: 'Amount not sufficient',
-              success: false,
-            });
-        }
-        if(type === 'BUY' && !amountSufficient(amount, pair?.quoteMinimum as number)){
-          return res.status(400)
-            .json({
-              msg: 'Amount not sufficient',
-              success: false,
-            });
-        }
+        // // check for minimum BUY or SELL amount required
+        // if(type === 'SELL' && !amountSufficient(amount, pair?.baseMinimum as number)){
+        //   return res.status(400)
+        //     .json({
+        //       msg: 'Amount not sufficient',
+        //       success: false,
+        //     });
+        // }
+        // if(type === 'BUY' && !amountSufficient(amount, pair?.quoteMinimum as number)){
+        //   return res.status(400)
+        //     .json({
+        //       msg: 'Amount not sufficient',
+        //       success: false,
+        //     });
+        // }
 
         // check for account balance sufficiency
         if(type === 'SELL' && !hasSufficientBalance(baseWalletExists.availableBalance,amount)){
@@ -215,6 +216,22 @@ class OrderController {
       return res.status(400)
         .json({
           msg: 'User wallet does not exist',
+          success: false,
+        });
+    }
+
+    // check for minimum BUY or SELL amount required
+    if(order?.type === 'SELL' && !amountSufficient(amount, order?.baseMinimum as number)){
+      return res.status(400)
+        .json({
+          msg: 'Minimum Order Amount not sufficient',
+          success: false,
+        });
+    }
+    if(order?.type === 'BUY' && !amountSufficient(amount, order?.quoteMinimum as number)){
+      return res.status(400)
+        .json({
+          msg: 'Minimum Order Amount not sufficient',
           success: false,
         });
     }
@@ -357,6 +374,8 @@ class OrderController {
         });
     }
   }
+
+
 
   async fetchOrder(req: Request | any, res: Response) {
     const orderId = req.params.id
@@ -537,7 +556,7 @@ class OrderController {
           msg: 'Successful',
           success: true,
           totalCount: totalCount,
-          pairs,
+          pairs
         });
 
     } catch (error) {

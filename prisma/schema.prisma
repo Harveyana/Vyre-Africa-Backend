@@ -294,6 +294,8 @@ model Order {
   blockId             String?
   userId              String?
   pairId              String
+  baseMinimum         Float       @default(0.00)      // minimum amount required for to place a sell order
+  quoteMinimum        Float       @default(0.00)     // minimum amount required for to place a buy order
   user                User?       @relation(fields: [userId], references: [id])
   pair                Pair        @relation(fields: [pairId], references: [id])
   block               Block?      @relation(fields: [blockId], references: [id])
@@ -311,8 +313,6 @@ model Pair {
   name         String
   base         String
   quote        String
-  baseMinimum  Float // minimum amount required for to place a sell order
-  quoteMinimum Float // minimum amount required for to place a buy order
 
   baseWalletId String?
   baseWallet   Wallet? @relation("BaseWallet", fields: [baseWalletId], references: [id])
