@@ -450,84 +450,95 @@ class OrderController {
   }
 
   async fetchOrders(req: Request | any, res: Response) {
-    const { limit, page, type, pairId } = req.query;
+    const { cursor, type, pairId, priceMin, priceMax } = req.query;
+
+    console.log(req.query)
 
     try {
+      // Build the where clause dynamically
+      const whereClause: any = {
+        ...(type && { type }),
+        ...(pairId && { pairId }),
+        ...((priceMin || priceMax) && {
+          price: {
+            ...(priceMin && { gte: parseFloat(priceMin) }),
+            ...(priceMax && { lte: parseFloat(priceMax) })
+          }
+        })
+      };
 
-      const totalCount = await prisma.order.count();
-
-      const itemLimit = (limit ? parseInt(limit as string) : 20) || 20;
-      console.log(limit)
-      const totalPages = Math.ceil(totalCount / itemLimit);
-
-      const currentPage = page ? Math.max(parseInt(page as string), 1) : 1;
-      const skip = (currentPage - 1) * itemLimit;
+      const totalCount = await prisma.order.count({
+        where: whereClause
+      });
 
       const orders = await prisma.order.findMany({
-        where:{
-          ...(type && { type }),
-          ...(pairId && { pairId })
-        },
-        select:{
+        where: whereClause,
+        select: {
           id: true,
           type: true,
-          user:{
-            select:{
+          user: {
+            select: {
               firstName: true,
               lastName: true,
               photoUrl: true,
             }
           },
-          pair:{
-            select:{
+          pair: {
+            select: {
               name: true,
               base: true,
               quote: true,
-              baseWallet:{
-                select:{
-                 imgurl: true,
-                 currency: true 
+              baseWallet: {
+                select: {
+                  imgurl: true,
+                  currency: true 
                 }
               },
-              quoteWallet:{
-                select:{
+              quoteWallet: {
+                select: {
                   imgurl: true,
                   currency: true
                 }
-                
               }
             }
-            
           },
           amount: true,
-          amountProcessed: true, // Amount of the order that has been filled
-          percentageProcessed: true, // Percentage of the order that has been filled
+          amountProcessed: true,
+          percentageProcessed: true,
           price: true,
           status: true,
           createdAt: true
         },
-        skip: skip,
-        take: itemLimit || 20
-      })
+        skip: cursor ? 1 : 0,  // Only skip if cursor is provided
+        take: 20,
+        ...(cursor && {
+          cursor: {
+            id: cursor
+          }
+        }),
+        orderBy: {
+          createdAt: 'desc'  // Assuming you want newest orders first
+        }
+      });
 
+      const newCursor = orders.length > 0 ? orders[orders.length - 1].id : null;
 
-      return res
-        .status(200)
-        .json({
-          msg: 'Successful',
-          success: true,
-          totalCount: totalCount,
-          totalPages: totalPages,
-          limit: itemLimit,
-          currentPage: currentPage,
-          orders,
-        });
+      return res.status(200).json({
+        msg: 'Successful',
+        success: true,
+        totalCount: totalCount,
+        cursor: newCursor,
+        orders
+      });
 
     } catch (error) {
       console.error(error);
-      return res.status(500).send({ msg: 'Internal Server Error', success: false, error });
+      return res.status(500).send({ 
+        msg: 'Internal Server Error', 
+        success: false
+      });
     }
-  }
+}
 
   async fetchPairs(req: Request | any, res: Response) {
     // const { limit, page, type, pairId } = req.query;
