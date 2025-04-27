@@ -25,7 +25,7 @@ class OrderController {
 
   async createOrder(req: Request & Record<string, any>, res: Response) {
     const { user } = req;
-    const { price, amount, type, pairId } = req.body;
+    const { price, amount, type, pairId, minimumAmount } = req.body;
 
     console.log(price, amount, type, pairId)
 
@@ -155,6 +155,7 @@ class OrderController {
         data:{
           userId: userData?.id,
           blockId,
+          amountMinimum: minimumAmount,
           amount: parseFloat(amount),
           type,
           pairId,
@@ -220,21 +221,15 @@ class OrderController {
         });
     }
 
-    // check for minimum BUY or SELL amount required
-    if(order?.type === 'SELL' && !amountSufficient(amount, order?.baseMinimum as number)){
+    // check for single minimum amount required per trade
+    if(!amountSufficient(amount, order?.amountMinimum as number)){
       return res.status(400)
         .json({
           msg: 'Minimum Order Amount not sufficient',
           success: false,
         });
     }
-    if(order?.type === 'BUY' && !amountSufficient(amount, order?.quoteMinimum as number)){
-      return res.status(400)
-        .json({
-          msg: 'Minimum Order Amount not sufficient',
-          success: false,
-        });
-    }
+    
 
     const orderBaseWallet = await prisma.wallet.findFirst({
       where:{
