@@ -55,6 +55,11 @@ router.post(
 );
 
 router.post(
+  '/webhook/fern',
+  walletController.fern_WebHook
+);
+
+router.post(
   '/tatum/events',
   walletController.tatum_WebHook
 );

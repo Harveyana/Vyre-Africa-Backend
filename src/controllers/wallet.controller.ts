@@ -27,6 +27,148 @@ class WalletController {
     );
   }
 
+  async fern_WebHook(req: Request | any, res: Response) {
+
+    async function verifySignature(content: any, signature: string) {
+      try {
+        // Step 1: Get the public key from the provided URL
+        const publicKey = config.QOREPAY_PUBLIC_KEY as string;
+        // Step 2: Decode the Base64-encoded signature
+        const decodedSignature = Buffer.from(signature, "base64");
+    
+        // Step 3: Create a verifier object with RSA + SHA256
+        const verifier = crypto.createVerify("RSA-SHA256");
+    
+        // Step 4: Update the verifier with the raw request body (exact form received)
+        verifier.update(content);
+    
+        // Step 5: Verify the signature using the public key
+        const isVerified = verifier.verify(publicKey, decodedSignature);
+    
+        return isVerified;
+      } catch (error) {
+        console.log("Error verifying signature:", error);
+        return false;
+      }
+    }
+
+    try {
+      const { body } = req;
+      
+
+      // FOR FIAT DEPOSITS 
+
+      // if(body.type === 'purchase'){
+
+      //    if(body.event_type === 'purchase.paid'){
+
+      //     const transaction = await prisma.transaction.findFirst({
+      //       where:{reference: body.id}
+      //     })
+    
+      //     console.log('transaction here', transaction)
+
+      //     await walletService.credit_Wallet(transaction?.amount as any, transaction?.walletId!)
+
+      //     const updatedTransaction = await prisma.transaction.update({
+      //       where:{id:transaction?.id!},
+      //       data:{status:'SUCCESSFUL'}
+      //     })
+
+      //   } 
+        
+      //   if(body.event_type === 'purchase.payment_failure'){
+
+      //     const transaction = await prisma.transaction.findFirst({
+      //       where:{reference: body.id}
+      //     })
+    
+      //     console.log('transaction here', transaction)
+
+      //     const updatedTransaction = await prisma.transaction.update({
+      //       where:{id:transaction?.id!},
+      //       data:{status:'FAILED'}
+      //     })
+
+      //   }
+
+      // }
+
+
+      // FOR FIAT WITHDRAWAL 
+
+      // if(body.type === 'payout'){
+
+      //   if(body.event_type === 'payout.created'){
+
+      //     const user = await prisma.user.findFirst({
+      //       where:{email:body.client.email}
+      //     })
+  
+      //     const wallet = await prisma.wallet.findFirst({
+      //       where:{
+      //         currency: body.payment.currency,
+      //         userId: user?.id
+      //       }
+      //     })
+      //     // record transaction
+      //     const transaction = await prisma.transaction.create({
+      //       data:{
+      //         userId: user?.id,
+      //         currency: wallet?.currency!,
+      //         amount: body?.payment.amount/100,
+      //         reference: body.id,
+      //         status: 'PENDING',
+      //         walletId: wallet?.id,
+      //         type:'FIAT_WITHDRAWAL',
+      //         description:`${wallet?.currency} withdrawal transfer`
+      //       }
+      //     })
+
+
+      //   }else if(body.event_type === 'payout.success'){
+
+      //     const transaction = await prisma.transaction.findFirst({
+      //       where:{reference: body.id}
+      //     })
+      //     // debit user wallet
+      //     await walletService.debit_Wallet(transaction?.amount as any, transaction?.walletId!)
+
+      //     await prisma.transaction.update({
+      //       where:{id:transaction?.id},
+      //       data:{status: 'SUCCESSFUL',}
+      //     })
+
+      //   }else{
+
+      //     const transaction = await prisma.transaction.findFirst({
+      //       where:{reference: body.id}
+      //     })
+          
+      //     await prisma.transaction.update({
+      //       where:{id:transaction?.id},
+      //       data:{status: 'FAILED',}
+      //     })
+
+      //   }
+
+      // }
+      
+  
+      return res.status(200).json({
+        msg: 'Event verified',
+        success: true,
+      });
+  
+    } catch (error) {
+      console.error('Error verifying webhook:', error);
+      return res.status(500).json({ 
+        error: 'Internal Server Error', 
+        message: (error as Error).message 
+      });
+    }
+  }
+
   async qorepay_WebHook(req: Request | any, res: Response) {
 
     async function verifySignature(content: any, signature: string) {
