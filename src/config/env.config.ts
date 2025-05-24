@@ -59,6 +59,10 @@ const config = {
         usdc_Img: process.env.usdc_Img || 'https://firebasestorage.googleapis.com/v0/b/vyre-a6527.appspot.com/o/usdc.png?alt=media&token=081f1646-7728-4adc-9aab-73ca1a55928f',
         bnb_Img: process.env.bnb_Img || 'https://firebasestorage.googleapis.com/v0/b/vyre-a6527.appspot.com/o/binance.png?alt=media&token=08d89c33-d0df-41ae-956b-d95b7bb61c2c',
     },
+    fern: {
+        Key: process.env.FERN_KEY || '',
+        Secret: process.env.FERN_WEBHOOK_SECRET || ''
+    },
     paystack: {
         secretKey: process.env.PAYSTACK_SECRET || ''
     },

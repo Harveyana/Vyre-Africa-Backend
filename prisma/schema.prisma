@@ -40,6 +40,8 @@ enum AccountType {
 enum UserStatus {
   ACTIVE
   PENDING
+  REJECTED
+  DEACTIVATED
   DISMISSED
 }
 
@@ -47,6 +49,7 @@ enum OrderType {
   BUY
   SELL
 }
+
 
 enum OrderStatus {
   OPEN
@@ -188,7 +191,8 @@ model User {
   otpCodeUsed       Boolean     @default(false)
   otpCodeExpiryTime String?
 
-  pushToken                     String?
+  fernId                        String?
+  fernKycLink                   String?
   userBanks                     UserBank[]
   notifications                 Notification[]
   transactions                  Transaction[]

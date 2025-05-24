@@ -25,6 +25,7 @@ import walletService from '../services/wallet.service';
 import { endOfDay, startOfDay, subDays } from 'date-fns';
 import mobilePushService from '../services/mobilePush.service';
 import smsService from '../services/sms.service';
+import fernService from '../services/fern.service';
 
 class UserController {
     
@@ -59,6 +60,13 @@ class UserController {
             
             console.log('entered individual')
             console.log('PERSONAL', DETAILS)
+
+            const customer = await fernService.customer({
+                customerType:'INDIVIDUAL',
+                firstName:DETAILS.firstName,
+                lastName: DETAILS.lastName,
+                email: DETAILS.email
+            })
             const newUser = await prisma.user.create({
                 data: {
                     firstName: DETAILS.firstName,
@@ -67,17 +75,20 @@ class UserController {
                     phoneNumber: DETAILS.phoneNumber,
                     ...(referree && { referreeId: referree.referralId }),
                     type: TYPE,
+
                     otpCode: otpCode,
                     otpCodeExpiryTime: OTP_CODE_EXP,
                     photoUrl: config.defaultPhotoUrl,
+
+                    fernId: customer.customerId,
+                    fernKycLink: customer.kycLink
                 
                 },
             });
 
             console.log('newUser',newUser)
               
-            await walletService.createWallet(newUser.id, 'NGN')
-            // await mailService.sendMail(DETAILS.email,otpCode)
+            // await walletService.createWallet(newUser.id, 'NGN')
 
             await mailService.sendOtp(DETAILS.email, DETAILS.firstName, otpCode);
 
