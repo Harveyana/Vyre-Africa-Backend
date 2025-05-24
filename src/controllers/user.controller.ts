@@ -542,10 +542,10 @@ class UserController {
 
         try {
             const user = await prisma.user.findUnique({
-                where: { email: email, isDeactivated: false },
-                include: {
-                    wallet: true,
-                },
+                where: { email, isDeactivated: false },
+                // include: {
+                //     wallet: true,
+                // },
             });
 
             console.log(user)
