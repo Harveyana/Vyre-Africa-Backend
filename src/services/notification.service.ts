@@ -59,28 +59,28 @@ class NotificationService
         
     // }
 
-    async subscribeToUser(token:string, userId:string)
-    {
+    // async subscribeToUser(token:string, userId:string)
+    // {
 
-        await prisma.user.update({
-            where: {id: userId},
-            data:{pushToken: token}
-        })
+    //     await prisma.user.update({
+    //         where: {id: userId},
+    //         data:{pushToken: token}
+    //     })
 
-        const registrationTokens = [
-            token,
-        ];
+    //     const registrationTokens = [
+    //         token,
+    //     ];
 
-        try {
-            await adminBase.messaging().subscribeToTopic(registrationTokens, 'USER-BROADCAST')
-            await adminBase.messaging().subscribeToTopic(registrationTokens, 'GENERAL-BROADCAST')
-            return true
-        } catch (error:any) {
-            console.log('Error subscribing to topic:', error);
-          return false
-        }
+    //     try {
+    //         await adminBase.messaging().subscribeToTopic(registrationTokens, 'USER-BROADCAST')
+    //         await adminBase.messaging().subscribeToTopic(registrationTokens, 'GENERAL-BROADCAST')
+    //         return true
+    //     } catch (error:any) {
+    //         console.log('Error subscribing to topic:', error);
+    //       return false
+    //     }
         
-    }
+    // }
 
     async sendPushNotification(userType:string, title:string, body:string)
     {

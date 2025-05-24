@@ -61,12 +61,6 @@ class UserController {
             console.log('entered individual')
             console.log('PERSONAL', DETAILS)
 
-            const customer = await fernService.customer({
-                customerType:'INDIVIDUAL',
-                firstName:DETAILS.firstName,
-                lastName: DETAILS.lastName,
-                email: DETAILS.email
-            })
             const newUser = await prisma.user.create({
                 data: {
                     firstName: DETAILS.firstName,
@@ -80,11 +74,18 @@ class UserController {
                     otpCodeExpiryTime: OTP_CODE_EXP,
                     photoUrl: config.defaultPhotoUrl,
 
-                    fernId: customer.customerId,
-                    fernKycLink: customer.kycLink
-                
+                    // fernId: customer.customerId,
+                    // fernKycLink: customer.kycLink,
+                    // userStatus:customer.customerStatus
                 },
             });
+
+            const customer = await fernService.customer({
+                customerType:'INDIVIDUAL',
+                firstName:DETAILS.firstName,
+                lastName: DETAILS.lastName,
+                email: DETAILS.email
+            })
 
             console.log('newUser',newUser)
               
@@ -475,33 +476,6 @@ class UserController {
                 .status(500)
                 .json({ msg: 'Internal Server Error', success: false, error });
         }
-    }
-
-    async subscribe(req: Request | any, res: Response) {
-        const user = req.user
-
-        const { token } = req.body;
-
-        // const storeAdmin = await prisma.storeAdmin.findFirst({
-        //     where: { userId: user.id }
-        // })
-
-        try {
-
-            notificationService.subscribeToUser(token, user.id)
-            return res.status(200).json({
-                msg: 'Subscription Successfull',
-                success: true,
-            });
-            
-        } catch (error) {
-
-            return res
-                .status(500)
-                .json({ msg: 'Internal Server Error', success: false, error });
-            
-        }
-
     }
 
     async resendOtpCode(req: Request, res: Response) {

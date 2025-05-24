@@ -15,84 +15,84 @@ import {Currency,walletType} from '@prisma/client';
 import { subMinutes } from 'date-fns';
 import * as crypto from 'crypto';
 import {createHmac} from 'node:crypto';
-import { generateRefCode } from '../utils';
+import { generateRefCode, generateSignature, isValidSignature } from '../utils';
 import transactionService from '../services/transaction.service';
+import fernService from '../services/fern.service';
 
 class WalletController {
-  paystack: Paystack;
 
-  constructor() {
-    this.paystack = new Paystack(
-      'sk_test_3425cf96b06b8ce98715964ed1255707871fc486',
-    );
-  }
 
   async fern_WebHook(req: Request | any, res: Response) {
 
-    async function verifySignature(content: any, signature: string) {
-      try {
-        // Step 1: Get the public key from the provided URL
-        const publicKey = config.QOREPAY_PUBLIC_KEY as string;
-        // Step 2: Decode the Base64-encoded signature
-        const decodedSignature = Buffer.from(signature, "base64");
-    
-        // Step 3: Create a verifier object with RSA + SHA256
-        const verifier = crypto.createVerify("RSA-SHA256");
-    
-        // Step 4: Update the verifier with the raw request body (exact form received)
-        verifier.update(content);
-    
-        // Step 5: Verify the signature using the public key
-        const isVerified = verifier.verify(publicKey, decodedSignature);
-    
-        return isVerified;
-      } catch (error) {
-        console.log("Error verifying signature:", error);
-        return false;
-      }
+    const signature = req.header("x-api-signature");
+    const timestamp = req.header("x-api-timestamp");
+    const rawBody = req.body.toString(); //
+
+    console.log('webhook body',req.body)
+
+    if (!signature || !timestamp || !isValidSignature(rawBody, timestamp, signature, config.fern.Secret)) {
+      console.error("Invalid webhook signature – request possibly forged!");
+      return res.sendStatus(400); // reject if signature doesn't match
     }
+
 
     try {
       const { body } = req;
       
 
-      // FOR FIAT DEPOSITS 
+      // Customer Events
 
-      // if(body.type === 'purchase'){
+      if(body.type === 'customer.created'){
+        const customer = body.resource
 
-      //    if(body.event_type === 'purchase.paid'){
+        const updated = fernService.customer_Created(
+          customer.customerId,
+          customer.customerStatus,
+          customer.kycLink,
+          customer.email
+        )
 
-      //     const transaction = await prisma.transaction.findFirst({
-      //       where:{reference: body.id}
-      //     })
-    
-      //     console.log('transaction here', transaction)
+        return res.status(200).json({
+          msg: 'Event Successful',
+          success: true,
+        });
 
-      //     await walletService.credit_Wallet(transaction?.amount as any, transaction?.walletId!)
+      }
 
-      //     const updatedTransaction = await prisma.transaction.update({
-      //       where:{id:transaction?.id!},
-      //       data:{status:'SUCCESSFUL'}
-      //     })
+      if(body.type === 'customer.updated'){
+        const customer = body.resource
 
-      //   } 
-        
-      //   if(body.event_type === 'purchase.payment_failure'){
+        const updated = fernService.customer_updated(
+          customer.customerStatus,
+          customer.email
+        )
 
-      //     const transaction = await prisma.transaction.findFirst({
-      //       where:{reference: body.id}
-      //     })
-    
-      //     console.log('transaction here', transaction)
+        return res.status(200).json({
+          msg: 'Event Successful',
+          success: true,
+        });
+      }
+      
 
-      //     const updatedTransaction = await prisma.transaction.update({
-      //       where:{id:transaction?.id!},
-      //       data:{status:'FAILED'}
-      //     })
+      if(body.type === 'payment_account.created'){
 
-      //   }
+      }
 
-      // }
+      if(body.type === 'payment_account.deleted'){
+
+      }
+
+      if(body.type === 'transaction.created'){
+
+      }
+
+      if(body.type === 'transaction.updated'){
+
+      }
+
+      if(body.type === 'transaction.updated'){
+
+      }
 
 
       // FOR FIAT WITHDRAWAL 

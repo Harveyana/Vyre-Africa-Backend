@@ -280,14 +280,6 @@ router.post(
   userController.changePassword,
 );
 
-router.post(
-  '/user/subscribe',
-  authMiddleware,
-  userValidator.Subscribe(),
-  middleware.handleValidationError,
-  userController.subscribe,
-);
-
 //get banks
 router.get(
   '/banks',

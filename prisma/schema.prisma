@@ -39,6 +39,7 @@ enum AccountType {
 
 enum UserStatus {
   ACTIVE
+  CREATED
   PENDING
   REJECTED
   DEACTIVATED

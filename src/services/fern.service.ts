@@ -3,7 +3,7 @@ import { Paystack } from "paystack-sdk";
 import config from "../config/env.config";
 import prisma from '../config/prisma.config';
 import axios from "axios";
-import { UserBank } from "@prisma/client";
+import { UserBank,UserStatus } from "@prisma/client";
 import { generateRefCode } from "../utils";
 
 const fernAxios = axios.create({
@@ -25,7 +25,37 @@ class FernService {
     return result
   }
 
-  
+  async customer_Created(customerId:string, status:string, kycLink:string, email:string){
+    
+    const updatedUser = await prisma.user.update({
+      where:{email},
+      data:{
+        fernId: customerId,
+        fernKycLink: kycLink,
+        userStatus: status as UserStatus
+      }
+    })
+    console.log(updatedUser)
+
+    return true
+  }
+
+  async customer_updated(status:string, email:string){
+    
+    const updatedUser = await prisma.user.update({
+      where:{email},
+      data:{
+        userStatus: status as UserStatus
+      }
+    })
+    console.log(updatedUser)
+
+    return true
+  }
+
+
+
+
   
 
     // async getBanks(){

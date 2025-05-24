@@ -11,6 +11,34 @@ const key: Buffer = crypto.randomBytes(32);
 const iv: Buffer = crypto.randomBytes(16);
 
 
+export const generateSignature = (
+    body: string,       // raw JSON string of the request body
+    timestamp: string,  // timestamp string from header
+    secret: string      // your webhook secret
+): string => {
+    const payloadToSign = `${timestamp}.${body}`;
+    return crypto
+      .createHmac("sha256", secret)
+      .update(payloadToSign)
+      .digest("hex");
+};
+
+export const isValidSignature = (
+    body: string,       // raw JSON string of the request body
+    timestamp: string,  // timestamp string from X-Api-Timestamp header
+    signature: string,  // hex string from X-Api-Signature header
+    secret: string      // your webhook secret
+): boolean => {
+    const expectedSignature = generateSignature(body, timestamp, secret);
+    // Use timing-safe comparison to avoid timing attack vulnerability
+    const sigBuffer = Buffer.from(signature, "hex");
+    const expectedSigBuffer = Buffer.from(expectedSignature, "hex");
+    return (
+      sigBuffer.length === expectedSigBuffer.length &&
+      crypto.timingSafeEqual(sigBuffer, expectedSigBuffer)
+    );
+};
+
 export const hasSufficientBalance = (
     availableBalance: any, // Store balance as string
     amount: string|number
