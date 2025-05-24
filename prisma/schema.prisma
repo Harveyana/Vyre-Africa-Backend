@@ -51,7 +51,6 @@ enum OrderType {
   SELL
 }
 
-
 enum OrderStatus {
   OPEN
   CLOSED
@@ -159,20 +158,6 @@ model Rating {
   userId    String
 }
 
-model kyc {
-  id      String  @id @default(cuid())
-  idType  String
-  idFront String?
-  idBack  String?
-  regNo   String? @unique @db.VarChar(100)
-  file    String? @db.VarChar(600)
-
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  idNumber  String?
-  createdAt DateTime @default(now())
-}
-
 model User {
   id                String      @id @default(cuid())
   firstName         String      @db.VarChar(255)
@@ -192,7 +177,7 @@ model User {
   otpCodeUsed       Boolean     @default(false)
   otpCodeExpiryTime String?
 
-  fernUserId                     String?
+  fernUserId                    String?
   fernKycLink                   String?
   userBanks                     UserBank[]
   notifications                 Notification[]
@@ -205,10 +190,9 @@ model User {
   isDeactivated                 Boolean                       @default(false)
   deactivationReason            String?
   createdAt                     DateTime                      @default(now())
-  Card                          Card?
-  kyc                           kyc[]
   Order                         Order[]
   PendingActivity               PendingActivity[]
+  Card                          Card?
 }
 
 model Bank {
@@ -299,7 +283,7 @@ model Order {
   blockId             String?
   userId              String?
   pairId              String
-  amountMinimum       Float       @default(0.00)      // minimum amount required for to place a sell order
+  amountMinimum       Float       @default(0.00) // minimum amount required for to place a sell order
   user                User?       @relation(fields: [userId], references: [id])
   pair                Pair        @relation(fields: [pairId], references: [id])
   block               Block?      @relation(fields: [blockId], references: [id])
@@ -313,10 +297,10 @@ model Order {
 }
 
 model Pair {
-  id           String @id @default(cuid())
-  name         String
-  base         String
-  quote        String
+  id    String @id @default(cuid())
+  name  String
+  base  String
+  quote String
 
   baseWalletId String?
   baseWallet   Wallet? @relation("BaseWallet", fields: [baseWalletId], references: [id])
