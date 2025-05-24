@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Paystack } from "paystack-sdk";
 import config from "../config/env.config";
 import prisma from '../config/prisma.config';
+import { Prisma } from "@prisma/client";
 import axios from "axios";
 import { UserBank,UserStatus } from "@prisma/client";
 import { generateRefCode } from "../utils";
@@ -30,10 +31,11 @@ class FernService {
     const updatedUser = await prisma.user.update({
       where:{email},
       data:{
-        fernId: customerId,
-        fernKycLink: kycLink,
-        userStatus: status as UserStatus
-      }
+        userStatus: status as UserStatus,
+        fernUserId: customerId,
+        fernKycLink: kycLink
+        
+      } as Prisma.UserUncheckedUpdateInput
     })
     console.log(updatedUser)
 

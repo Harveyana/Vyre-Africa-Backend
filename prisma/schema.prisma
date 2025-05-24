@@ -192,7 +192,7 @@ model User {
   otpCodeUsed       Boolean     @default(false)
   otpCodeExpiryTime String?
 
-  fernId                        String?
+  fernUserId                     String?
   fernKycLink                   String?
   userBanks                     UserBank[]
   notifications                 Notification[]
