@@ -183,87 +183,87 @@ class UserController {
     //     }
     // }
 
-    async uploadKyc(req: Request, res: Response) {
-        const { idType, idNumber, idFront, idBack, userId } = req.body;
+    // async uploadKyc(req: Request, res: Response) {
+    //     const { idType, idNumber, idFront, idBack, userId } = req.body;
 
-        console.log('body',req.body)
+    //     console.log('body',req.body)
 
-        try {
+    //     try {
 
-            let createdKyc;
+    //         let createdKyc;
 
-            const userExist = await prisma.user.findUnique({
-            where: { id:userId },
-            });
+    //         const userExist = await prisma.user.findUnique({
+    //         where: { id:userId },
+    //         });
 
-            const kycExist = await prisma.kyc.findFirst({
-                where: { userId }
-            });
+    //         const kycExist = await prisma.kyc.findFirst({
+    //             where: { userId }
+    //         });
 
-            if (!userExist) {
-                return res.status(400).json({
-                    msg: 'User Not Found',
-                    success: false,
-                });
-            }
+    //         if (!userExist) {
+    //             return res.status(400).json({
+    //                 msg: 'User Not Found',
+    //                 success: false,
+    //             });
+    //         }
 
-            const result = await prisma.$transaction(
-                async (prisma) => {
+    //         const result = await prisma.$transaction(
+    //             async (prisma) => {
 
-                    if(kycExist){
+    //                 if(kycExist){
 
-                        createdKyc = await prisma.kyc.update({
-                            where: { id: kycExist.id },
-                            data: {
-                              idType,
-                              idFront,
-                              idBack,
-                              userId,
-                              idNumber 
-                            },
-                        });
+    //                     createdKyc = await prisma.kyc.update({
+    //                         where: { id: kycExist.id },
+    //                         data: {
+    //                           idType,
+    //                           idFront,
+    //                           idBack,
+    //                           userId,
+    //                           idNumber 
+    //                         },
+    //                     });
 
                       
-                    }else{
+    //                 }else{
 
-                        createdKyc = await prisma.kyc.create({
-                            data: {
-                                idType,
-                                idFront,
-                                idBack,
-                                userId,
-                                idNumber
-                            },
-                        }); 
+    //                     createdKyc = await prisma.kyc.create({
+    //                         data: {
+    //                             idType,
+    //                             idFront,
+    //                             idBack,
+    //                             userId,
+    //                             idNumber
+    //                         },
+    //                     }); 
 
-                    }
+    //                 }
 
                     
-                    return {
-                      kyc: createdKyc
-                    }
-                },
-                {
-                 maxWait: 50000, // default: 2000
-                 timeout: 50000, // default: 5000
-                }
-            )
+    //                 return {
+    //                   kyc: createdKyc
+    //                 }
+    //             },
+    //             {
+    //              maxWait: 50000, // default: 2000
+    //              timeout: 50000, // default: 5000
+    //             }
+    //         )
 
-            console.log('newKyc',result.kyc)
-
-
-            return res.status(201).json({
-                msg: 'identity Uploaded Successfully',
-                success: true
-            });
+    //         console.log('newKyc',result.kyc)
 
 
-        } catch (error) {
-            return res
-            .status(500)
-            .json({ msg: 'Error please Try Again', success: false, error });
-        }
-    }
+    //         return res.status(201).json({
+    //             msg: 'identity Uploaded Successfully',
+    //             success: true
+    //         });
+
+
+    //     } catch (error) {
+    //         return res
+    //         .status(500)
+    //         .json({ msg: 'Error please Try Again', success: false, error });
+    //     }
+    // }
 
     // async addVehicle(req: Request, res: Response) {8
     //     const { vehicleInfo, documents, images, userId } = req.body;

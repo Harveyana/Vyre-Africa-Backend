@@ -64,12 +64,12 @@ router.post(
   walletController.tatum_WebHook
 );
 
-router.post(
-  '/upload_kyc',
-  userValidator.uploadKyc(),
-  middleware.handleValidationError,
-  userController.uploadKyc
-);
+// router.post(
+//   '/upload_kyc',
+//   userValidator.uploadKyc(),
+//   middleware.handleValidationError,
+//   userController.uploadKyc
+// );
 
 router.post(
   '/login',
