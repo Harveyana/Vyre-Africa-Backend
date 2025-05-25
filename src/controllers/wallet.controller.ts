@@ -19,6 +19,7 @@ import { generateRefCode, generateSignature, isValidSignature } from '../utils';
 import transactionService from '../services/transaction.service';
 import fernService from '../services/fern.service';
 
+
 class WalletController {
 
 
@@ -26,7 +27,7 @@ class WalletController {
 
     const signature = req.header("x-api-signature");
     const timestamp = req.header("x-api-timestamp");
-    const rawBody = req.body.toString(); //
+    const rawBody = req.body.toString('utf8');//
 
     console.log('webhook body',req.body)
     console.log('signature',signature)
