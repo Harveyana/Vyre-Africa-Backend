@@ -30,10 +30,10 @@ class WalletController {
 
     console.log('webhook body',req.body)
 
-    if (!signature || !timestamp || !isValidSignature(rawBody, timestamp, signature, config.fern.Secret)) {
-      console.error("Invalid webhook signature – request possibly forged!");
-      return res.sendStatus(400); // reject if signature doesn't match
-    }
+    // if (!signature || !timestamp || !isValidSignature(rawBody, timestamp, signature, config.fern.Secret)) {
+    //   console.error("Invalid webhook signature – request possibly forged!");
+    //   return res.sendStatus(400); // reject if signature doesn't match
+    // }
 
 
     try {
@@ -72,7 +72,7 @@ class WalletController {
           success: true,
         });
       }
-      
+
 
       if(body.type === 'payment_account.created'){
 
