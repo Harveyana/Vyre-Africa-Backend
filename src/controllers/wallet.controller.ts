@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { Paystack } from 'paystack-sdk';
 import { Request, Response } from 'express';
-import { KJUR } from 'jsrsasign'; 
+import { KJUR } from 'jsrsasign';
 import prisma from '../config/prisma.config';
 import axios from "axios";
 import orderService from '../services/order.service';
