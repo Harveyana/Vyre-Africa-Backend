@@ -29,11 +29,13 @@ class WalletController {
     const rawBody = req.body.toString(); //
 
     console.log('webhook body',req.body)
+    console.log('signature',signature)
+    console.log('timestamp',timestamp)
 
-    // if (!signature || !timestamp || !isValidSignature(rawBody, timestamp, signature, config.fern.Secret)) {
-    //   console.error("Invalid webhook signature – request possibly forged!");
-    //   return res.sendStatus(400); // reject if signature doesn't match
-    // }
+    if (!signature || !timestamp || !isValidSignature(rawBody, timestamp, signature, config.fern.Secret)) {
+      console.error("Invalid webhook signature – request possibly forged!");
+      return res.sendStatus(400); // reject if signature doesn't match
+    }
 
 
     try {
