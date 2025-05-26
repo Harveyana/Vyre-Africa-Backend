@@ -27,9 +27,9 @@ class WalletController {
 
     const signature = req.header("x-api-signature");
     const timestamp = req.header("x-api-timestamp");
-    const rawBody = req.body.toString('utf8');//
+    const rawBody = req.body.toString();//
 
-    console.log('webhook body',req.body)
+    console.log('webhook body',rawBody)
     console.log('signature',signature)
     console.log('timestamp',timestamp)
 
