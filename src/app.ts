@@ -14,8 +14,8 @@ import { router } from './routes';
 
 dotenv.config();
 
-// FOR WEBHOOK handler 
-// app.use('/webhook/fern', express.raw({ type: 'application/json', limit: '10mb' }));
+// FOR WEBHOOK handler
+app.use('/api/v1/webhook/fern', express.raw({ type: 'application/json', limit: '10mb' }));
 
 // app.use(express.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
