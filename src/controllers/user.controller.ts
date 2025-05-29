@@ -32,7 +32,6 @@ class UserController {
     async register(req: Request, res: Response) {
         const { DETAILS} = req.body;
         console.log(req.body)
-        const otpCode = generateOtp();
 
         try {
 
@@ -60,8 +59,11 @@ class UserController {
             console.log('entered individual')
             console.log('PERSONAL', DETAILS)
 
+            const otpCode = generateOtp();
 
-            const result = await prisma.$transaction(async (prisma) => {
+            // const result = await prisma.$transaction(async (prisma) => {
+
+                
 
                 const customer = await fernService.customer({
                     customerType:'INDIVIDUAL',
@@ -87,17 +89,17 @@ class UserController {
 
                         fernId: customer.customerId,
                         fernKycLink: customer.kycLink,
-                        userStatus:customer.customerStatus
-                    },
+                        userStatus: customer.customerStatus
+                    }
                 });
 
                 console.log('newUser',newUser,'customer',customer)
 
-                return {
-                  user: newUser
-                };
+            //     return {
+            //       user: newUser
+            //     };
 
-            });
+            // });
 
             // await walletService.createWallet(newUser.id, 'NGN')
 
@@ -106,7 +108,7 @@ class UserController {
             return res.status(201).json({
                 msg: 'An otp code sent to your email',
                 success: true,
-                user: result.user
+                user: newUser
             });
 
 
