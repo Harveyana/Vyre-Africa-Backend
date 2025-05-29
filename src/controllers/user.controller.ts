@@ -30,7 +30,7 @@ import fernService from '../services/fern.service';
 class UserController {
     
     async register(req: Request, res: Response) {
-        const { TYPE, DETAILS} = req.body;
+        const { DETAILS} = req.body;
         console.log(req.body)
         const otpCode = generateOtp();
 
@@ -67,8 +67,8 @@ class UserController {
                     lastName: DETAILS.lastName,
                     email: DETAILS.email,
                     phoneNumber: DETAILS.phoneNumber,
+                    country: DETAILS.country,
                     ...(referree && { referreeId: referree.referralId }),
-                    type: TYPE,
 
                     otpCode: otpCode,
                     otpCodeExpiryTime: OTP_CODE_EXP,
@@ -847,6 +847,35 @@ class UserController {
 
             return res.status(201).json({
                 msg: 'Profile updated successfully',
+                success: true,
+                user: updatedUser,
+            });
+
+        } catch (error) {
+            return res
+                .status(500)
+                .json({ msg: 'Internal Server Error', success: false, error });
+        }
+    }
+
+    async submitAddress(req: Request & Record<string, any>, res: Response) {
+        const { country, address, state, city, postalCode, userId } = req.body
+        // const user = req.user
+
+        try {
+            const updatedUser = await prisma.user.update({
+                where: { id: userId },
+                data: {
+                    country,
+                    address,
+                    state,
+                    city,
+                    postalCode
+                },
+            });
+
+            return res.status(201).json({
+                msg: 'Details updated successfully',
                 success: true,
                 user: updatedUser,
             });

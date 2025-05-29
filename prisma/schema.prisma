@@ -159,22 +159,29 @@ model Rating {
 }
 
 model User {
-  id                String      @id @default(cuid())
-  firstName         String      @db.VarChar(255)
-  lastName          String      @db.VarChar(255)
-  BusinessName      String?
-  referralId        String?
-  referreeId        String?
-  email             String      @unique @db.VarChar(255)
-  userStatus        UserStatus  @default(ACTIVE)
-  type              AccountType @default(INDIVIDUAL)
-  photoUrl          String?     @db.VarChar(500)
-  phoneNumber       String?
-  password          String?     @db.VarChar(500)
-  emailVerified     Boolean?    @default(false)
-  accountVerified   Boolean?    @default(false)
+  id           String      @id @default(cuid())
+  firstName    String      @db.VarChar(255)
+  lastName     String      @db.VarChar(255)
+  BusinessName String?
+  referralId   String?
+  referreeId   String?
+  email        String      @unique @db.VarChar(255)
+  userStatus   UserStatus  @default(ACTIVE)
+  type         AccountType @default(INDIVIDUAL)
+  photoUrl     String?     @db.VarChar(500)
+  phoneNumber  String?
+
+  country      String?
+  address      String?
+  city         String?
+  state        String?
+  postalCode   String?
+
+  password          String?  @db.VarChar(500)
+  emailVerified     Boolean? @default(false)
+  accountVerified   Boolean? @default(false)
   otpCode           String?
-  otpCodeUsed       Boolean     @default(false)
+  otpCodeUsed       Boolean  @default(false)
   otpCodeExpiryTime String?
 
   fernUserId                    String?
@@ -193,6 +200,8 @@ model User {
   Order                         Order[]
   PendingActivity               PendingActivity[]
   Card                          Card?
+  fiatAccount                   fiatAccount[]
+  cryptoAccount                 cryptoAccount[]
 }
 
 model Bank {
@@ -214,6 +223,31 @@ model UserBank {
   bankId        String
   bank          Bank     @relation(fields: [bankId], references: [id])
   createdAt     DateTime @default(now())
+}
+
+model fiatAccount {
+  id            String @id @default(cuid())
+  name          String
+  bank          String
+  accountNumber String
+  currency      String
+  method        String
+  country       String
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model cryptoAccount {
+  id               String   @id @default(cuid())
+  name             String
+  cryptoWalletType String
+  chain            String
+  address          String
+  userId           String
+  user             User     @relation(fields: [userId], references: [id])
+  createdAt        DateTime @default(now())
 }
 
 model NotificationSetting {

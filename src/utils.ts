@@ -155,3 +155,119 @@ export const decryptData = async (data: string) => {
     encrypted += cipher.final('hex');
     return encrypted;
 }
+
+type PaymentMethod =
+  | 'ACH'          // USA
+  | 'WIRE'         // International
+  | 'SEPA'         // Eurozone
+  | 'AE_UAEFTS'    // UAE
+  | 'AR_TRANSFERS_3' // Argentina
+  | 'AU_BECS'      // Australia
+  | 'BD_BEFTN'     // Bangladesh
+  | 'BO_RTGS'      // Bolivia
+  | 'BR_TED_DOC_PIX' // Brazil
+  | 'CA_INTERAC'   // Canada
+  | 'CL_TEF'       // Chile
+  | 'CN_CNAPS'     // China
+  | 'CO_ACH'       // Colombia
+  | 'CR_SINPE'     // Costa Rica
+  | 'CZ_CERTIS'    // Czech Republic
+  | 'DK_NEMKONTO_FI' // Denmark
+  | 'DO_ACH'       // Dominican Republic
+  | 'EC_LOCAL'     // Ecuador
+  | 'EG_RTGS_IPN'  // Egypt
+  | 'GB_BACS_CHAPS_FPS' // UK
+  | 'GH_GHIPSS'    // Ghana
+  | 'GT_ACH'       // Guatemala
+  | 'HK_HKICL_CHATS_ECG' // Hong Kong
+  | 'HU_GIRO'      // Hungary
+  | 'ID_SKN_RTGS'  // Indonesia
+  | 'IL_ZAHAV'     // Israel
+  | 'IN_NEFT_RTGS_IMPS' // India
+  | 'JM_LOCAL'     // Jamaica
+  | 'JO_ACH'       // Jordan
+  | 'JP_ZENGIN'    // Japan
+  | 'KE_KIBBS_PESALINK' // Kenya
+  | 'KR_LOCAL'     // South Korea
+  | 'LK_LOCAL'     // Sri Lanka
+  | 'MX_SPEI'      // Mexico
+  | 'MY_IBG_RENTAS' // Malaysia
+  | 'NG_NIBSS_NEFT' // Nigeria
+  | 'NO_NICS'      // Norway
+  | 'NP_LOCAL'     // Nepal
+  | 'NZ_LOCAL'     // New Zealand
+  | 'PE_CCE'       // Peru
+  | 'PH_INSTAPAY_PESONET' // Philippines
+  | 'PK_RAAST_IBFT' // Pakistan
+  | 'PL_ELIXIR_BLUE_CASH' // Poland
+  | 'QA_QPS'       // Qatar
+  | 'RO_RTGS'      // Romania
+  | 'SA_MADA'      // Saudi Arabia
+  | 'SE_BANKGIROT' // Sweden
+  | 'SG_FAST_MEPS' // Singapore
+  | 'SV_LOCAL'     // El Salvador
+  | 'SWIFT'        // International
+  | 'TH_BAHTNET_PROMPTPAY' // Thailand
+  | 'TR_FAST_EFT'  // Turkey
+  | 'TZ_RTGS'      // Tanzania
+  | 'VN_IBPS'      // Vietnam
+  | 'ZA_RTGS_EFT'; // South Africa
+
+  export function getPaymentMethodByCurrency(currencyCode: string): PaymentMethod | undefined {
+    const currencyToMethod: Record<string, PaymentMethod> = {
+      USD: 'ACH',       // USA (ACH) or 'WIRE' for international USD
+      EUR: 'SEPA',      // Eurozone
+      AED: 'AE_UAEFTS', // UAE
+      ARS: 'AR_TRANSFERS_3', // Argentina
+      AUD: 'AU_BECS',   // Australia
+      BDT: 'BD_BEFTN',  // Bangladesh
+      BOB: 'BO_RTGS',   // Bolivia
+      BRL: 'BR_TED_DOC_PIX', // Brazil
+      CAD: 'CA_INTERAC', // Canada
+      CLP: 'CL_TEF',    // Chile
+      CNY: 'CN_CNAPS',  // China
+      COP: 'CO_ACH',    // Colombia
+      CRC: 'CR_SINPE',  // Costa Rica
+      CZK: 'CZ_CERTIS', // Czech Republic
+      DKK: 'DK_NEMKONTO_FI', // Denmark
+      DOP: 'DO_ACH',    // Dominican Republic
+      EGP: 'EG_RTGS_IPN', // Egypt
+      GBP: 'GB_BACS_CHAPS_FPS', // UK
+      GHS: 'GH_GHIPSS', // Ghana
+      GTQ: 'GT_ACH',    // Guatemala
+      HKD: 'HK_HKICL_CHATS_ECG', // Hong Kong
+      HUF: 'HU_GIRO',   // Hungary
+      IDR: 'ID_SKN_RTGS', // Indonesia
+      ILS: 'IL_ZAHAV',  // Israel
+      INR: 'IN_NEFT_RTGS_IMPS', // India
+      JMD: 'JM_LOCAL',  // Jamaica
+      JOD: 'JO_ACH',    // Jordan
+      JPY: 'JP_ZENGIN', // Japan
+      KES: 'KE_KIBBS_PESALINK', // Kenya
+      KRW: 'KR_LOCAL',  // South Korea
+      LKR: 'LK_LOCAL',  // Sri Lanka
+      MXN: 'MX_SPEI',   // Mexico
+      MYR: 'MY_IBG_RENTAS', // Malaysia
+      NGN: 'NG_NIBSS_NEFT', // Nigeria
+      NOK: 'NO_NICS',   // Norway
+      NPR: 'NP_LOCAL',  // Nepal
+      NZD: 'NZ_LOCAL',  // New Zealand
+      PEN: 'PE_CCE',    // Peru
+      PHP: 'PH_INSTAPAY_PESONET', // Philippines
+      PKR: 'PK_RAAST_IBFT', // Pakistan
+      PLN: 'PL_ELIXIR_BLUE_CASH', // Poland
+      QAR: 'QA_QPS',    // Qatar
+      RON: 'RO_RTGS',   // Romania
+      SAR: 'SA_MADA',   // Saudi Arabia
+      SEK: 'SE_BANKGIROT', // Sweden
+      SGD: 'SG_FAST_MEPS', // Singapore
+      THB: 'TH_BAHTNET_PROMPTPAY', // Thailand
+      TRY: 'TR_FAST_EFT', // Turkey
+      TZS: 'TZ_RTGS',   // Tanzania
+      VND: 'VN_IBPS',   // Vietnam
+      ZAR: 'ZA_RTGS_EFT', // South Africa
+    };
+  
+    return currencyToMethod[currencyCode.toUpperCase()];
+  }
+  

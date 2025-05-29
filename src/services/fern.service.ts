@@ -55,8 +55,153 @@ class FernService {
     return true
   }
 
+  async fiatAccount(payload:{
+    userId:string,
+    bankName:string,
+    accountNumber:string,
+    currency:string,
+    addressLine1:string,
+    addressLine2:string,
+    city:string,
+    state:string,
+    postalCode:string,
+    accountType:string,
+    bankMethod:string,
 
+  }){
 
+    const user = await prisma.user.findUnique({
+      where:{id:payload.userId}
+    })
+
+    const accountData = {
+        paymentAccountType: "EXTERNAL_BANK_ACCOUNT",
+        customerId: user?.fernUserId,
+        nickname: `${payload.bankName} Savings Account`,
+        externalBankAccount: {
+          accountNumber: payload.accountNumber,
+          bankName: payload.bankName,
+          bankAccountCurrency: payload.currency,
+          bankAddress: {
+            country: user?.country,
+            addressLine1: payload.addressLine1,
+            addressLine2: payload.addressLine2,
+            city: payload.city,
+            state: payload.state,
+            postalCode: payload.postalCode,
+            locale: "en-US"
+          },
+          bankAccountType: payload.accountType,
+          bankAccountPaymentMethod: payload.bankMethod,
+          bankAccountOwner: {
+            email: user?.email,
+            firstName: user?.firstName,
+            lastName: user?.lastName,
+            address: {
+              country: user?.country,
+              addressLine1: user?.address,
+              // addressLine2: user?.addressLine2,
+              city: user?.city,
+              state: user?.state,
+              postalCode: user?.postalCode,
+              "locale": "en-US"
+            },
+            type: "INDIVIDUAL"
+          }
+          
+        }
+    }
+    
+    const response = await fernAxios.post('/payment-accounts', accountData)
+    const result = response.data
+    console.log(result)
+
+    return result
+
+  }
+
+  async cryptoAccount(payload:{
+    userId:string,
+    chain:string,
+    address:string
+  }){
+
+    const user = await prisma.user.findUnique({
+      where:{id:payload.userId}
+    })
+      
+    const accountData = {
+      paymentAccountType: "EXTERNAL_CRYPTO_WALLET",
+      customerId: user?.fernUserId,
+      nickname: `${payload.chain} Account`,
+      externalCryptoWallet: {
+       cryptoWalletType: "EVM",
+       chain: payload.chain,
+       address: payload.address
+      },
+    }
+          
+    const response = await fernAxios.post('/payment-accounts', accountData)
+    const result = response.data
+    console.log(result)
+      
+    return result
+      
+  }
+
+  // async payment_Account_Created(payload:{
+  //   customerId: string, 
+  //   paymentAccountId: string, 
+  //   bankName?: string, 
+  //   nickname: string
+  //   accountMask?: string,
+  //   currency: string,
+  //   method?: string,
+
+  //   cryptoWalletType ?:string,
+  //   chain?: string,
+  //   address?: string
+  // }){
+
+  //   const user = await prisma.user.findFirst({
+  //     where:{fernUserId:payload.customerId }
+  //   })
+
+  //   if(payload.bankName){
+  //     const fiatAccount = await prisma.fiatAccount.create({
+  //       data:{
+  //         id: payload.paymentAccountId,
+  //         name: payload.nickname,
+  //         currency: payload.currency,
+  //         country: user?.country!,
+  //         userId: user?.id,
+  //         bank: payload.bankName,
+  //         accountNumber: payload.accountMask!,
+  //         method: payload.method!
+          
+  //       }
+  //     })
+
+  //   }
+
+  //   if(payload.chain){
+  //     const cryptoAccount = await prisma.cryptoAccount.create({
+  //       data:{
+  //         id: payload.paymentAccountId,
+  //         name: payload.nickname,
+  //         userId:user?.id,
+          
+  //         cryptoWalletType: payload.cryptoWalletType,
+  //         chain: payload.chain,
+  //         address: payload.address
+          
+  //       }
+  //     })
+  //   }
+    
+
+  //   return true
+  // }
 
   
 

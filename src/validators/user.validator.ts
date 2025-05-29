@@ -109,6 +109,16 @@ class UserValidator {
                 .withMessage('Password is required')
         ];
     }
+    submitAddress() {
+        return [
+            body('country').notEmpty().withMessage('country is required'),
+            body('address').notEmpty().withMessage('address is required'),
+            body('state').notEmpty().withMessage('state is required'),
+            body('city').notEmpty().withMessage('city is required'),
+            body('postalCode').notEmpty().withMessage('postalCode is required'),
+            body('userId').notEmpty().withMessage('userId is required'),
+        ];
+    }
     updateProfile() {
         return [
             body('firstName').notEmpty().withMessage('first name is required'),

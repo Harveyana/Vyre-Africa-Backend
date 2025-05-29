@@ -22,6 +22,8 @@ import mobileProductController from '../controllers/mobile/mobile.product.contro
 import mobileUserController from '../controllers/mobile/mobile.user.controller';
 import mobileAdvertController from '../controllers/mobile/mobile.advert.controller';
 import walletController from '../controllers/wallet.controller';
+import swapController from '../controllers/swap.controller';
+import swapValidator from '../validators/swap.validator';
 
 const router = Router();
 
@@ -125,6 +127,29 @@ router.post(
   middleware.handleValidationError,
   userController.updatePasswordRecovery,
 );
+
+router.post(
+  '/user-Address',
+  userValidator.submitAddress(),
+  middleware.handleValidationError,
+  userController.submitAddress
+);
+
+// swap
+router.post(
+  '/paymentAccount/fiat',
+  swapValidator.addFiatAccount(),
+  middleware.handleValidationError,
+  swapController.addFiatAccount,
+);
+
+router.post(
+  '/paymentAccount/crypto',
+  swapValidator.addCryptoAccount(),
+  middleware.handleValidationError,
+  swapController.addCryptoAccount,
+);
+
 
 // router.post('/sendOTP', userController.sendVerification);
 
