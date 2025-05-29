@@ -61,7 +61,7 @@ class UserController {
 
             const otpCode = generateOtp();
 
-            // const result = await prisma.$transaction(async (prisma) => {
+            const result = await prisma.$transaction(async (prisma) => {
 
                 
 
@@ -80,14 +80,14 @@ class UserController {
                         lastName: DETAILS.lastName,
                         email: DETAILS.email,
                         phoneNumber: DETAILS.phoneNumber,
-                        country: DETAILS.country,
+                        // country: DETAILS.country,
                         ...(referree && { referreeId: referree.referralId }),
 
                         otpCode: otpCode,
                         otpCodeExpiryTime: OTP_CODE_EXP,
                         photoUrl: config.defaultPhotoUrl,
 
-                        fernId: customer.customerId,
+                        fernUserId: customer.customerId,
                         fernKycLink: customer.kycLink,
                         userStatus: customer.customerStatus
                     }
@@ -95,11 +95,11 @@ class UserController {
 
                 console.log('newUser',newUser,'customer',customer)
 
-            //     return {
-            //       user: newUser
-            //     };
+                return {
+                  user: newUser
+                };
 
-            // });
+            });
 
             // await walletService.createWallet(newUser.id, 'NGN')
 
@@ -108,7 +108,7 @@ class UserController {
             return res.status(201).json({
                 msg: 'An otp code sent to your email',
                 success: true,
-                user: newUser
+                user: result.user
             });
 
 
