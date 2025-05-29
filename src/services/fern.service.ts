@@ -26,7 +26,16 @@ class FernService {
     return result
   }
 
-  async customer_Created(customerId:string, status:string, kycLink:string, email:string){
+  async customer_Created(payload:{customerId:string, status:string, kycLink:string, email:string}){
+
+    const {customerId,status,kycLink,email} = payload
+
+    console.log('customer created',{
+      customerId,
+      status,
+      kycLink,
+      email
+    })
     
     const updatedUser = await prisma.user.update({
       where:{email},
@@ -34,8 +43,7 @@ class FernService {
         userStatus: status as UserStatus,
         fernUserId: customerId,
         fernKycLink: kycLink
-        
-      } as Prisma.UserUncheckedUpdateInput
+      }
     })
     console.log(updatedUser)
 
