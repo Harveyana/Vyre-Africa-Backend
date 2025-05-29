@@ -87,7 +87,7 @@ class UserController {
                 email: DETAILS.email
             })
 
-            console.log('newUser',newUser)
+            console.log('newUser',newUser,'customer',customer)
               
             // await walletService.createWallet(newUser.id, 'NGN')
 
