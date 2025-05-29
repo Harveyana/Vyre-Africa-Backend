@@ -56,39 +56,49 @@ class UserController {
                     user: userExist,
                 });
             }
-
             
             console.log('entered individual')
             console.log('PERSONAL', DETAILS)
 
-            const newUser = await prisma.user.create({
-                data: {
-                    firstName: DETAILS.firstName,
+
+            const result = await prisma.$transaction(async (prisma) => {
+
+                const customer = await fernService.customer({
+                    customerType:'INDIVIDUAL',
+                    firstName:DETAILS.firstName,
                     lastName: DETAILS.lastName,
-                    email: DETAILS.email,
-                    phoneNumber: DETAILS.phoneNumber,
-                    country: DETAILS.country,
-                    ...(referree && { referreeId: referree.referralId }),
+                    email: DETAILS.email
+                })
 
-                    otpCode: otpCode,
-                    otpCodeExpiryTime: OTP_CODE_EXP,
-                    photoUrl: config.defaultPhotoUrl,
+                console.log('customer',customer)
 
-                    // fernId: customer.customerId,
-                    // fernKycLink: customer.kycLink,
-                    // userStatus:customer.customerStatus
-                },
+                const newUser = await prisma.user.create({
+                    data: {
+                        firstName: DETAILS.firstName,
+                        lastName: DETAILS.lastName,
+                        email: DETAILS.email,
+                        phoneNumber: DETAILS.phoneNumber,
+                        country: DETAILS.country,
+                        ...(referree && { referreeId: referree.referralId }),
+
+                        otpCode: otpCode,
+                        otpCodeExpiryTime: OTP_CODE_EXP,
+                        photoUrl: config.defaultPhotoUrl,
+
+                        fernId: customer.customerId,
+                        fernKycLink: customer.kycLink,
+                        userStatus:customer.customerStatus
+                    },
+                });
+
+                console.log('newUser',newUser,'customer',customer)
+
+                return {
+                  user: newUser
+                };
+
             });
 
-            const customer = await fernService.customer({
-                customerType:'INDIVIDUAL',
-                firstName:DETAILS.firstName,
-                lastName: DETAILS.lastName,
-                email: DETAILS.email
-            })
-
-            console.log('newUser',newUser,'customer',customer)
-              
             // await walletService.createWallet(newUser.id, 'NGN')
 
             await mailService.sendOtp(DETAILS.email, DETAILS.firstName, otpCode);
@@ -96,7 +106,7 @@ class UserController {
             return res.status(201).json({
                 msg: 'An otp code sent to your email',
                 success: true,
-                user: newUser,
+                user: result.user
             });
 
 
@@ -459,7 +469,7 @@ class UserController {
             const encryptedPassword = await hashData(password);
 
             await prisma.user.update({
-                where: { email: user.email },
+                where: { id: user.id },
                 data: {
                     password: encryptedPassword
                 },
@@ -468,7 +478,7 @@ class UserController {
             return res.status(201).json({
                 msg: 'Password Set successfully',
                 success: true,
-                user,
+                user
             });
 
         } catch (error) {

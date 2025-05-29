@@ -46,22 +46,22 @@ class WalletController {
       // Customer Events
 
       if(body.type === 'customer.created'){
-        const customer = body.resource
+        // const customer = body.resource
 
-        const updated = await fernService.customer_Created({
-          customerId: customer.customerId, 
-          status: customer.customerStatus, 
-          kycLink: customer.kycLink, 
-          email: customer.email
+        // const updated = await fernService.customer_Created({
+        //   customerId: customer.customerId, 
+        //   status: customer.customerStatus, 
+        //   kycLink: customer.kycLink, 
+        //   email: customer.email
 
-        })
+        // })
 
-        if(updated){
+        // if(updated){
           return res.status(200).json({
             msg: 'Event Successful',
             success: true,
           });
-        }
+        // }
 
       }
 
