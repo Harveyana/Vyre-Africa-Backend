@@ -15,7 +15,7 @@ import {Currency,walletType} from '@prisma/client';
 import { subMinutes } from 'date-fns';
 import * as crypto from 'crypto';
 import {createHmac} from 'node:crypto';
-import { getPaymentMethodByCurrency } from '../utils';
+import { getPaymentMethodByCurrency, getISOByCountry } from '../utils';
 import transactionService from '../services/transaction.service';
 import fernService from '../services/fern.service';
 
@@ -68,16 +68,28 @@ class SwapController {
     const { user } = req;
     const {
       accountNumber,
+
+      routingNumber,
+      bicSwift,
+      sortCode,
+      institutionNumber,
+      bsbNumber,
+      ifscCode,
+      clabeNumber,
+      cnapsCode,
+      pixCode,
+      clearingCode,
+
       bankName,
       currency,
       type,
       Address,
-      // Beneficiary
     } = req.body
+      
 
     try {
 
-      if(!accountNumber || !bankName || !currency || !type || !Address){
+      if(!bankName || !currency || !type || !Address){
         return res.status(400)
         .json({
           msg: 'Incomplete Details',
@@ -95,11 +107,27 @@ class SwapController {
           bankName,
           accountNumber,
           currency,
-          addressLine1: Address.addressLine1,
-          addressLine2: Address.addressLine2,
-          city: Address.city,
-          state: Address.state,
-          postalCode: Address.postalCode,
+          bankAddress: {
+            country: getISOByCountry(userData?.country as string),
+            addressLine1: Address.addressLine1,
+            addressLine2: Address.addressLine2,
+            city: Address.city,
+            state: Address.state,
+            postalCode: Address.postalCode,
+            locale: "en-US"
+          },
+
+          ...(userData?.country === 'United States' && { routingNumber }),
+          ...(userData?.country === 'Nigeria' && { nubanNumber: accountNumber }),
+          ...(userData?.country === 'United Kingdom' && { sortCode }),
+          ...(userData?.country === 'Australia' && { bsbNumber }),
+          ...(userData?.country === 'Canada' && { institutionNumber }),
+          ...(userData?.country === 'India' && { ifscCode }),
+          ...(userData?.country === 'Mexico' && { clabeNumber }),
+          ...(userData?.country === 'China' && { cnapsCode }),
+          ...(userData?.country === 'Brazil' && { pixCode }),
+          ...(userData?.country === 'Hong Kong' && { clearingCode }),
+          ...(bicSwift && { bicSwift }),
           accountType: type,
           bankMethod: getPaymentMethodByCurrency(currency as string) || ''
       

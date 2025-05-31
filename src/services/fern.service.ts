@@ -5,7 +5,7 @@ import prisma from '../config/prisma.config';
 import { Prisma } from "@prisma/client";
 import axios from "axios";
 import { UserBank,UserStatus } from "@prisma/client";
-import { generateRefCode } from "../utils";
+import { generateRefCode,getISOByCountry } from "../utils";
 
 const fernAxios = axios.create({
   baseURL: 'https://api.fernhq.com',
@@ -14,6 +14,39 @@ const fernAxios = axios.create({
     'Content-Type': 'application/json'
   }
 });
+
+interface fiatAccount {
+  userId:string,
+    bankName:string,
+    accountNumber:string,
+    currency:string,
+
+    bankAddress: {
+      country: string,
+      addressLine1: string,
+      addressLine2: string,
+      city: string,
+      state: string,
+      postalCode: string,
+      locale: string
+    },
+
+    // optionals
+    routingNumber?:string,
+    nubanNumber?:string,
+    bicSwift:string,
+    sortCode?:string,
+    bsbNumber?:string,
+    institutionNumber?:string,
+    ifscCode?:string,
+    clabeNumber?:string,
+    cnapsCode?:string,
+    pixCode?:string,
+    clearingCode?:string,
+
+    accountType:string,
+    bankMethod:string,
+}
 
 class FernService {
 
@@ -63,20 +96,21 @@ class FernService {
     return true
   }
 
-  async fiatAccount(payload:{
-    userId:string,
-    bankName:string,
-    accountNumber:string,
-    currency:string,
-    addressLine1:string,
-    addressLine2:string,
-    city:string,
-    state:string,
-    postalCode:string,
-    accountType:string,
-    bankMethod:string,
+  async fiatAccount(payload:fiatAccount){
 
-  }){
+    const {
+      routingNumber,
+      nubanNumber,
+      bicSwift,
+      sortCode,
+      bsbNumber,
+      institutionNumber,
+      ifscCode,
+      clabeNumber,
+      cnapsCode,
+      pixCode,
+      clearingCode
+    } = payload
 
     const user = await prisma.user.findUnique({
       where:{id:payload.userId}
@@ -90,23 +124,30 @@ class FernService {
           accountNumber: payload.accountNumber,
           bankName: payload.bankName,
           bankAccountCurrency: payload.currency,
-          bankAddress: {
-            country: user?.country,
-            addressLine1: payload.addressLine1,
-            addressLine2: payload.addressLine2,
-            city: payload.city,
-            state: payload.state,
-            postalCode: payload.postalCode,
-            locale: "en-US"
-          },
+
+          ...(routingNumber && { routingNumber }),
+          ...(nubanNumber && { nubanNumber }),
+          ...(sortCode && { sortCode }),
+          ...(bsbNumber && { bsbNumber }),
+          ...(institutionNumber && { institutionNumber }),
+          ...(ifscCode && { ifscCode }),
+          ...(clabeNumber && { clabeNumber }),
+          ...(cnapsCode && { cnapsCode }),
+          ...(pixCode && { pixCode }),
+          ...(clearingCode && { clearingCode }),
+          ...(bicSwift && { bicSwift }),
+
+          bankAddress: payload.bankAddress,
+
           bankAccountType: payload.accountType,
           bankAccountPaymentMethod: payload.bankMethod,
+
           bankAccountOwner: {
             email: user?.email,
             firstName: user?.firstName,
             lastName: user?.lastName,
             address: {
-              country: user?.country,
+              country: getISOByCountry(user?.country as string),
               addressLine1: user?.address,
               // addressLine2: user?.addressLine2,
               city: user?.city,

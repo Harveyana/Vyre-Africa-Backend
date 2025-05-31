@@ -63,8 +63,6 @@ class UserController {
 
             const result = await prisma.$transaction(async (prisma) => {
 
-                
-
                 const customer = await fernService.customer({
                     customerType:'INDIVIDUAL',
                     firstName:DETAILS.firstName,
@@ -389,7 +387,7 @@ class UserController {
                     .json({ msg: 'Invalid otp code or otp code is expired' });
             }
             if (code !== user.otpCode) {
-                return res.status(400).json({ msg: 'Otp Code is incorrect' });
+                return res.status(400).json({ msg: 'Otp Code is incorrect',success: false, });
             }
             await prisma.user.update({
                 where: { email },
@@ -432,7 +430,7 @@ class UserController {
                         .json({ msg: 'Invalid otp code or otp code is expired' });
                 }
                 if (code !== parseInt(user.otpCode as string)) {
-                    return res.status(400).json({ success: true, msg: 'Otp Code is incorrect' });
+                    return res.status(400).json({ success: false, msg: 'Otp Code is incorrect' });
                 }
                 await prisma.user.update({
                     where: { email },
