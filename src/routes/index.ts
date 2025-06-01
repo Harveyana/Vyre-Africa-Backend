@@ -141,7 +141,7 @@ router.post(
   authMiddleware,
   swapValidator.addFiatAccount(),
   middleware.handleValidationError,
-  swapController.addFiatAccount,
+  swapController.addFiatAccount
 );
 
 router.post(
@@ -149,7 +149,13 @@ router.post(
   authMiddleware,
   swapValidator.addCryptoAccount(),
   middleware.handleValidationError,
-  swapController.addCryptoAccount,
+  swapController.addCryptoAccount
+);
+
+router.get(
+  '/linkedAccounts',
+  authMiddleware,
+  swapController.getLinkedAccounts
 );
 
 

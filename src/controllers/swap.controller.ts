@@ -193,6 +193,14 @@ class SwapController {
       const userData = await prisma.user.findUnique({
         where: { id: user.id }
       })
+
+      if(!userData){
+        return res.status(400)
+          .json({
+            msg: 'User not found',
+            success: false,
+          });
+      }
   
       const account = await fernService.cryptoAccount(
         {
@@ -216,7 +224,7 @@ class SwapController {
       return res
         .status(200)
         .json({
-          msg: 'Account Added Successfully',
+          msg: 'Account Linked Successfully',
           success: true,
           account
         });
@@ -228,6 +236,54 @@ class SwapController {
           msg: 'Internal Server Error',
           success: false,
         });
+    }
+  }
+
+  async getLinkedAccounts(req: Request & Record<string, any>, res: Response) {
+    const { type } = req.query;
+
+    const { user } = req;
+
+    try {
+      console.log('query',req.query)
+
+      let Accounts;
+
+      if(!type){
+        return res.status(400)
+          .json({
+            msg: 'Account type required',
+            success: false,
+          });
+      }
+
+      if (type && type == 'FIAT') {
+        Accounts = await prisma.fiatAccount.findMany({
+          where:{userId: user.id}
+        })
+
+      }
+
+      if (type && type == 'CRYPTO') {
+        Accounts = await prisma.cryptoAccount.findMany({
+          where:{userId: user.id}
+        })
+
+      }
+
+      
+      return res
+        .status(200)
+        .json({
+          msg:`Accounts fetched successfully`,
+          success: true,
+          accounts: Accounts,
+      });
+
+
+    } catch (error) {
+      console.log(error);
+      res.status(500).send(error);
     }
   }
 
