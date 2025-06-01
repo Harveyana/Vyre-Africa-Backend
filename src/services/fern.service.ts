@@ -48,6 +48,31 @@ interface fiatAccount {
     bankMethod:string,
 }
 
+interface PaymentSource {
+  sourcePaymentAccountId: string;
+  sourceCurrency: string;
+  sourcePaymentMethod: string;
+  sourceAmount: string;
+}
+
+interface PaymentDestination {
+  destinationPaymentAccountId: string;
+  destinationPaymentMethod: string;
+  destinationCurrency: string;
+}
+
+interface DeveloperFee {
+  developerFeeType: string;
+  developerFeeAmount: string;
+}
+
+interface QuotePayload {
+  customerId: string;
+  source: PaymentSource;
+  destination: PaymentDestination;
+  developerFee: DeveloperFee;
+}
+
 class FernService {
 
   async customer(payload:{customerType:string,firstName:string,lastName:string,email:string}){
@@ -191,6 +216,31 @@ class FernService {
     }
           
     const response = await fernAxios.post('/payment-accounts', accountData)
+    const result = response.data
+    console.log(result)
+      
+    return result
+      
+  }
+
+  async generateQuote(payload:QuotePayload){
+
+    // const user = await prisma.user.findUnique({
+    //   where:{id:payload.userId}
+    // })
+      
+    // const accountData = {
+    //   paymentAccountType: "EXTERNAL_CRYPTO_WALLET",
+    //   customerId: user?.fernUserId,
+    //   nickname: `${payload.chain} Account`,
+    //   externalCryptoWallet: {
+    //    cryptoWalletType: "EVM",
+    //    chain: payload.chain,
+    //    address: payload.address
+    //   },
+    // }
+          
+    const response = await fernAxios.post('/quotes', payload)
     const result = response.data
     console.log(result)
       

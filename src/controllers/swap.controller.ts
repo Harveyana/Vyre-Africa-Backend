@@ -249,6 +249,76 @@ class SwapController {
     }
   }
 
+  async generateQuote(req: Request & Record<string, any>, res: Response) {
+    const { user } = req;
+    const {
+      destination,
+      source
+    } = req.body
+
+    try {
+
+      // if(!chain || !address){
+      //   return res.status(400)
+      //   .json({
+      //     msg: 'Incomplete Details',
+      //     success: false,
+      //   });
+      // }
+
+      const userData = await prisma.user.findUnique({
+        where: { id: user.id }
+      })
+
+      if(!userData){
+        return res.status(400)
+          .json({
+            msg: 'User not found',
+            success: false
+          });
+      }
+  
+      const quote = await fernService.generateQuote(
+        {
+          customerId: userData?.fernUserId!,
+          source,
+          destination,
+          developerFee: {
+            developerFeeType: "USD",
+            developerFeeAmount: "5.45"
+          }
+        }
+      )
+
+      if(quote){
+        return res
+        .status(200)
+        .json({
+          msg: 'Quote generated Successfully',
+          success: true,
+          quote
+        });
+      }else{
+
+        return res
+        .status(400)
+        .json({
+          msg: 'operation failed',
+          success: false,
+        });
+      }
+
+      
+    } catch (error) {
+      console.log(error)
+      res.status(500)
+        .json({
+          msg: 'Internal Server Error',
+          success: false,
+        });
+    }
+  }
+
   async getLinkedAccounts(req: Request & Record<string, any>, res: Response) {
     const { type } = req.query;
 

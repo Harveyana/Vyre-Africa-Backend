@@ -19,6 +19,31 @@ class SwapValidator {
     ];
   }
 
+  generateQuote() {
+    return [
+      body('source').isObject(),
+            body('admin.sourcePaymentAccountId')
+                .optional().withMessage('sourcePaymentAccountId is optional'),
+            body('source.sourceCurrency')
+                .notEmpty().withMessage('sourceCurrency is required'),
+            body('source.sourcePaymentMethod')
+                .notEmpty().withMessage('sourcePaymentMethod is required'),
+            body('source.sourceAmount')
+                .notEmpty().withMessage('sourceAmount is required'),
+
+      body('destination').isObject(),
+            body('destination.destinationPaymentAccountId')
+                .notEmpty().withMessage('destinationPaymentAccountId is required'),
+            body('destination.destinationCurrency')
+                .notEmpty().withMessage('destinationCurrency is required'),
+            body('destination.destinationPaymentMethod')
+                .notEmpty().withMessage('destinationPaymentMethod is required')
+            
+    ];
+
+    
+  }
+
 }
 
 export default new SwapValidator();

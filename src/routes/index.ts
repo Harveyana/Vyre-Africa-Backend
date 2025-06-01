@@ -158,6 +158,14 @@ router.get(
   swapController.getLinkedAccounts
 );
 
+router.post(
+  '/swap/quote',
+  authMiddleware,
+  swapValidator.generateQuote(),
+  middleware.handleValidationError,
+  swapController.generateQuote
+);
+
 
 // router.post('/sendOTP', userController.sendVerification);
 
