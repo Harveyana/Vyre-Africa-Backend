@@ -138,6 +138,7 @@ router.post(
 // swap
 router.post(
   '/paymentAccount/fiat',
+  authMiddleware,
   swapValidator.addFiatAccount(),
   middleware.handleValidationError,
   swapController.addFiatAccount,
@@ -145,6 +146,7 @@ router.post(
 
 router.post(
   '/paymentAccount/crypto',
+  authMiddleware,
   swapValidator.addCryptoAccount(),
   middleware.handleValidationError,
   swapController.addCryptoAccount,
