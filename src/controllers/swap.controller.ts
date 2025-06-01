@@ -221,9 +221,9 @@ class SwapController {
           data:{
             id: account.paymentAccountId,
             name: `${currency} ${account.nickname}`,
-            cryptoWalletType: account.cryptoWalletType,
-            chain:account.chain,
-            address:account.address,   
+            cryptoWalletType: account.externalCryptoWallet.cryptoWalletType,
+            chain:account.externalCryptoWallet.chain,
+            address:account.externalCryptoWallet.address,   
             userId: user.id
           }
         })
