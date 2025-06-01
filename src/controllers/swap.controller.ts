@@ -100,6 +100,14 @@ class SwapController {
       const userData = await prisma.user.findUnique({
         where: { id: user.id }
       })
+
+      if(!userData){
+        return res.status(400)
+          .json({
+            msg: 'User not found',
+            success: false,
+          });
+      }
   
       const account = await fernService.fiatAccount(
         {
@@ -142,7 +150,7 @@ class SwapController {
           accountNumber: account.externalBankAccount.bankAccountMask,
           currency,
           method:account.externalBankAccount.bankAccountPaymentMethod,
-          country: account.userData.country,
+          country: userData?.country!,
           userId: user.id
         }
       })
