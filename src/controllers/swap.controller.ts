@@ -142,18 +142,22 @@ class SwapController {
         }
       )
 
-      const fiatAccount = await prisma.fiatAccount.create({
-        data:{
-          id: account.paymentAccountId,
-          name: account.nickname,
-          bank: account.externalBankAccount.bankName,
-          accountNumber: account.externalBankAccount.bankAccountMask,
-          currency,
-          method:account.externalBankAccount.bankAccountPaymentMethod,
-          country: userData?.country!,
-          userId: user.id
-        }
-      })
+      if(account){
+        const fiatAccount = await prisma.fiatAccount.create({
+          data:{
+            id: account.paymentAccountId,
+            name: account.nickname,
+            bank: account.externalBankAccount.bankName,
+            accountNumber: account.externalBankAccount.bankAccountMask,
+            currency,
+            method:account.externalBankAccount.bankAccountPaymentMethod,
+            country: userData?.country!,
+            userId: user.id
+          }
+        })
+      }
+
+      
 
       return res
         .status(200)
@@ -176,6 +180,7 @@ class SwapController {
   async addCryptoAccount(req: Request & Record<string, any>, res: Response) {
     const { user } = req;
     const {
+      currency,
       chain,
       address
     } = req.body
@@ -210,17 +215,22 @@ class SwapController {
         }
       )
 
-      await prisma.cryptoAccount.create({
-        data:{
-          id: account.paymentAccountId,
-          name: account.nickname,
-          cryptoWalletType: account.cryptoWalletType,
-          chain:account.chain,
-          address:account.address,   
-          userId: user.id
-        }
-      })
+      if(account){
 
+        await prisma.cryptoAccount.create({
+          data:{
+            id: account.paymentAccountId,
+            name: `${currency} ${account.nickname}`,
+            cryptoWalletType: account.cryptoWalletType,
+            chain:account.chain,
+            address:account.address,   
+            userId: user.id
+          }
+        })
+
+      }
+
+      
       return res
         .status(200)
         .json({

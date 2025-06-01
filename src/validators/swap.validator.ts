@@ -14,7 +14,8 @@ class SwapValidator {
   addCryptoAccount() {
     return [
       body('chain').notEmpty().withMessage('chain is required'),
-      body('address').notEmpty().withMessage('address is required')
+      body('address').notEmpty().withMessage('address is required'),
+      body('currency').notEmpty().withMessage('currency is required')
     ];
   }
 
