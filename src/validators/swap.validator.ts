@@ -23,7 +23,7 @@ class SwapValidator {
     return [
       body('source').isObject(),
             body('admin.sourcePaymentAccountId')
-                .optional().withMessage('sourcePaymentAccountId is optional'),
+                .optional(),
             body('source.sourceCurrency')
                 .notEmpty().withMessage('sourceCurrency is required'),
             body('source.sourcePaymentMethod')
