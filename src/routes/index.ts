@@ -166,6 +166,14 @@ router.post(
   swapController.generateQuote
 );
 
+router.post(
+  '/swap/initiate',
+  authMiddleware,
+  swapValidator.initiateSwap(),
+  middleware.handleValidationError,
+  swapController.initiateSwap
+);
+
 
 // router.post('/sendOTP', userController.sendVerification);
 

@@ -46,6 +46,13 @@ enum UserStatus {
   DISMISSED
 }
 
+enum SwapStatus {
+  AWAITING_TRANSFER
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
 enum OrderType {
   BUY
   SELL
@@ -171,11 +178,11 @@ model User {
   photoUrl     String?     @db.VarChar(500)
   phoneNumber  String?
 
-  country      String?
-  address      String?
-  city         String?
-  state        String?
-  postalCode   String?
+  country    String?
+  address    String?
+  city       String?
+  state      String?
+  postalCode String?
 
   password          String?  @db.VarChar(500)
   emailVerified     Boolean? @default(false)
@@ -202,6 +209,23 @@ model User {
   Card                          Card?
   fiatAccount                   fiatAccount[]
   cryptoAccount                 cryptoAccount[]
+  Swap                          Swap[]
+}
+
+model Swap {
+  id        String     @id @default(cuid())
+  status    SwapStatus @default(AWAITING_TRANSFER)
+  userId    String?
+  user      User?      @relation(fields: [userId], references: [id])
+  createdAt DateTime   @default(now())
+
+  sourceCurrency      String
+  destinationCurrency String
+
+  rate              Float?
+  sourceAmount      Float?
+  destinationAmount Float?
+  fee               Float?
 }
 
 model Bank {

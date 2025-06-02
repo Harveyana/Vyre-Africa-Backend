@@ -44,6 +44,12 @@ class SwapValidator {
     
   }
 
+  initiateSwap() {
+    return [
+      body('quoteId').notEmpty().withMessage('quoteId is required')
+    ];
+  }
+
 }
 
 export default new SwapValidator();

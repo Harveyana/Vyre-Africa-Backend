@@ -4,8 +4,9 @@ import config from "../config/env.config";
 import prisma from '../config/prisma.config';
 import { Prisma } from "@prisma/client";
 import axios from "axios";
-import { UserBank,UserStatus } from "@prisma/client";
+import { UserBank,UserStatus,SwapStatus } from "@prisma/client";
 import { generateRefCode,getISOByCountry } from "../utils";
+import Ably from 'ably';
 
 const fernAxios = axios.create({
   baseURL: 'https://api.fernhq.com',
@@ -224,29 +225,48 @@ class FernService {
   }
 
   async generateQuote(payload:QuotePayload){
-
-    // const user = await prisma.user.findUnique({
-    //   where:{id:payload.userId}
-    // })
-      
-    // const accountData = {
-    //   paymentAccountType: "EXTERNAL_CRYPTO_WALLET",
-    //   customerId: user?.fernUserId,
-    //   nickname: `${payload.chain} Account`,
-    //   externalCryptoWallet: {
-    //    cryptoWalletType: "EVM",
-    //    chain: payload.chain,
-    //    address: payload.address
-    //   },
-    // }
           
     const response = await fernAxios.post('/quotes', payload)
     const result = response.data
     console.log(result)
       
     return result
-      
   }
+
+  async initTransaction(payload:{quoteId:string}){
+          
+    const response = await fernAxios.post('/transactions', payload)
+    const result = response.data
+    console.log(result)
+      
+    return result
+  }
+
+  async transaction_updated(status:string, transactionId:string){
+    
+    const updatedTransaction = await prisma.swap.update({
+      where:{id:transactionId},
+      data:{
+        status: status as SwapStatus
+      }
+    })
+    console.log(updatedTransaction)
+
+    const ably = new Ably.Realtime("nECyrQ.Y6Twcg:Ao47kxy-2RK2df35GalolYCLEUwlYuhbASnKwUeFUiE")
+    ably.connection.once("connected", () => {
+      console.log("Connected to Ably!")
+    })
+
+    const SwapChannel = ably.channels.get("SWAP")
+
+    await SwapChannel.publish(transactionId,{status})
+    // return 'done'
+    ably.connection.close();
+    return true
+
+  }
+
+  
 
   // async payment_Account_Created(payload:{
   //   customerId: string, 

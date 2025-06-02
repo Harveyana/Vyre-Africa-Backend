@@ -84,25 +84,38 @@ class WalletController {
       }
 
 
-      if(body.type === 'payment_account.created'){
+      // if(body.type === 'payment_account.created'){
 
-      }
+      // }
 
-      if(body.type === 'payment_account.deleted'){
+      // if(body.type === 'payment_account.deleted'){
 
-      }
+      // }
 
-      if(body.type === 'transaction.created'){
+      // if(body.type === 'transaction.created'){
 
-      }
-
-      if(body.type === 'transaction.updated'){
-
-      }
+      // }
 
       if(body.type === 'transaction.updated'){
+        const transaction = body.resource
+
+        const updated = await fernService.transaction_updated(
+          transaction.transactionStatus,
+          transaction.transactionId
+        )
+
+        if(updated){
+          return res.status(200).json({
+            msg: 'Event Successful',
+            success: true
+          });
+        }
 
       }
+
+      // if(body.type === 'transaction.updated'){
+
+      // }
 
 
       // FOR FIAT WITHDRAWAL 
