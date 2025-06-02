@@ -12,7 +12,8 @@ const fernAxios = axios.create({
   baseURL: 'https://api.fernhq.com',
   headers: {
     'Authorization': `Bearer ${config.fern.Key}`,
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'x-idempotency-key':`x-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`
   }
 });
 
