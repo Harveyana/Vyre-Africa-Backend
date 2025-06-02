@@ -47,6 +47,7 @@ enum UserStatus {
 }
 
 enum SwapStatus {
+  AWAITING_TRANSFER
   CREATED
   PROCESSING
   COMPLETED

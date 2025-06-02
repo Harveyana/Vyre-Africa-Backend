@@ -353,6 +353,7 @@ class SwapController {
           data:{
             id: transaction.transactionId,
             userId: userData?.id,
+            status: transaction.transactionStatus,
             sourceCurrency: transaction.source?.sourceCurrency?.label,
             destinationCurrency:transaction?.destination?.destinationCurrency?.label,
             rate: parseFloat(transaction?.destination?.exchangeRate),
