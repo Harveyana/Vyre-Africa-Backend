@@ -7,13 +7,14 @@ import axios from "axios";
 import { UserBank,UserStatus,SwapStatus } from "@prisma/client";
 import { generateRefCode,getISOByCountry } from "../utils";
 import Ably from 'ably';
+import { v4 as uuidv4 } from 'uuid';
 
 const fernAxios = axios.create({
   baseURL: 'https://api.fernhq.com',
   headers: {
     'Authorization': `Bearer ${config.fern.Key}`,
     'Content-Type': 'application/json',
-    'x-idempotency-key':`x-${Date.now()}`
+    'x-idempotency-key': uuidv4()
   }
 });
 
