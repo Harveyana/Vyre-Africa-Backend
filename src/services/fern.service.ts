@@ -13,7 +13,7 @@ const fernAxios = axios.create({
   headers: {
     'Authorization': `Bearer ${config.fern.Key}`,
     'Content-Type': 'application/json',
-    'x-idempotency-key':`x-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`
+    'x-idempotency-key':`x-${Date.now()}`
   }
 });
 
