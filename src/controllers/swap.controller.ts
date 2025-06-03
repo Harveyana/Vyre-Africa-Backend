@@ -280,7 +280,10 @@ class SwapController {
 
       const response = await walletService.getRate(source.sourceCurrency as string,'USD')
       // Calculate 0.9% of the rate
-      const fee = (response.value * 0.009).toFixed(2); 
+      const fee = (response.value * 0.009).toFixed(2);
+
+      console.log('my rate',response.value)
+      console.log('my fee',fee)
   
       const quote = await fernService.generateQuote(
         {
