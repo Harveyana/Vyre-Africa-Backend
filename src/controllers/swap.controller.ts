@@ -279,8 +279,8 @@ class SwapController {
       }
 
       const rate = await walletService.getRate(source.sourceCurrency as string,'USD')
-      // Calculate 2.5% of the rate
-      const fee = (rate.value * source.sourceAmount * 0.025).toFixed(2);
+      // Calculate 5.5% of the rate
+      const fee = (rate.value * source.sourceAmount * 0.055).toFixed(2);
 
       console.log('my rate',rate.value)
       console.log('my fee',fee)
