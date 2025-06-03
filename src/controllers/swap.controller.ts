@@ -277,6 +277,10 @@ class SwapController {
             success: false
           });
       }
+
+      const response = await walletService.getRate(source.sourceCurrency as string,'USD')
+      // Calculate 0.9% of the rate
+      const fee = (response.value * 0.009).toFixed(2); 
   
       const quote = await fernService.generateQuote(
         {
@@ -285,7 +289,7 @@ class SwapController {
           destination,
           developerFee: {
             developerFeeType: "USD",
-            developerFeeAmount: "5.45"
+            developerFeeAmount: `${fee}`
           }
         }
       )
