@@ -284,10 +284,19 @@ class SwapController {
       ? 'USD' 
       : source.sourceCurrency;
 
-      // const rate = await walletService.getRate((source.sourceType ==='CRYPTO'? source.sourceCurrency: 'USD' ) as string,(source.sourceType ==='CRYPTO'? 'USD' :source.sourceCurrency ))
-      const rate = await walletService.getRate(fromCurrency, toCurrency);
-      // Calculate 4.5% of the rate
-      const fee = (rate.value * source.sourceAmount * 0.045).toFixed(2);
+      const rate = await walletService.getRate(source.sourceCurrency as string,'USD')
+      // const rate = await walletService.getRate(fromCurrency, toCurrency);
+      // Calculate 4.5% of the 
+      
+      let fee;
+
+      if(source.sourceType === 'CRYPTO'){
+        fee = (rate.value * source.sourceAmount * 0.045).toFixed(2);
+      }else{
+        fee = (rate.value / source.sourceAmount * 0.045).toFixed(2);
+      }
+
+      
 
       console.log('my rate',rate.value)
       console.log('my fee',fee)
