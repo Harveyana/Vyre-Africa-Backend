@@ -277,39 +277,35 @@ class SwapController {
           });
       }
 
-      const fromCurrency = source.sourceType === 'CRYPTO' 
-      ? source.sourceCurrency 
-      : 'USD';
-      const toCurrency = source.sourceType === 'CRYPTO' 
-      ? 'USD' 
-      : source.sourceCurrency;
+      // const fromCurrency = source.sourceType === 'CRYPTO' 
+      // ? source.sourceCurrency 
+      // : 'USD';
+      // const toCurrency = source.sourceType === 'CRYPTO' 
+      // ? 'USD' 
+      // : source.sourceCurrency;
 
       const rate = await walletService.getRate(source.sourceCurrency as string,'USD')
-      // const rate = await walletService.getRate(fromCurrency, toCurrency);
       // Calculate 4.5% of the 
       
-      let fee;
-
-      if(source.sourceType === 'CRYPTO'){
-        fee = (rate.value * source.sourceAmount * 0.045).toFixed(2);
-      }else{
-        fee = (rate.value / source.sourceAmount * 0.045).toFixed(2);
-      }
-
-      
+      const fee = (rate.value * source.sourceAmount * 0.045).toFixed(2);
+     
 
       console.log('my rate',rate.value)
       console.log('my fee',fee)
+
+      if(Number(fee) < 0.5){
+        return res
+        .status(400)
+        .json({
+          msg: 'Amount below minimum',
+          success: false
+        });
+      }
   
       const quote = await fernService.generateQuote(
         {
           customerId: userData?.fernUserId!,
-          source:{
-            sourcePaymentAccountId: source?.sourcePaymentAccountId,
-            sourceCurrency: source?.sourceCurrency,
-            sourcePaymentMethod: source?.sourcePaymentMethod,
-            sourceAmount: source?.sourceAmount
-          },
+          source,
           destination,
           developerFee: {
             developerFeeType: "USD",
