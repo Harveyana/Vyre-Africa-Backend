@@ -293,7 +293,7 @@ class SwapController {
       console.log('my rate',rate.value)
       console.log('my fee',fee)
 
-      if(Number(fee) < 0.5){
+      if(Number(fee) < 0.3){
         return res
         .status(400)
         .json({
