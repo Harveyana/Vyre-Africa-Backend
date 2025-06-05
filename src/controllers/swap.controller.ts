@@ -257,7 +257,6 @@ class SwapController {
     } = req.body
 
     try {
-
       // if(!chain || !address){
       //   return res.status(400)
       //   .json({
@@ -278,7 +277,15 @@ class SwapController {
           });
       }
 
-      const rate = await walletService.getRate(source.sourceCurrency as string,'USD')
+      const fromCurrency = source.sourceType === 'CRYPTO' 
+      ? source.sourceCurrency 
+      : 'USD';
+      const toCurrency = source.sourceType === 'CRYPTO' 
+      ? 'USD' 
+      : source.sourceCurrency;
+
+      // const rate = await walletService.getRate((source.sourceType ==='CRYPTO'? source.sourceCurrency: 'USD' ) as string,(source.sourceType ==='CRYPTO'? 'USD' :source.sourceCurrency ))
+      const rate = await walletService.getRate(fromCurrency, toCurrency);
       // Calculate 4.5% of the rate
       const fee = (rate.value * source.sourceAmount * 0.045).toFixed(2);
 
@@ -288,7 +295,12 @@ class SwapController {
       const quote = await fernService.generateQuote(
         {
           customerId: userData?.fernUserId!,
-          source,
+          source:{
+            sourcePaymentAccountId: source?.sourcePaymentAccountId,
+            sourceCurrency: source?.sourceCurrency,
+            sourcePaymentMethod: source?.sourcePaymentMethod,
+            sourceAmount: source?.sourceAmount
+          },
           destination,
           developerFee: {
             developerFeeType: "USD",

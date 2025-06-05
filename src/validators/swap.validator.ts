@@ -30,6 +30,8 @@ class SwapValidator {
                 .notEmpty().withMessage('sourcePaymentMethod is required'),
             body('source.sourceAmount')
                 .notEmpty().withMessage('sourceAmount is required'),
+            body('source.sourceType')
+                .notEmpty().withMessage('sourceType is required'),
 
       body('destination').isObject(),
             body('destination.destinationPaymentAccountId')
