@@ -257,13 +257,6 @@ class SwapController {
     } = req.body
 
     try {
-      // if(!chain || !address){
-      //   return res.status(400)
-      //   .json({
-      //     msg: 'Incomplete Details',
-      //     success: false,
-      //   });
-      // }
 
       const userData = await prisma.user.findUnique({
         where: { id: user.id }

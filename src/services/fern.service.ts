@@ -164,6 +164,7 @@ class FernService {
           ...(pixCode && { pixCode }),
           ...(clearingCode && { clearingCode }),
           ...(bicSwift && { bicSwift }),
+          cbnCode:'068',
 
           bankAddress: payload.bankAddress,
 
