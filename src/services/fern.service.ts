@@ -14,7 +14,7 @@ const fernAxios = axios.create({
   headers: {
     'Authorization': `Bearer ${config.fern.Key}`,
     'Content-Type': 'application/json',
-    'x-idempotency-key': uuidv4()
+    'x-idempotency-key': Date.now()
   }
 });
 
