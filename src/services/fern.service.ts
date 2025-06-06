@@ -18,6 +18,17 @@ const fernAxios = axios.create({
   }
 });
 
+const createFernRequest = (idempotencyKey: string) => {
+  return axios.create({
+    baseURL: 'https://api.fernhq.com',
+    headers: {
+      'Authorization': `Bearer ${config.fern.Key}`,
+      'Content-Type': 'application/json',
+      'x-idempotency-key': idempotencyKey
+    }
+  });
+};
+
 interface fiatAccount {
   userId:string,
     bankName:string,
@@ -237,8 +248,12 @@ class FernService {
   }
 
   async initTransaction(payload:{quoteId:string}){
-          
-    const response = await fernAxios.post('/transactions', payload)
+
+    // const idempotencyKey = uuidv4();
+
+    const fern = createFernRequest(payload.quoteId);
+    const response = await fern.post('/transactions', payload);
+    // const response = await fernAxios.post('/transactions', payload)
     const result = response.data
     console.log(result)
       
