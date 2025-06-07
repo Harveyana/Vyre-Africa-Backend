@@ -8,6 +8,7 @@ import { UserBank,UserStatus,SwapStatus } from "@prisma/client";
 import { generateRefCode,getISOByCountry } from "../utils";
 import Ably from 'ably';
 import { v4 as uuidv4 } from 'uuid';
+import mailService from "./mail.service";
 
 const fernAxios = axios.create({
   baseURL: 'https://api.fernhq.com',
@@ -131,6 +132,10 @@ class FernService {
       }
     })
     console.log(updatedUser)
+    
+    if(status === 'ACTIVE'){
+      await mailService.sendWelcomeEmail(updatedUser.email,updatedUser.firstName)
+    }
 
     return true
   }

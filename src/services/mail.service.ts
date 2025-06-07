@@ -141,6 +141,36 @@ class MailService {
         }
     }
 
+    public async sendWelcomeEmail(address:string, userName:string): Promise<void> {
+
+        console.log('address',address,'userName',userName)
+        try {
+            const response = await this.client.sendMail({
+                mail_template_key:'13ef.77aaa135805f0ced.k1.d7473860-437c-11f0-832a-66e0c45c7bae.19749980ee6',
+                
+                from: {
+                    address: 'noreply@vyre.africa',
+                    name: 'noreply',
+                },
+                to: [
+                    {
+                        email_address: {
+                            address: address,
+                            name: 'Vyre',
+                        },
+                    },
+                ],
+                merge_info: { 
+                    user_name: userName 
+                },
+                subject: 'Welcome to Vyre – Your Account is Fully Verified! 🎉',
+            });
+            console.log('success', response);
+        } catch (error) {
+            console.error('error', error);
+        }
+    }
+
     public async sendVerificationLink(address:string, userName:string, url: string): Promise<void> {
         try {
             const response = await this.client.sendMail({
