@@ -409,6 +409,45 @@ class SwapController {
     }
   }
 
+  async fetchSwaps(req: Request | any, res: Response) {
+    const { currency } = req.query;
+
+    console.log(req.query)
+
+    try {
+      // Build the where clause dynamically
+      const whereClause: any = {
+        ...(currency && { sourceCurrency:currency })
+      };
+
+      const totalCount = await prisma.swap.count({
+        where: whereClause
+      });
+
+      const swaps = await prisma.swap.findMany({
+        where: whereClause,
+        take: 20,
+        orderBy: {
+          createdAt: 'desc'  // newest orders first
+        }
+      });
+
+      return res.status(200).json({
+        msg: 'Successful',
+        success: true,
+        totalCount,
+        swaps
+      });
+
+    } catch (error) {
+      console.error(error);
+      return res.status(500).send({ 
+        msg: 'Internal Server Error', 
+        success: false
+      });
+    }
+  }
+
 
   async getLinkedAccounts(req: Request & Record<string, any>, res: Response) {
     const { type } = req.query;
