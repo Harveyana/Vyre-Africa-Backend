@@ -1,5 +1,6 @@
 import * as bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import prisma from './config/prisma.config';
 import moment from 'moment';
 import config from './config/env.config';
 import { User } from './globals';
@@ -155,6 +156,27 @@ export const decryptData = async (data: string) => {
     encrypted += cipher.final('hex');
     return encrypted;
 }
+
+export const checkUserPaymentMethods = async (userId: string)=> {
+    const [fiatAccounts, cryptoAccounts] = await Promise.all([
+      prisma.fiatAccount.findMany({
+        where: { userId },
+        select: { id: true, name: true, currency: true }
+      }),
+      prisma.cryptoAccount.findMany({
+        where: { userId },
+        select: { id: true, name: true, cryptoWalletType: true }
+      })
+    ]);
+  
+    return {
+      hasAnyPaymentMethod: fiatAccounts.length > 0 || cryptoAccounts.length > 0,
+      hasFiatAccount: fiatAccounts.length > 0,
+      hasCryptoAccount: cryptoAccounts.length > 0,
+    //   fiatAccounts,
+    //   cryptoAccounts
+    };
+  }
 
 type PaymentMethod =
   | 'ACH'          // USA

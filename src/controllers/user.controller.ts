@@ -18,6 +18,7 @@ import {
     generateOtp,
     generateRefCode,
     hashData,
+    checkUserPaymentMethods
 } from '../utils';
 import moment from 'moment';
 import transactionService from '../services/transaction.service';
@@ -826,10 +827,13 @@ class UserController {
                 });
             }
 
+            const {hasAnyPaymentMethod,hasFiatAccount,hasCryptoAccount} = await checkUserPaymentMethods(userData.id)
+
             return res.status(201).json({
                 msg: 'Profile fetched successfully',
                 success: true,
-                user: userData
+                user: userData,
+                hasAnyPaymentMethod
             });
 
         } catch (error) {
