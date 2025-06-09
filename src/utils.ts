@@ -183,8 +183,10 @@ export const calculateFee = (sourceAmount: number): number => {
     let feePercentage: number;
   
     if (sourceAmount <= 10) {
-      feePercentage = 0.10; // 10.0% for small amounts (<$10)
-    } else if (sourceAmount <= 50) {
+      feePercentage = 0.15; // 15.0% for small amounts (<$10)
+    }else if (sourceAmount <= 20) {
+        feePercentage = 0.095; // 9.5% for $20–50
+    }else if (sourceAmount <= 50) {
       feePercentage = 0.045; // 4.5% for $10–50
     } else {
       feePercentage = 0.025; // 2.5% for $50–100
