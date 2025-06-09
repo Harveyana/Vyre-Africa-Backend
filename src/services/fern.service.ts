@@ -265,8 +265,8 @@ class FernService {
   }
 
   async getTransaction(id:string){
-
-    const response = await fernAxios.post(`/transactions/${id}`)
+    
+    const response = await fernAxios.get(`/transactions/${id}`)
     const result = response.data
     console.log(result)
       
