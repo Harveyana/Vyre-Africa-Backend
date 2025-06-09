@@ -15,7 +15,7 @@ import {Currency,walletType} from '@prisma/client';
 import { subMinutes } from 'date-fns';
 import * as crypto from 'crypto';
 import {createHmac} from 'node:crypto';
-import { getPaymentMethodByCurrency, getISOByCountry } from '../utils';
+import { getPaymentMethodByCurrency, getISOByCountry, calculateFee } from '../utils';
 import transactionService from '../services/transaction.service';
 import fernService from '../services/fern.service';
 
@@ -280,7 +280,8 @@ class SwapController {
       const rate = await walletService.getRate(source.sourceCurrency as string,'USD')
       // Calculate 4.5% of the 
       
-      const fee = (rate.value * source.sourceAmount * 0.045).toFixed(2);
+      // const fee = (rate.value * source.sourceAmount * 0.045).toFixed(2);
+      const fee = calculateFee(rate.value * source.sourceAmount)
      
 
       console.log('my rate',rate.value)

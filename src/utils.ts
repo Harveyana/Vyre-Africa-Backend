@@ -176,7 +176,26 @@ export const checkUserPaymentMethods = async (userId: string)=> {
     //   fiatAccounts,
     //   cryptoAccounts
     };
-  }
+}
+
+export const calculateFee = (sourceAmount: number): number => {
+    // Base fee is 4.5%, but decreases with higher amounts
+    let feePercentage: number;
+  
+    if (sourceAmount <= 10) {
+      feePercentage = 0.045; // 4.5% for small amounts (<$10)
+    } else if (sourceAmount <= 50) {
+      feePercentage = 0.035; // 3.5% for $10–50
+    } else {
+      feePercentage = 0.025; // 2.5% for $50–100
+    }
+  
+    // Calculate fee in USD
+    let fee = sourceAmount * feePercentage;
+  
+    // Ensure minimum fee of $0.40
+    return Number(Math.max(fee, 0.40).toFixed(2));
+  };
 
 type PaymentMethod =
   | 'ACH'          // USA
