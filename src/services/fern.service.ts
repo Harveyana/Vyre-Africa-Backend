@@ -264,6 +264,15 @@ class FernService {
     return result
   }
 
+  async getTransaction(id:string){
+
+    const response = await fernAxios.post(`/transactions/${id}`)
+    const result = response.data
+    console.log(result)
+      
+    return result
+  }
+
   async transaction_updated(status:string, transactionId:string){
     
     const updatedTransaction = await prisma.swap.update({

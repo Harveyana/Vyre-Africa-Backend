@@ -449,6 +449,51 @@ class SwapController {
     }
   }
 
+  async fetchSwap(req: Request | any, res: Response) {
+    const { id } = req.params;
+
+    console.log(req.query)
+
+    if(!id){
+      return res.status(400)
+        .json({
+          msg: 'swap id is required',
+          success: false,
+        });
+    }
+
+    try {
+      // Build the where clause dynamically
+
+      const swap = await prisma.swap.findUnique({
+        where:{id}
+      });
+
+      if(!swap){
+        return res.status(404)
+          .json({
+            msg: 'transaction not found',
+            success: false,
+          });
+      }
+
+      const result = await fernService.getTransaction(swap?.id)
+
+      return res.status(200).json({
+        msg: 'Successful',
+        success: true,
+        transaction: result
+      });
+
+    } catch (error) {
+      console.error(error);
+      return res.status(500).send({ 
+        msg: 'Internal Server Error', 
+        success: false
+      });
+    }
+  }
+
 
   async getLinkedAccounts(req: Request & Record<string, any>, res: Response) {
     const { type } = req.query;

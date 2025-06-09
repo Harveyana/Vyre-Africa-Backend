@@ -180,6 +180,12 @@ router.get(
   swapController.fetchSwaps
 );
 
+router.get(
+  '/swaps/:id',
+  authMiddleware,
+  swapController.fetchSwap
+)
+
 
 // router.post('/sendOTP', userController.sendVerification);
 
