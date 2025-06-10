@@ -412,12 +412,14 @@ class SwapController {
 
   async fetchSwaps(req: Request | any, res: Response) {
     const { currency } = req.query;
+    const { user } = req;
 
     console.log(req.query)
 
     try {
       // Build the where clause dynamically
       const whereClause: any = {
+        userId: user.id,
         ...(currency && { sourceCurrency:currency })
       };
 

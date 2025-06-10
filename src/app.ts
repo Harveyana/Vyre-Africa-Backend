@@ -19,7 +19,7 @@ app.use('/api/v1/webhook/fern', express.raw({ type: 'application/json', limit: '
 
 app.use(express.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
-app.get('/', (req, res) => res.send('QAYA Backend!'));
+app.get('/', (req, res) => res.send('Vyre Backend!'));
 
 initializeAdmin();
 
