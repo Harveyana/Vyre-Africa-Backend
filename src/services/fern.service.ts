@@ -265,7 +265,7 @@ class FernService {
   }
 
   async getTransaction(id:string){
-    
+
     const response = await fernAxios.get(`/transactions/${id}`)
     const result = response.data
     console.log(result)
@@ -283,16 +283,16 @@ class FernService {
     })
     console.log(updatedTransaction)
 
-    const ably = new Ably.Realtime("nECyrQ.Y6Twcg:Ao47kxy-2RK2df35GalolYCLEUwlYuhbASnKwUeFUiE")
-    ably.connection.once("connected", () => {
-      console.log("Connected to Ably!")
-    })
+    // const ably = new Ably.Realtime("nECyrQ.Y6Twcg:Ao47kxy-2RK2df35GalolYCLEUwlYuhbASnKwUeFUiE")
+    // ably.connection.once("connected", () => {
+    //   console.log("Connected to Ably!")
+    // })
 
-    const SwapChannel = ably.channels.get("SWAP")
+    // const SwapChannel = ably.channels.get("SWAP")
 
-    await SwapChannel.publish(transactionId,{status})
-    // return 'done'
-    ably.connection.close();
+    // await SwapChannel.publish(transactionId,{status})
+    // // return 'done'
+    // ably.connection.close();
     return true
 
   }
