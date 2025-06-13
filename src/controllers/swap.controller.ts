@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+// import { PrismaClient } from '@prisma/client';
 import { Paystack } from 'paystack-sdk';
 import { Request, Response } from 'express';
 import { KJUR } from 'jsrsasign';
@@ -11,7 +11,7 @@ import config from '../config/env.config';
 import smsService from '../services/sms.service';
 import mobilePushService from '../services/mobilePush.service';
 import walletService from '../services/wallet.service';
-import {Currency,walletType} from '@prisma/client';
+// import {Currency,walletType} from '@prisma/client';
 import { subMinutes } from 'date-fns';
 import * as crypto from 'crypto';
 import {createHmac} from 'node:crypto';
@@ -68,28 +68,26 @@ class SwapController {
     const { user } = req;
     const {
       accountNumber,
-
-      routingNumber,
-      bicSwift,
-      sortCode,
-      institutionNumber,
-      bsbNumber,
-      ifscCode,
-      clabeNumber,
-      cnapsCode,
-      pixCode,
-      clearingCode,
-
-      bankName,
-      currency,
+      bankId,
       type,
-      Address,
+      // bicSwift,
+      // routingNumber,
+      // sortCode,
+      // institutionNumber,
+      // bsbNumber,
+      // ifscCode,
+      // clabeNumber,
+      // cnapsCode,
+      // pixCode,
+      // clearingCode,
+      // currency,
+      // Address,
     } = req.body
       
 
     try {
 
-      if(!bankName || !currency || !type || !Address){
+      if(!bankId ||!type){
         return res.status(400)
         .json({
           msg: 'Incomplete Details',
@@ -108,36 +106,48 @@ class SwapController {
             success: false,
           });
       }
+
+      const bank = await prisma.bank.findUnique({
+        where: { id: bankId }
+      });
+
+      console.log(bank)
+
+      if (!bank) {
+          return res.status(400).json({
+              msg: 'bank not found',
+              success: false,
+          });
+      }
   
       const account = await fernService.fiatAccount(
         {
           userId:user.id,
-          bankName,
+          bankName: bank.name,
           accountNumber,
-          currency,
+          currency: bank?.currency!,
           bankAddress: {
-            country: getISOByCountry(userData?.country as string),
-            addressLine1: Address.addressLine1,
-            addressLine2: Address.addressLine2,
-            city: Address.city,
-            state: Address.state,
-            postalCode: Address.postalCode,
+            country: getISOByCountry(bank?.country as string)!,
+            addressLine1: bank?.address!,
+            city: bank?.city!,
+            state: bank?.state!,
+            postalCode: bank?.postalCode!,
             locale: "en-US"
           },
 
-          ...(userData?.country === 'United States' && { routingNumber }),
+          // ...(userData?.country === 'United States' && { routingNumber }),
           ...(userData?.country === 'Nigeria' && { nubanNumber: accountNumber }),
-          ...(userData?.country === 'United Kingdom' && { sortCode }),
-          ...(userData?.country === 'Australia' && { bsbNumber }),
-          ...(userData?.country === 'Canada' && { institutionNumber }),
-          ...(userData?.country === 'India' && { ifscCode }),
-          ...(userData?.country === 'Mexico' && { clabeNumber }),
-          ...(userData?.country === 'China' && { cnapsCode }),
-          ...(userData?.country === 'Brazil' && { pixCode }),
-          ...(userData?.country === 'Hong Kong' && { clearingCode }),
-          ...(bicSwift && { bicSwift }),
+          // ...(userData?.country === 'United Kingdom' && { sortCode }),
+          // ...(userData?.country === 'Australia' && { bsbNumber }),
+          // ...(userData?.country === 'Canada' && { institutionNumber }),
+          // ...(userData?.country === 'India' && { ifscCode }),
+          // ...(userData?.country === 'Mexico' && { clabeNumber }),
+          // ...(userData?.country === 'China' && { cnapsCode }),
+          // ...(userData?.country === 'Brazil' && { pixCode }),
+          // ...(userData?.country === 'Hong Kong' && { clearingCode }),
+          // ...(bicSwift && { bicSwift }),
           accountType: type,
-          bankMethod: getPaymentMethodByCurrency(currency as string) || ''
+          bankMethod: getPaymentMethodByCurrency(bank?.currency as string) || ''
       
         }
       )
@@ -149,7 +159,7 @@ class SwapController {
             name: account.nickname,
             bank: account.externalBankAccount.bankName,
             accountNumber: account.externalBankAccount.bankAccountMask,
-            currency,
+            currency: bank?.currency!,
             method:account.externalBankAccount.bankAccountPaymentMethod,
             country: userData?.country!,
             userId: user.id

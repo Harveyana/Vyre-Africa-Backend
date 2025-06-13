@@ -39,7 +39,7 @@ interface fiatAccount {
     bankAddress: {
       country: string,
       addressLine1: string,
-      addressLine2: string,
+      // addressLine2: string,
       city: string,
       state: string,
       postalCode: string,
@@ -49,7 +49,7 @@ interface fiatAccount {
     // optionals
     routingNumber?:string,
     nubanNumber?:string,
-    bicSwift:string,
+    bicSwift?:string,
     sortCode?:string,
     bsbNumber?:string,
     institutionNumber?:string,
@@ -293,7 +293,7 @@ class FernService {
     // await SwapChannel.publish(transactionId,{status})
     // // return 'done'
     // ably.connection.close();
-    return true
+    return updatedTransaction
 
   }
 

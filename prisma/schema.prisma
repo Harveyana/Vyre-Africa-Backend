@@ -230,13 +230,21 @@ model Swap {
 }
 
 model Bank {
-  id        String     @id @default(cuid())
-  name      String
-  slug      String
-  code      String
-  country   String
-  userBanks UserBank[]
-  createdAt DateTime   @default(now())
+  id         String     @id @default(cuid())
+  name       String
+  slug       String
+  code       String
+  country    String
+  currency   String?
+
+  address    String?
+  postalCode   String?
+  state      String?
+  city       String?
+
+
+  userBanks  UserBank[]
+  createdAt  DateTime   @default(now())
 }
 
 model UserBank {
