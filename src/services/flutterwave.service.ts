@@ -120,8 +120,8 @@ class FlutterwaveService {
 
       try {
         const payload = {
-            "account_number": account_number,
-            "account_bank": bank_code
+            account_number: account_number,
+            account_bank: bank_code
         }
         const response = await this.flw.Misc.verify_Account(payload)
         console.log(response);
