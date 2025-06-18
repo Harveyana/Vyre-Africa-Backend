@@ -125,7 +125,7 @@ class FlutterwaveService {
         }
         const response = await this.flw.Misc.verify_Account(payload)
         console.log(response);
-        return response.data
+        return response
 
       } catch (error) {
         console.log(error)
