@@ -5,6 +5,7 @@ import cron from 'node-cron';
 import adminBroadcastController from "./controllers/admin/admin.broadcast.controller";
 import orderController from "./controllers/order.controller";
 import paystackService from "./services/paystack.service";
+import flutterwaveService from "./services/flutterwave.service";
 
 const server = http.createServer(app);
 
@@ -12,7 +13,7 @@ const server = http.createServer(app);
 // cron.schedule('* * * * *', () => {
 //     console.log('Checking for scheduled notifications...');
     
-//     paystackService.getAllBanks().catch((error) => {
+//     flutterwaveService.getBanks().catch((error) => {
 //         console.error('Failed to process banks', error);
 //     });
 // });

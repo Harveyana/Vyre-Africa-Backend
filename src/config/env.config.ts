@@ -66,6 +66,10 @@ const config = {
     paystack: {
         secretKey: process.env.PAYSTACK_SECRET || ''
     },
+    flutterwave: {
+        FLW_PUBLIC_KEY: process.env.FLW_PUBLIC_KEY || 'FLWPUBK_TEST-553d6132a4f2ac3aa84b5f15824956d1-X',
+        FLW_SECRET_KEY: process.env.FLW_SECRET_KEY || 'FLWSECK_TEST-d38146b176ac3762b1e30ddcea6be953-X'
+    },
     Admin_Id: process.env.Admin_Id || '',
     defaultCurrency: process.env.DEFAULT_CURRENCY || 'NGN',
     termiiBaseUrl: process.env.TERMII_BASE_URL || 'https://v3.api.termii.com',

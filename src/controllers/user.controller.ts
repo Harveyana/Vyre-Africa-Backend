@@ -6,6 +6,7 @@ import config from '../config/env.config';
 import prisma from '../config/prisma.config';
 import mailService from '../services/mail.service';
 import paystackService from '../services/paystack.service';
+import flutterwaveService from '../services/flutterwave.service';
 import { authenticator, totp } from 'otplib';
 import * as speakeasy from 'speakeasy';
 import * as qrcode from 'qrcode';
@@ -1061,12 +1062,11 @@ class UserController {
             });
         }
 
-        const verifyDetails = await paystackService.resolveAccount(bank.code, accountNumber)
-        // const verifyDetails = await paystackService.resolveAccount("999992", "8138152101")
+        const verifyDetails = await flutterwaveService.resolveAccount(bank.code, accountNumber)
 
         console.log(verifyDetails)
 
-        if (!verifyDetails?.status) {
+        if (verifyDetails?.status !== 'success') {
             return res.status(400).json({
                 msg: 'wrong account details',
                 success: false,
