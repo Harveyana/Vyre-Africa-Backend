@@ -347,6 +347,11 @@ router.get(
   userController.getAllBanks,
 );
 
+router.get(
+  '/banks/currency',
+  userController.getCurrencyBanks,
+);
+
 router.post(
   '/user/verify-account-detail',
   authMiddleware,

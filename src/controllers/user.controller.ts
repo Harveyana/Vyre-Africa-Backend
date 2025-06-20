@@ -1014,6 +1014,40 @@ class UserController {
         
     }
 
+    async getCurrencyBanks(req: Request & Record<string, any>, res: Response) {
+        // const banks = await paystackService.getBanks();
+        const { currency } = req.query;
+
+        if (!currency) {
+            return res.status(400).json({
+                msg: 'currency required',
+                success: false,
+            });
+        }
+
+        let banks:any;
+        
+
+        console.log('got in ')
+
+        banks = await prisma.bank.findMany({
+          where:{currency: currency as string},
+        //   take: Number(limit),
+          select: {
+            id: true,
+            name: true,
+            code: true,
+           },
+        });
+
+        return res.status(201).json({
+            msg: 'Banks fetched successfully',
+            success: true,
+            banks,
+        });
+        
+    }
+
     async queryUser(req: Request, res: Response) {
         // const banks = await paystackService.getBanks();
         const { email } = req.body;
