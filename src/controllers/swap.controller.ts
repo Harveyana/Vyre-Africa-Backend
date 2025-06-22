@@ -70,17 +70,19 @@ class SwapController {
       accountNumber,
       bankId,
       type,
-      // bicSwift,
-      // routingNumber,
-      // sortCode,
-      // institutionNumber,
-      // bsbNumber,
-      // ifscCode,
-      // clabeNumber,
-      // cnapsCode,
-      // pixCode,
-      // clearingCode,
-      // currency,
+
+      bicSwift,
+      routingNumber,
+      sortCode,
+      institutionNumber,
+      bsbNumber,
+      ifscCode,
+      clabeNumber,
+      cnapsCode,
+      pixCode,
+      clearingCode,
+
+      currency,
       // Address,
     } = req.body
       
@@ -135,19 +137,20 @@ class SwapController {
             locale: "en-US"
           },
 
-          // ...(userData?.country === 'United States' && { routingNumber }),
-          ...(userData?.country === 'Nigeria' && { nubanNumber: accountNumber }),
-          // ...(userData?.country === 'United Kingdom' && { sortCode }),
-          // ...(userData?.country === 'Australia' && { bsbNumber }),
-          // ...(userData?.country === 'Canada' && { institutionNumber }),
-          // ...(userData?.country === 'India' && { ifscCode }),
-          // ...(userData?.country === 'Mexico' && { clabeNumber }),
-          // ...(userData?.country === 'China' && { cnapsCode }),
-          // ...(userData?.country === 'Brazil' && { pixCode }),
-          // ...(userData?.country === 'Hong Kong' && { clearingCode }),
+          ...(currency === 'USD' && { routingNumber }),
+          ...(currency === 'NGN' && { nubanNumber: accountNumber }),
+          ...(currency === 'GBP' && { sortCode }),
+          ...(currency === 'AUD' && { bsbNumber }),
+          ...(currency === 'CAD' && { institutionNumber }),
+          ...(currency === 'INR' && { ifscCode }),
+          ...(currency === 'MXN' && { clabeNumber }),
+          ...(currency === 'CNY' && { cnapsCode }),
+          ...(currency === 'BRL' && { pixCode }),
+          ...(currency === 'HKD' && { clearingCode }),
           // ...(bicSwift && { bicSwift }),
           accountType: type,
-          bankMethod: getPaymentMethodByCurrency(bank?.currency as string) || ''
+          bankMethod: getPaymentMethodByCurrency(bank?.currency as string) || '',
+          isThirdParty: bank.country === userData?.country ? false : true
       
         }
       )

@@ -31,7 +31,7 @@ const createFernRequest = (idempotencyKey: string) => {
 };
 
 interface fiatAccount {
-  userId:string,
+    userId:string,
     bankName:string,
     accountNumber:string,
     currency:string,
@@ -61,6 +61,7 @@ interface fiatAccount {
 
     accountType:string,
     bankMethod:string,
+    isThirdParty:boolean
 }
 
 interface PaymentSource {
@@ -202,7 +203,8 @@ class FernService {
             type: "INDIVIDUAL"
           }
           
-        }
+        },
+        isThirdParty: payload.isThirdParty
     }
     
     const response = await fernAxios.post('/payment-accounts', accountData)
