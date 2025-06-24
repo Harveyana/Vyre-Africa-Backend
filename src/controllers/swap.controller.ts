@@ -493,6 +493,10 @@ class SwapController {
       }
 
       const result = await fernService.getTransaction(swap?.id)
+      await prisma.swap.update({
+        where:{id:swap?.id},
+        data:{status:result?.transactionStatus}
+      })
 
       return res.status(200).json({
         msg: 'Successful',
