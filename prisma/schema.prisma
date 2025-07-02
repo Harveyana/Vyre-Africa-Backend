@@ -101,24 +101,15 @@ enum walletType {
   FIAT
 }
 
+enum currencyType {
+  CRYPTO
+  FIAT
+}
+
 enum TransactionStatus {
   SUCCESSFUL
   PENDING
   FAILED
-}
-
-enum Currency {
-  NGN
-  USD
-  ETH
-  BTC
-  LTC
-  TRON
-  BNB
-  XRP
-  USDT_ETH
-  USDT_TRON
-  USDC
 }
 
 enum TransactionPaymentMethod {
@@ -230,21 +221,20 @@ model Swap {
 }
 
 model Bank {
-  id         String     @id @default(cuid())
-  name       String
-  slug       String
-  code       String
-  country    String
-  currency   String?
+  id       String  @id @default(cuid())
+  name     String
+  slug     String
+  code     String
+  country  String
+  currency String?
 
   address    String?
-  postalCode   String?
+  postalCode String?
   state      String?
   city       String?
 
-
-  userBanks  UserBank[]
-  createdAt  DateTime   @default(now())
+  userBanks UserBank[]
+  createdAt DateTime   @default(now())
 }
 
 model UserBank {
@@ -308,7 +298,7 @@ model Transaction {
   walletId    String?
   userId      String?
   orderId     String?
-  currency    Currency
+  currency    String?
   user        User?             @relation(fields: [userId], references: [id])
   wallet      Wallet?           @relation(fields: [walletId], references: [id])
   reference   String?
@@ -319,14 +309,32 @@ model Transaction {
   createdAt   DateTime          @default(now())
 }
 
-model Wallet {
-  id     String     @id @default(cuid())
-  userId String?
-  user   User?      @relation(fields: [userId], references: [id])
-  type   walletType @default(CRYPTO)
-  imgurl String
+model Currency {
+  id   String       @id @default(cuid())
+  type currencyType @default(CRYPTO)
 
-  currency           Currency
+  name        String
+  ISO         String
+  chain       String?
+  imgUrl      String?
+  chainImgUrl String?
+  flagEmoji   String?
+ 
+  isStablecoin  Boolean   @default(false)
+  createdAt   DateTime     @default(now())
+  Wallet     Wallet[]
+  basePairs    Pair[]     @relation("baseCurrency")
+  quotePairs   Pair[]     @relation("quoteCurrency")
+}
+
+model Wallet {
+  id String @id @default(cuid())
+
+  userId     String?
+  user       User?     @relation(fields: [userId], references: [id])
+  currencyId String?
+  currency   Currency? @relation(fields: [currencyId], references: [id])
+
   createdAt          DateTime @default(now())
   updatedAt          DateTime @default(now())
   Tatum_customerId   String
@@ -336,12 +344,13 @@ model Wallet {
   derivationKey      Int?
   frozen             Boolean
 
-  accountBalance   Decimal       @default(0.00)
-  availableBalance Decimal       @default(0.00)
-  Transaction      Transaction[]
-  Block            Block[]
-  basePairs        Pair[]        @relation("BaseWallet") // Reverse relation for `baseWallet`
-  quotePairs       Pair[]        @relation("QuoteWallet") // Reverse relation for `quoteWallet`
+  accountBalance   Decimal @default(0.00)
+  availableBalance Decimal @default(0.00)
+
+  Transaction Transaction[]
+  Block       Block[]
+  basePairs   Pair[]        @relation("BaseWallet") // Reverse relation for `baseWallet`
+  quotePairs  Pair[]        @relation("QuoteWallet") // Reverse relation for `quoteWallet`
 }
 
 model Order {
@@ -364,18 +373,31 @@ model Order {
 }
 
 model Pair {
-  id    String @id @default(cuid())
-  name  String
-  base  String
-  quote String
+  id            String    @id @default(cuid())
+  name          String
+  createdAt     DateTime  @default(now())
 
-  baseWalletId String?
-  baseWallet   Wallet? @relation("BaseWallet", fields: [baseWalletId], references: [id])
+  // Currency Relations
+  baseId        String?
+  baseCurrency  Currency? @relation("baseCurrency", fields: [baseId], references: [id])
+  
+  quoteId       String?
+  quoteCurrency Currency? @relation("quoteCurrency", fields: [quoteId], references: [id])
 
+  // Wallet Relations
+  baseWalletId  String?
+  baseWallet    Wallet?   @relation("BaseWallet", fields: [baseWalletId], references: [id])
+  
   quoteWalletId String?
-  quoteWallet   Wallet?  @relation("QuoteWallet", fields: [quoteWalletId], references: [id])
-  createdAt     DateTime @default(now())
+  quoteWallet   Wallet?   @relation("QuoteWallet", fields: [quoteWalletId], references: [id])
   Order         Order[]
+
+  @@index([baseId])
+  @@index([quoteId])
+  @@index([baseWalletId])
+  @@index([quoteWalletId])
+  @@index([createdAt])
+  
 }
 
 model Block {

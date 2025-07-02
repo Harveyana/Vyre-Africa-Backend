@@ -6,6 +6,7 @@ import adminBroadcastController from "./controllers/admin/admin.broadcast.contro
 import orderController from "./controllers/order.controller";
 import paystackService from "./services/paystack.service";
 import flutterwaveService from "./services/flutterwave.service";
+import pairService from "./services/pair.service";
 
 const server = http.createServer(app);
 
@@ -23,6 +24,14 @@ const server = http.createServer(app);
 //   })
 //   .catch((error) => {
 //     console.error('Failed to process banks:', error);
+// });
+
+// cron.schedule('* * * * *', () => {
+//     console.log('starting pair sync...');
+    
+//     pairService.syncStablecoinPairs().catch((error) => {
+//         console.error('Failed to process sync', error);
+//     });
 // });
 
 

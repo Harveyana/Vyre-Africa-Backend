@@ -11,7 +11,7 @@ import config from '../config/env.config';
 import smsService from '../services/sms.service';
 import mobilePushService from '../services/mobilePush.service';
 import walletService from '../services/wallet.service';
-import {Currency,walletType} from '@prisma/client';
+import {currencyType} from '@prisma/client';
 import { subMinutes } from 'date-fns';
 import * as crypto from 'crypto';
 import {createHmac} from 'node:crypto';
@@ -38,50 +38,49 @@ class WalletController {
       return res.sendStatus(400); // reject if signature doesn't match
     }
 
-
     try {
       const { body } = req;
       
 
       // Customer Events
 
-      if(body.type === 'customer.created'){
-        // const customer = body.resource
+      // if(body.type === 'customer.created'){
+      //   // const customer = body.resource
 
-        // const updated = await fernService.customer_Created({
-        //   customerId: customer.customerId, 
-        //   status: customer.customerStatus, 
-        //   kycLink: customer.kycLink, 
-        //   email: customer.email
+      //   // const updated = await fernService.customer_Created({
+      //   //   customerId: customer.customerId, 
+      //   //   status: customer.customerStatus, 
+      //   //   kycLink: customer.kycLink, 
+      //   //   email: customer.email
 
-        // })
+      //   // })
 
-        // if(updated){
-          return res.status(200).json({
-            msg: 'Event Successful',
-            success: true,
-          });
-        // }
+      //   // if(updated){
+      //     return res.status(200).json({
+      //       msg: 'Event Successful',
+      //       success: true,
+      //     });
+      //   // }
 
-      }
+      // }
 
-      if(body.type === 'customer.updated'){
-        const customer = body.resource
+      // if(body.type === 'customer.updated'){
+      //   const customer = body.resource
 
-        const updated = await fernService.customer_updated(
-          customer.customerStatus,
-          customer.email
-        )
+      //   const updated = await fernService.customer_updated(
+      //     customer.customerStatus,
+      //     customer.email
+      //   )
 
-        if(updated){
-          return res.status(200).json({
-            msg: 'Event Successful',
-            success: true,
-          });
-        }
+      //   if(updated){
+      //     return res.status(200).json({
+      //       msg: 'Event Successful',
+      //       success: true,
+      //     });
+      //   }
 
        
-      }
+      // }
 
 
       // if(body.type === 'payment_account.created'){
@@ -96,22 +95,22 @@ class WalletController {
 
       // }
 
-      if(body.type === 'transaction.updated'){
-        const transaction = body.resource
+      // if(body.type === 'transaction.updated'){
+      //   const transaction = body.resource
 
-        const updated = await fernService.transaction_updated(
-          transaction.transactionStatus,
-          transaction.transactionId
-        )
+      //   const updated = await fernService.transaction_updated(
+      //     transaction.transactionStatus,
+      //     transaction.transactionId
+      //   )
 
-        if(updated){
-          return res.status(200).json({
-            msg: 'Event Successful',
-            success: true
-          });
-        }
+      //   if(updated){
+      //     return res.status(200).json({
+      //       msg: 'Event Successful',
+      //       success: true
+      //     });
+      //   }
 
-      }
+      // }
 
       // if(body.type === 'transaction.updated'){
 
@@ -176,8 +175,66 @@ class WalletController {
       //   }
 
       // }
-      
+
+      switch (body.type) {
+        // case 'customer.created':
+        //     // const customer = body.resource
+
+        //     // const updated = await fernService.customer_Created({
+        //     //   customerId: customer.customerId, 
+        //     //   status: customer.customerStatus, 
+        //     //   kycLink: customer.kycLink, 
+        //     //   email: customer.email
+
+        //     // })
+
+        //     // if(updated){
+        //       return res.status(200).json({
+        //         msg: 'Event Successful',
+        //         success: true,
+        //       });
+
+        //  break;
+
+        case 'customer.updated':
+          const customer = body.resource
+
+          console.log('case customer updated,', customer)
+
+          const updated = await fernService.customer_updated(
+            customer.customerStatus,
+            customer.email
+          )
   
+          if(updated){
+            return res.status(200).json({
+              msg: 'Event Successful',
+              success: true,
+            });
+          }
+  
+          break;
+        case 'transaction.updated':
+          const transaction = body.resource
+
+          console.log('case transaction updated', transaction)
+
+          const transactionUpdated = await fernService.transaction_updated(
+            transaction.transactionStatus,
+            transaction.transactionId
+          )
+
+          if(!transactionUpdated){
+            return res.status(400).json({
+              msg: 'operation failed',
+              success: true
+            });
+          }
+          break;
+        default:
+          console.log(`Unhandled event type ${body.type}.`);
+      }
+
       return res.status(200).json({
         msg: 'Event verified',
         success: true,
@@ -284,24 +341,34 @@ class WalletController {
           const user = await prisma.user.findFirst({
             where:{email:body.client.email}
           })
-  
+
           const wallet = await prisma.wallet.findFirst({
-            where:{
-              currency: body.payment.currency,
-              userId: user?.id
+            where: {
+              userId: user?.id,
+              currency: {  // Use the relation field name (currency) not the model name (Currency)
+                ISO: body.payment.currency  // This assumes 'type' is a variable containing the currency type you're filtering by
+              }
+            },
+            include: {
+              currency:{
+                select:{
+                  id:true,
+                  ISO:true
+                }
+              }  // Optionally include the full currency data in the response
             }
-          })
+          });
           // record transaction
           const transaction = await prisma.transaction.create({
             data:{
               userId: user?.id,
-              currency: wallet?.currency!,
+              currency: wallet?.currency?.ISO!,
               amount: body?.payment.amount/100,
               reference: body.id,
               status: 'PENDING',
               walletId: wallet?.id,
               type:'FIAT_WITHDRAWAL',
-              description:`${wallet?.currency} withdrawal transfer`
+              description:`${wallet?.currency?.ISO} withdrawal transfer`
             }
           })
 
@@ -395,13 +462,22 @@ class WalletController {
       if(body.subscriptionType === 'ACCOUNT_INCOMING_BLOCKCHAIN_TRANSACTION'){
 
         const wallet = await prisma.wallet.findUnique({
-          where:{id: body.accountId}
+          where:{id: body.accountId},
+          include:{
+            currency:{
+              select:{
+                id:true,
+                ISO:true,
+
+              }
+            }
+          }
         })
 
         const transaction = await prisma.transaction.create({
           data:{
               userId: wallet?.userId,
-              currency: wallet?.currency!,
+              currency: wallet?.currency?.ISO!,
               amount: body.amount,
               reference: body.reference,
               status: 'SUCCESSFUL',
@@ -476,9 +552,21 @@ class WalletController {
 
   async createWallet(req: Request & Record<string, any>, res: Response) {
     const { user } = req;
-    const currency = req.params.currency
+    const currencyId = req.params.currencyId
 
     try {
+
+      const currency = await prisma.currency.findUnique({
+        where:{id:currencyId}
+      })
+
+      if(!currency){
+        return res.status(400)
+          .json({
+            msg: `currency not found`,
+            success: false,
+          });
+      }
 
       const userData = await prisma.user.findUnique({
         where: { id: user.id }
@@ -487,7 +575,7 @@ class WalletController {
       const walletExists = await prisma.wallet.findFirst({
         where: { 
           userId: user.id,
-          currency: currency as Currency
+          currencyId
         }
       })
   
@@ -499,7 +587,7 @@ class WalletController {
           });
       }
 
-      const result = await walletService.createWallet(user.id,currency as Currency)
+      const result = await walletService.createWallet({userId:user.id, currencyId: currency.id as string})
 
       return res
         .status(200)
@@ -521,12 +609,24 @@ class WalletController {
 
   async init_BankDeposit(req: Request & Record<string, any>, res: Response) {
     const { user } = req;
-    const {currency,amount} = req.body
+    const {currencyId, amount} = req.body
 
-    if(!currency || !amount){
+    if(!currencyId || !amount){
       return res.status(400)
         .json({
           msg: 'required details missing',
+          success: false,
+        });
+    }
+
+    const currency = await prisma.currency.findUnique({
+      where:{id:currencyId}
+    })
+
+    if(!currency){
+      return res.status(400)
+        .json({
+          msg: `currency not found`,
           success: false,
         });
     }
@@ -540,18 +640,17 @@ class WalletController {
       const wallet = await prisma.wallet.findFirst({
         where:{
           userId:userData?.id,
-          currency
+          currencyId
         }
       })
   
-      const payment = await walletService.depositFiat
-      (
-        currency,
+      const payment = await walletService.depositFiat({
+        currency: currency.ISO,
         amount,
-        userData?.email!,
-        userData?.id!, 
-        wallet?.id!
-      )
+        email: userData?.email!,
+        userId: userData?.id!, 
+        walletId: wallet?.id!
+      })
   
       return res
         .status(200)
@@ -573,14 +672,26 @@ class WalletController {
 
   async authorize_fiat_Withdrawal(req: Request & Record<string, any>, res: Response) {
     const { user } = req;
-    const {currency, amount} = req.body
+    const {currencyId, amount} = req.body
 
     console.log(req.body)
 
-    if(!currency || !amount){
+    if(!currencyId || !amount){
       return res.status(400)
         .json({
           msg: 'required details missing',
+          success: false,
+        });
+    }
+
+    const currency = await prisma.currency.findUnique({
+      where:{id:currencyId}
+    })
+
+    if(!currency){
+      return res.status(400)
+        .json({
+          msg: `currency not found`,
           success: false,
         });
     }
@@ -594,7 +705,7 @@ class WalletController {
       const walletExists = await prisma.wallet.findFirst({
         where: { 
           userId: user.id,
-          currency
+          currencyId
         }
       })
   
@@ -614,7 +725,7 @@ class WalletController {
           });
       }
   
-      const payUrl = await walletService.authorize_Withdrawal(currency, amount, userData?.email!, userData?.phoneNumber!)
+      const payUrl = await walletService.authorize_Withdrawal(currency.ISO, amount, userData?.email!, userData?.phoneNumber!)
 
       if(payUrl){
 
@@ -651,16 +762,28 @@ class WalletController {
     const { user } = req;
     const {
       amount,
-      currency,
+      currencyId,
       receipient_id
     } = req.body;
 
     try {
 
+      const currency = await prisma.currency.findUnique({
+        where:{id:currencyId}
+      })
+
+      if(!currency){
+        return res.status(400)
+          .json({
+            msg: `currency not found`,
+            success: false,
+          });
+      }
+
       const walletExists = await prisma.wallet.findFirst({
         where: { 
           userId: user.id,
-          currency
+          currencyId
         }
       })
   
@@ -681,13 +804,12 @@ class WalletController {
       }
 
       const result = await walletService.offchain_Transfer
-        (
-          user.id,
-          receipient_id,
-          currency,
+        ({
+          userId: user.id,
+          receipientId: receipient_id,
+          currencyId: currencyId,
           amount
-          // walletExists.id,
-        )
+        })
 
         return res
         .status(200)
@@ -711,17 +833,30 @@ class WalletController {
     const { user } = req;
     const {
       amount,
-      currency,
+      currencyId,
       address, 
       destinationTag
     } = req.body;
 
     try {
 
+      const currency = await prisma.currency.findUnique({
+        where:{id: currencyId}
+      })
+
+      if(!currency){
+        return res.status(400)
+          .json({
+            msg: `currency not valid`,
+            success: false,
+          });
+      }
+
+
       const walletExists = await prisma.wallet.findFirst({
         where: { 
           userId: user.id,
-          currency
+          currencyId
         }
       })
   
@@ -741,7 +876,7 @@ class WalletController {
           });
       }
 
-        if(currency === 'XRP' && !destinationTag){
+        if(currency.ISO === 'XRP' && !destinationTag){
           return res.status(400)
           .json({
             msg: 'destination_Tag required for ripple widthdrawal',
@@ -751,13 +886,13 @@ class WalletController {
 
         // Handle crypto withdrawal logic here
         const result = await walletService.blockchain_Transfer
-        (
-          user.id,
-          currency,
-          amount,
-          address,
-          destinationTag
-        )
+        ({
+          userId: user.id, 
+          currencyId: currency.id,
+          amount: amount,
+          address: address,
+          destination_Tag: destinationTag
+        })
 
         return res
         .status(200)
@@ -790,13 +925,12 @@ class WalletController {
     try {
 
         const result = await walletService.bank_Transfer
-        (
+        ({
           account_number,
           bank_code,
-          recipient_name,
-          endpoint_url
-        )
-
+          recipient_name: recipient_name,
+          endpoint: endpoint_url
+        })
 
         return res
         .status(200)
@@ -989,7 +1123,12 @@ class WalletController {
         wallets = await prisma.wallet.findMany({
           where: {
             userId: user.id,
-            type: type as walletType
+            currency: {  // Use the relation field name (currency) not the model name (Currency)
+              type: type as currencyType  // This assumes 'type' is a variable containing the currency type you're filtering by
+            }
+          },
+          include: {
+            currency: true  // Optionally include the full currency data in the response
           }
         });
       }else{
@@ -1048,8 +1187,8 @@ class WalletController {
       let Balance_rate: any | undefined;
       let Available_Balance_rate: any | undefined;
 
-      if(wallet?.type === 'CRYPTO' ){
-        const response = await walletService.getRate(wallet?.currency, 'NGN')
+      if(wallet?.currency?.type === 'CRYPTO' ){
+        const response = await walletService.getRate(wallet?.currency?.ISO, 'NGN')
       
         Balance_rate = `${wallet.accountingCurrency} ${(Number(wallet?.accountBalance) * response.value).toFixed(2)}`;
         Available_Balance_rate = `${wallet.accountingCurrency} ${(Number(wallet?.availableBalance) * response.value).toFixed(2)}`;
@@ -1084,10 +1223,24 @@ class WalletController {
 
       let wallet:any;
 
+      const currency = await prisma.currency.findFirst({
+        where:{
+          ISO: name
+        }
+      })
+
+      if(!currency){
+        return res.status(400)
+          .json({
+            msg: 'currency not found',
+            success: false,
+        });
+      }
+
       wallet = await prisma.wallet.findFirst({
         where: {
           userId: user.id,
-          currency: name as Currency
+          currencyId: currency.id
         }
       });
 

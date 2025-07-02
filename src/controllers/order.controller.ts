@@ -10,7 +10,7 @@ import config from '../config/env.config';
 import smsService from '../services/sms.service';
 import mobilePushService from '../services/mobilePush.service';
 import { subMinutes } from 'date-fns';
-import {Currency,walletType} from '@prisma/client';
+// import {Currency,walletType} from '@prisma/client';
 import { hasSufficientBalance, amountSufficient } from '../utils';
 
 class OrderController {
@@ -46,16 +46,41 @@ class OrderController {
         // block the amount for the order
         // create the order using a prisma transaction
 
-        const pair = await prisma.pair.findFirst({
-          where:{id: pairId}
+        const pair = await prisma.pair.findUnique({
+          where:{id: pairId},
+          include:{
+            quoteCurrency:{
+              select:{
+                id:true,
+                ISO:true  
+              },
+            },
+            baseCurrency:{
+              select:{
+                id:true,
+                ISO:true  
+              },
+            },
+            quoteWallet:true,
+            baseWallet:true,
+          }
         })
+
+        if(!pair){
+          return res.status(400)
+            .json({
+              msg: 'order pair does not exist',
+              success: false,
+            });
+        }
+
 
         console.log('pair', pair)
 
         const baseWalletExists = await prisma.wallet.findFirst({
           where: {
             userId: user.id,
-            currency: pair?.base as Currency
+            currencyId: pair?.baseCurrency?.id!
           }
         });
 
@@ -64,7 +89,7 @@ class OrderController {
         const quoteWalletExists = await prisma.wallet.findFirst({
           where: {
             userId: user.id,
-            currency: pair?.quote as Currency
+            currencyId: pair?.quoteCurrency?.id!
           }
         });
 
@@ -126,12 +151,12 @@ class OrderController {
 
                 console.log('inside transaction')
                 // deduct fee amount
-                const transfer = await walletService.offchain_Transfer(
-                  user.id,
-                  config.Admin_Id,
-                  type === 'SELL'? pair?.base as Currency: pair?.quote as Currency,
-                  fee
-                )
+                const transfer = await walletService.offchain_Transfer({
+                  userId: user.id,
+                  receipientId: config.Admin_Id,
+                  currencyId: type === 'SELL'? pair?.baseCurrency?.id as string : pair?.quoteCurrency?.id as string,
+                  amount: fee
+                })
 
                 console.log('done with offchain transfer')
                 // block adjustedAmount
@@ -196,19 +221,43 @@ class OrderController {
     })
 
     const pair = await prisma.pair.findFirst({
-      where:{id: order?.pairId}
+      where:{id: order?.pairId},
+      include:{
+        quoteCurrency:{
+          select:{
+            id:true,
+            ISO:true  
+          },
+        },
+        baseCurrency:{
+          select:{
+            id:true,
+            ISO:true  
+          },
+        },
+        quoteWallet:true,
+        baseWallet:true,
+      }
     })
+
+    if(!pair){
+      return res.status(400)
+        .json({
+          msg: 'order pair not found',
+          success: false,
+        });
+    }
 
     const userBaseWallet = await prisma.wallet.findFirst({
       where:{
-        currency: pair?.base as Currency,
+        currencyId: pair?.baseCurrency?.id,
         userId: user.id
       }
     })
 
     const userQuoteWallet = await prisma.wallet.findFirst({
       where:{
-        currency: pair?.quote as Currency,
+        currencyId: pair?.quoteCurrency?.id,
         userId: user.id
       }
     })
@@ -233,14 +282,14 @@ class OrderController {
 
     const orderBaseWallet = await prisma.wallet.findFirst({
       where:{
-        currency: pair?.base as Currency,
+        currencyId: pair?.baseCurrency?.id,
         userId: order?.userId as string
       }
     })
 
     const orderQuoteWallet = await prisma.wallet.findFirst({
       where:{
-        currency: pair?.quote as Currency,
+        currencyId: pair?.quoteCurrency?.id,
         userId: order?.userId as string
       }
     })
@@ -316,7 +365,7 @@ class OrderController {
             orderTransfer = await walletService.unblock_Transfer(amountToProcess, order?.blockId as string, userQuoteWallet.id)
             newBlockId = await walletService.block_Amount(amountLeft, orderQuoteWallet.id)
             // user sends base currency
-            userTransfer = await walletService.offchain_Transfer(user.id, order?.userId as string, pair?.base as Currency, amount)
+            userTransfer = await walletService.offchain_Transfer({userId: user.id,receipientId: order?.userId as string, currencyId: pair?.baseCurrency?.id!, amount})
 
           } else {
             // User sends quote currency, order sends base currency
@@ -325,7 +374,7 @@ class OrderController {
             orderTransfer = await walletService.unblock_Transfer(amountToProcess, order?.blockId as string, userBaseWallet.id)
             newBlockId = await walletService.block_Amount(amountLeft, orderBaseWallet.id)
             // user sends quote currency
-            userTransfer = await walletService.offchain_Transfer(user.id, order?.userId as string, pair?.quote as Currency, amount)
+            userTransfer = await walletService.offchain_Transfer({userId: user.id,receipientId: order?.userId as string, currencyId: pair?.quoteCurrency?.id!, amount})
 
           }
 
@@ -402,20 +451,29 @@ class OrderController {
           pair:{
             select:{
               name: true,
-              base: true,
-              quote: true,
-              baseWallet:{
+              baseCurrency:{
                 select:{
-                 imgurl: true,
-                 currency: true 
-                }
+                  id: true, 
+                  type: true,
+                  name: true,
+                  ISO: true,
+                  chain: true,
+                  imgUrl: true,
+                  chainImgUrl: true,
+                  flagEmoji: true 
+                }  
               },
-              quoteWallet:{
+              quoteCurrency:{
                 select:{
-                  imgurl: true,
-                  currency: true
-                }
-                
+                  id: true, 
+                  type: true,
+                  name: true,
+                  ISO: true,
+                  chain: true,
+                  imgUrl: true,
+                  chainImgUrl: true,
+                  flagEmoji: true 
+                }  
               }
             }
             
@@ -479,21 +537,31 @@ class OrderController {
             }
           },
           pair: {
-            select: {
+            select:{
               name: true,
-              base: true,
-              quote: true,
-              baseWallet: {
-                select: {
-                  imgurl: true,
-                  currency: true 
-                }
+              baseCurrency:{
+                select:{
+                  id: true, 
+                  type: true,
+                  name: true,
+                  ISO: true,
+                  chain: true,
+                  imgUrl: true,
+                  chainImgUrl: true,
+                  flagEmoji: true 
+                }  
               },
-              quoteWallet: {
-                select: {
-                  imgurl: true,
-                  currency: true
-                }
+              quoteCurrency:{
+                select:{
+                  id: true, 
+                  type: true,
+                  name: true,
+                  ISO: true,
+                  chain: true,
+                  imgUrl: true,
+                  chainImgUrl: true,
+                  flagEmoji: true 
+                }  
               }
             }
           },
@@ -550,10 +618,33 @@ class OrderController {
       // const skip = (currentPage - 1) * itemLimit;
 
       const pairs = await prisma.pair.findMany({
-        include:{
-          baseWallet: true,
-          quoteWallet: true
-        }
+          select:{
+            name: true,
+            baseCurrency:{
+              select:{
+                id: true, 
+                type: true,
+                name: true,
+                ISO: true,
+                chain: true,
+                imgUrl: true,
+                chainImgUrl: true,
+                flagEmoji: true 
+              }  
+            },
+            quoteCurrency:{
+              select:{
+                id: true, 
+                type: true,
+                name: true,
+                ISO: true,
+                chain: true,
+                imgUrl: true,
+                chainImgUrl: true,
+                flagEmoji: true 
+              }  
+            }
+          }
       })
 
       return res
@@ -581,7 +672,11 @@ class OrderController {
       let quoteWallet;
 
       const pair = await prisma.pair.findFirst({
-        where:{id: pairId as string}
+        where:{id: pairId as string},
+        include:{
+          baseCurrency:true,
+          quoteCurrency:true,
+        }
       })
 
       if (!pair) {
@@ -595,13 +690,13 @@ class OrderController {
       baseWallet = await prisma.wallet.findFirst({
         where:{
           userId: user.id, 
-          currency: pair.base as Currency
+          currencyId: pair?.baseCurrency?.id
         }
       })
       quoteWallet = await prisma.wallet.findFirst({
         where:{
           userId: user.id, 
-          currency: pair.quote as Currency
+          currencyId: pair?.quoteCurrency?.id
         }
       })
 

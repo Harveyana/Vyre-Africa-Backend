@@ -2,8 +2,8 @@ import { Request, Response } from 'express';
 import prisma from '../config/prisma.config';
 import config from '../config/env.config';
 import axios from "axios";
-import {Currency,walletType} from '@prisma/client';
-import { currency as baseCurrency } from '../globals';
+// import {Currency,walletType} from '@prisma/client';
+// import { currency as baseCurrency } from '../globals';
 import { hasSufficientBalance } from '../utils';
 
     const tatumAxios = axios.create({
@@ -374,7 +374,7 @@ class WalletService
 
 
 
-    private create_Naira_wallet = async(userId:string)=>{
+    private create_Naira_wallet = async(userId:string,currencyId:string)=>{
         const data = {
             currency: "VC_NGN",
             customer:{
@@ -389,9 +389,7 @@ class WalletService
         const newWallet = await prisma.wallet.create({
             data:{
                 id: result.id,
-                currency: 'NGN',
-                imgurl: config.urls.naira_Img,
-                type: 'FIAT',
+                currencyId,
                 userId,
                 Tatum_customerId: result.customerId,
                 accountingCurrency: result.accountingCurrency,
@@ -402,7 +400,7 @@ class WalletService
         return newWallet
     }
 
-    private create_Dollar_wallet = async(userId:string)=>{
+    private create_Dollar_wallet = async(userId:string, currencyId:string)=>{
         const data = {
             currency: "VC_USD",
             customer:{
@@ -417,9 +415,7 @@ class WalletService
         const newWallet = await prisma.wallet.create({
             data:{
                 id: result.id,
-                currency: 'USD',
-                imgurl: config.urls.dollar_Img,
-                type: 'FIAT',
+                currencyId,
                 userId,
                 Tatum_customerId: result.customerId,
                 accountingCurrency: result.accountingCurrency,
@@ -430,7 +426,7 @@ class WalletService
         return newWallet
     }
 
-    private create_Bitcoin_wallet = async(userId:string)=>{
+    private create_Bitcoin_wallet = async(userId:string, currencyId:string)=>{
         const data = {
             currency: "BTC",
             xpub: config.BTC_XPUB,
@@ -448,9 +444,7 @@ class WalletService
         const newWallet = await prisma.wallet.create({
             data:{
                 id: result.id,
-                currency: 'BTC',
-                imgurl: config.urls.bitcoin_Img,
-                type: 'CRYPTO',
+                currencyId,
                 userId,
                 depositAddress: deposit.address,
                 derivationKey: deposit.derivationKey,
@@ -463,7 +457,7 @@ class WalletService
         return newWallet
     }
 
-    private create_Ethereum_wallet = async(userId:string)=>{
+    private create_Ethereum_wallet = async(userId:string, currencyId:string)=>{
         const data = {
             currency: "ETH",
             xpub: config.ETH_XPUB,
@@ -481,9 +475,7 @@ class WalletService
         const newWallet = await prisma.wallet.create({
             data:{
                 id: result.id,
-                currency: 'ETH',
-                imgurl: config.urls.ethereum_Img,
-                type: 'CRYPTO',
+                currencyId,
                 userId,
                 depositAddress: deposit.address,
                 derivationKey: deposit.derivationKey,
@@ -496,7 +488,7 @@ class WalletService
         return newWallet
     }
 
-    private create_Litecoin_wallet = async(userId:string)=>{
+    private create_Litecoin_wallet = async(userId:string, currencyId:string)=>{
         const data = {
             currency: "LTC",
             xpub: config.LTC_XPUB,
@@ -513,9 +505,7 @@ class WalletService
         const newWallet = await prisma.wallet.create({
             data:{
                 id: result.id,
-                currency: 'LTC',
-                imgurl: config.urls.litecoin_Img,
-                type: 'CRYPTO',
+                currencyId,
                 userId,
                 depositAddress: deposit.address,
                 derivationKey: deposit.derivationKey,
@@ -528,7 +518,7 @@ class WalletService
         return newWallet
     }
 
-    private create_Tron_wallet = async(userId:string)=>{
+    private create_Tron_wallet = async(userId:string, currencyId:string)=>{
         const data = {
             currency: "TRON",
             xpub: config.TRON_XPUB,
@@ -545,9 +535,7 @@ class WalletService
         const newWallet = await prisma.wallet.create({
             data:{
                 id: result.id,
-                currency: 'TRON',
-                imgurl: config.urls.tron_Img,
-                type: 'CRYPTO',
+                currencyId,
                 userId,
                 depositAddress: deposit.address,
                 derivationKey: deposit.derivationKey,
@@ -560,7 +548,7 @@ class WalletService
         return newWallet
     }
 
-    private create_Bnb_wallet = async(userId:string)=>{
+    private create_Bnb_wallet = async(userId:string, currencyId:string)=>{
         const data = {
             currency: "BNB",
             xpub: config.BNB_ADDRESS,
@@ -577,9 +565,7 @@ class WalletService
         const newWallet = await prisma.wallet.create({
             data:{
                 id: result.id,
-                currency: 'BNB',
-                imgurl: config.urls.bnb_Img,
-                type: 'CRYPTO',
+                currencyId,
                 userId,
                 depositAddress: deposit.address,
                 derivationKey: deposit.derivationKey,
@@ -592,7 +578,7 @@ class WalletService
         return newWallet
     }
 
-    private create_Ripple_wallet = async(userId:string)=>{
+    private create_Ripple_wallet = async(userId:string, currencyId:string)=>{
         const data = {
             currency: "XRP",
             xpub: config.XRP_ADDRESS,
@@ -609,9 +595,7 @@ class WalletService
         const newWallet = await prisma.wallet.create({
             data:{
                 id: result.id,
-                currency: 'XRP',
-                imgurl: config.urls.ripple_Img,
-                type: 'CRYPTO',
+                currencyId,
                 userId,
                 depositAddress: deposit.address,
                 derivationKey: deposit.derivationKey,
@@ -626,7 +610,7 @@ class WalletService
         return newWallet
     }
 
-    private create_USDC_wallet = async(userId:string)=>{
+    private create_USDC_wallet = async(userId:string, currencyId:string)=>{
         const data = {
             currency: "USDC",
             xpub: config.USDC_XPUB,
@@ -643,9 +627,7 @@ class WalletService
         const newWallet = await prisma.wallet.create({
             data:{
                 id: result.id,
-                currency: 'USDC',
-                imgurl: config.urls.usdc_Img,
-                type: 'CRYPTO',
+                currencyId,
                 userId,
                 depositAddress: deposit.address,
                 derivationKey: deposit.derivationKey,
@@ -658,7 +640,7 @@ class WalletService
         return newWallet
     }
 
-    private create_TetherErc_wallet = async(userId:string)=>{
+    private create_TetherErc_wallet = async(userId:string, currencyId:string)=>{
         const data = {
             currency: "USDT",
             xpub: config.USDT_ETH_XPUB,
@@ -675,9 +657,7 @@ class WalletService
         const newWallet = await prisma.wallet.create({
             data:{
                 id: result.id,
-                currency: 'USDT_ETH',
-                imgurl: config.urls.usdt_eth_Img,
-                type: 'CRYPTO',
+                currencyId,
                 userId,
                 depositAddress: deposit.address,
                 derivationKey: deposit.derivationKey,
@@ -690,7 +670,7 @@ class WalletService
         return newWallet
     }
 
-    private create_TetherTrc_wallet = async(userId:string)=>{
+    private create_TetherTrc_wallet = async(userId:string, currencyId:string)=>{
         const data = {
             currency: "USDT_TRON",
             xpub: config.USDT_TRON_XPUB,
@@ -707,9 +687,7 @@ class WalletService
         const newWallet = await prisma.wallet.create({
             data:{
                 id: result.id,
-                currency: 'USDT_TRON',
-                imgurl: config.urls.usdt_tron_Img,
-                type: 'CRYPTO',
+                currencyId,
                 userId,
                 depositAddress: deposit.address,
                 derivationKey: deposit.derivationKey,
@@ -723,63 +701,83 @@ class WalletService
     }
 
 
-    async createWallet(userId: string,currency: Currency)
+    async createWallet(payload:{userId:string, currencyId:string})
     {
+        const {userId, currencyId} = payload
+
+        const currency = await prisma.currency.findUnique({
+            where:{id:currencyId},
+            select:{
+              id: true,
+              type: true,
+              name: true,
+              ISO: true,
+              chain: true 
+            }
+              
+        })
+
+        if(!currency){
+            const error = new Error('currency not found');
+            error.name = 'CurrencyNotFoundError';
+            throw error;
+        }
+
         let result;
 
-        switch (currency) {
+        switch (currency.ISO) {
             case 'NGN':
-              result = await this.create_Naira_wallet(userId)
+              result = await this.create_Naira_wallet(userId, currency.id)
               return result
               break;
 
             case 'USD':
-              result = await this.create_Dollar_wallet(userId)
+              result = await this.create_Dollar_wallet(userId, currency.id)
               return result
               break;
             
             case 'BTC':
-              result = await this.create_Bitcoin_wallet(userId)
+              result = await this.create_Bitcoin_wallet(userId, currency.id)
               return result
               break;
             
             case 'ETH':
-              result = await this.create_Ethereum_wallet(userId)
+              result = await this.create_Ethereum_wallet(userId, currency.id)
               return result
               break;
 
             case 'LTC':
-              result = await this.create_Litecoin_wallet(userId)
+              result = await this.create_Litecoin_wallet(userId, currency.id)
               return result
               break;
             
             case 'TRON':
-              result = await this.create_Tron_wallet(userId)
+              result = await this.create_Tron_wallet(userId, currency.id)
               return result
               break;
 
             case 'BNB':
-              result = await this.create_Bnb_wallet(userId)
+              result = await this.create_Bnb_wallet(userId, currency.id)
               return result
               break;
 
             case 'XRP':
-              result = await this.create_Ripple_wallet(userId)
+              result = await this.create_Ripple_wallet(userId, currency.id)
               return result
               break;
 
             case 'USDC':
-              result = await this.create_USDC_wallet(userId)
+              result = await this.create_USDC_wallet(userId, currency.id)
               return result
               break;
 
-            case 'USDT_ETH':
-              result = await this.create_TetherErc_wallet(userId)
+            case 'USDT':
+              result = await this.create_TetherErc_wallet(userId, currency.id)
               return result
               break;
 
             case 'USDT_TRON':
-              result = await this.create_TetherTrc_wallet(userId)
+              result = await this.create_TetherTrc_wallet(userId, currency.id)
               return result
               break;
 
@@ -788,19 +786,38 @@ class WalletService
         }
     }
 
-    async blockchain_Transfer(
+    async blockchain_Transfer(payload:{
         userId: string, 
-        currency: Currency, 
+        currencyId:string,
         amount: number,
         address: string,
         destination_Tag?: number
-    )
+    })
     {
+        const {userId,currencyId,amount,address,destination_Tag} = payload
+
+        const currency = await prisma.currency.findUnique({
+            where:{id:currencyId},
+            select:{
+              id: true,
+              type: true,
+              name: true,
+              ISO: true,
+              chain: true 
+            }
+              
+        })
+
+        if(!currency){
+            const error = new Error('currency not found');
+            error.name = 'CurrencyNotFoundError';
+            throw error;
+        }
 
         const wallet = await prisma.wallet.findFirst({
             where:{
                 userId,
-                currency
+                currencyId
             }
         })
 
@@ -808,7 +825,7 @@ class WalletService
         let result;
 
 
-        switch (currency) {
+        switch (currency.ISO) {
             
             case 'BTC':
               result = await this.Withdraw_Bitcoin(
@@ -889,39 +906,59 @@ class WalletService
     
     }
 
-    async offchain_Transfer(
+    async offchain_Transfer(payload:{
         userId: string,
-        receipientId: string, 
-        currency: Currency, 
+        receipientId: string,
+        currencyId: string, 
         amount: number
-    )
+    })
     {
+        const {userId,receipientId,currencyId,amount} = payload
+
         let receipient_Wallet: any;
         let user_Wallet: any;
 
+        const currency = await prisma.currency.findUnique({
+            where:{id:currencyId},
+            select:{
+              id: true,
+              type: true,
+              name: true,
+              ISO: true,
+              chain: true 
+            }
+              
+        })
+
+        if(!currency){
+            const error = new Error('currency not found');
+            error.name = 'CurrencyNotFoundError';
+            throw error;
+        }
+
         console.log('transfer data passed',
             userId,
-            receipientId, 
-            currency, 
+            receipientId,
+            currencyId, 
             amount
         )
 
         receipient_Wallet = await prisma.wallet.findFirst({
             where:{
                 userId: receipientId,
-                currency: currency
+                currencyId
             }
         })
 
         //check if receipient has currency wallet created else we create it
         if(!receipient_Wallet){
-            receipient_Wallet = await this.createWallet(receipientId,currency)
+            receipient_Wallet = await this.createWallet({userId:receipientId, currencyId: currencyId as string})
         }
 
         user_Wallet = await prisma.wallet.findFirst({
             where:{
                 userId,
-                currency
+                currencyId
             }
         })
 
@@ -945,7 +982,7 @@ class WalletService
             data:[
                 {
                 userId: userId,
-                currency,
+                currency: currency.ISO,
                 amount: -amount,
                 reference: paymentData.reference,
                 status: 'SUCCESSFUL',
@@ -955,7 +992,7 @@ class WalletService
                },
                {
                 userId: userId,
-                currency,
+                currency: currency.ISO,
                 amount: amount,
                 reference: paymentData.reference,
                 status: 'SUCCESSFUL',
@@ -970,13 +1007,15 @@ class WalletService
     
     }
 
-    async bank_Transfer(
+    async bank_Transfer(payload:{
         account_number: string,
         bank_code: string, 
         recipient_name: string,
         endpoint: string
-    )
+    })
     {
+        const {account_number,bank_code,recipient_name,endpoint} = payload
+
         const data = {
             account_number,
             bank_code,
@@ -990,14 +1029,16 @@ class WalletService
         return result
     }
 
-    async depositFiat(
-        currency: Currency,
+    async depositFiat(payload:{
+        currency: string,
         amount: number, 
         email:string,
         userId:string,
         walletId:string
-    )
+    })
     {
+        const { currency, amount, email, userId, walletId } = payload
+        
         const data = {
             client: {
                 email
@@ -1064,6 +1105,15 @@ class WalletService
               frozen: result.frozen,
               accountBalance:result.balance.accountBalance,
               availableBalance:result.balance.availableBalance
+            },
+            include:{
+                currency:{
+                    select:{
+                      id:true,
+                      ISO:true,
+                      type:true
+                    }
+                }
             }
         });
 

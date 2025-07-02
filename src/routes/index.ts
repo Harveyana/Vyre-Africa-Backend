@@ -191,7 +191,7 @@ router.get(
 
 // Wallet
 router.post(
-  '/wallet/create/:currency',
+  '/wallet/create/:currencyId',
   authMiddleware,
   walletController.createWallet
 )

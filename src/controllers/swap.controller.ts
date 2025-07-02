@@ -562,57 +562,57 @@ class SwapController {
     }
   }
 
-  async init_BankDeposit(req: Request & Record<string, any>, res: Response) {
-    const { user } = req;
-    const {currency,amount} = req.body
+  // async init_BankDeposit(req: Request & Record<string, any>, res: Response) {
+  //   const { user } = req;
+  //   const {currency,amount} = req.body
 
-    if(!currency || !amount){
-      return res.status(400)
-        .json({
-          msg: 'required details missing',
-          success: false,
-        });
-    }
+  //   if(!currency || !amount){
+  //     return res.status(400)
+  //       .json({
+  //         msg: 'required details missing',
+  //         success: false,
+  //       });
+  //   }
 
-    try {
+  //   try {
 
-      const userData = await prisma.user.findUnique({
-        where: { id: user.id }
-      })
+  //     const userData = await prisma.user.findUnique({
+  //       where: { id: user.id }
+  //     })
 
-      const wallet = await prisma.wallet.findFirst({
-        where:{
-          userId:userData?.id,
-          currency
-        }
-      })
+  //     const wallet = await prisma.wallet.findFirst({
+  //       where:{
+  //         userId:userData?.id,
+  //         currency
+  //       }
+  //     })
   
-      const payment = await walletService.depositFiat
-      (
-        currency,
-        amount,
-        userData?.email!,
-        userData?.id!, 
-        wallet?.id!
-      )
+  //     const payment = await walletService.depositFiat
+  //     (
+  //       currency,
+  //       amount,
+  //       userData?.email!,
+  //       userData?.id!, 
+  //       wallet?.id!
+  //     )
   
-      return res
-        .status(200)
-        .json({
-          msg: 'Deposit initiated Successfully',
-          success: true,
-          payment
-        });
+  //     return res
+  //       .status(200)
+  //       .json({
+  //         msg: 'Deposit initiated Successfully',
+  //         success: true,
+  //         payment
+  //       });
 
-    } catch (error) {
-      console.log(error)
-      res.status(500)
-        .json({
-          msg: 'Internal Server Error',
-          success: false,
-        });
-    }
-  }
+  //   } catch (error) {
+  //     console.log(error)
+  //     res.status(500)
+  //       .json({
+  //         msg: 'Internal Server Error',
+  //         success: false,
+  //       });
+  //   }
+  // }
 
   async authorize_fiat_Withdrawal(req: Request & Record<string, any>, res: Response) {
     const { user } = req;
@@ -679,66 +679,6 @@ class SwapController {
       }
   
       
-
-    } catch (error) {
-      console.log(error)
-      res.status(500)
-        .json({
-          msg: 'Internal Server Error',
-          success: false,
-        });
-    }
-  }
-
-  async init_VyreTransfer(req: Request & Record<string, any>, res: Response) {
-    const { user } = req;
-    const {
-      amount,
-      currency,
-      receipient_id
-    } = req.body;
-
-    try {
-
-      const walletExists = await prisma.wallet.findFirst({
-        where: { 
-          userId: user.id,
-          currency
-        }
-      })
-  
-      if(!walletExists){
-        return res.status(400)
-          .json({
-            msg: 'User wallet does not exist',
-            success: false,
-          });
-      }
-
-      if(amount > walletExists.availableBalance){
-        return res.status(400)
-          .json({
-            msg: 'Available balance not sufficient',
-            success: false,
-          });
-      }
-
-      const result = await walletService.offchain_Transfer
-        (
-          user.id,
-          receipient_id,
-          currency,
-          amount
-          // walletExists.id,
-        )
-
-        return res
-        .status(200)
-        .json({
-          msg: 'Transfer Successful',
-          success: true,
-          wallet:result
-        });
 
     } catch (error) {
       console.log(error)
