@@ -669,7 +669,7 @@ class OrderController {
 
   async fetchPairWallets(req: Request & Record<string, any>, res: Response) {
     const { user } = req;
-    const { orderType, pairId } = req.query;
+    const { pairId } = req.query;
 
     try {
 
@@ -704,6 +704,22 @@ class OrderController {
           currencyId: pair?.quoteCurrency?.id
         }
       })
+
+      if (!baseWallet) {
+        return res.status(400)
+          .json({
+            msg: `please create your ${pair?.baseCurrency?.ISO} wallet`,
+            success: false,
+          });
+      }
+
+      if (!quoteWallet) {
+        return res.status(400)
+          .json({
+            msg: `please create your ${pair?.quoteCurrency?.ISO} wallet` ,
+            success: false,
+          });
+      }
 
       baseWallet = await walletService.getAccount(baseWallet?.id as string)
       quoteWallet = await walletService.getAccount(quoteWallet?.id as string)
