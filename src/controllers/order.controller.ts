@@ -548,6 +548,7 @@ class OrderController {
                   chain: true,
                   imgUrl: true,
                   chainImgUrl: true,
+                  isStablecoin: true,
                   flagEmoji: true 
                 }  
               },
@@ -560,6 +561,7 @@ class OrderController {
                   chain: true,
                   imgUrl: true,
                   chainImgUrl: true,
+                  isStablecoin: true,
                   flagEmoji: true 
                 }  
               }
