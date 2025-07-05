@@ -619,6 +619,7 @@ class OrderController {
 
       const pairs = await prisma.pair.findMany({
           select:{
+            id: true,
             name: true,
             baseCurrency:{
               select:{

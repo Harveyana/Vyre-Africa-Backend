@@ -567,10 +567,6 @@ class WalletController {
             success: false,
           });
       }
-
-      const userData = await prisma.user.findUnique({
-        where: { id: user.id }
-      })
   
       const walletExists = await prisma.wallet.findFirst({
         where: { 
@@ -587,7 +583,10 @@ class WalletController {
           });
       }
 
-      const result = await walletService.createWallet({userId:user.id, currencyId: currency.id as string})
+      const result = await walletService.createWallet({
+        userId:user.id, 
+        currencyId: currency.id as string
+      })
 
       return res
         .status(200)

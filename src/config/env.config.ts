@@ -91,8 +91,8 @@ const config = {
     ETH_XPUB: process.env.ETH_XPUB,
     ETH_MNEMONIC: process.env.ETH_MNEMONIC,
 
-    USDT_ETH_XPUB: process.env.USDT_ETH_XPUB,
-    USDT_ETH_MNEMONIC: process.env.USDT_ETH_MNEMONIC,
+    // USDT_ETH_XPUB: process.env.USDT_ETH_XPUB,
+    // USDT_ETH_MNEMONIC: process.env.USDT_ETH_MNEMONIC,
 
     LTC_XPUB: process.env.LTC_XPUB,
     LTC_MNEMONIC: process.env.LTC_MNEMONIC,
@@ -100,11 +100,11 @@ const config = {
     TRON_XPUB: process.env.TRON_XPUB,
     TRON_MNEMONIC: process.env.TRON_MNEMONIC,
 
-    USDT_TRON_XPUB: process.env.USDT_TRON_XPUB,
-    USDT_TRON_MNEMONIC: process.env.USDT_TRON_MNEMONIC,
+    // USDT_TRON_XPUB: process.env.USDT_TRON_XPUB,
+    // USDT_TRON_MNEMONIC: process.env.USDT_TRON_MNEMONIC,
 
-    USDC_XPUB: process.env.USDC_XPUB,
-    USDC_MNEMONIC: process.env.USDC_MNEMONIC,
+    // USDC_ETH_XPUB: process.env.USDC_ETH_XPUB,
+    // USDC_ETH_MNEMONIC: process.env.USDC_ETH_MNEMONIC,
 
     BNB_ADDRESS: process.env.BNB_ADDRESS,
     BNB_KEY: process.env.BNB_KEY,
@@ -112,7 +112,52 @@ const config = {
     XRP_ADDRESS: process.env.XRP_ADDRESS,
     XRP_SECRET: process.env.XRP_SECRET,
 
-    SOL_ADDRESS: process.env.SOL_ADDRESS
+    SOL_ADDRESS: process.env.SOL_ADDRESS,
+
+    USDC: {
+        ETH_XPUB: process.env.USDC_ETH_XPUB,
+        ETH_MNEMONIC: process.env.USDC_ETH_MNEMONIC,
+
+        POLYGON_XPUB: process.env.USDC_MATIC_XPUB,
+        POLYGON_MNEMONIC: process.env.USDC_MATIC_MNEMONIC,
+
+        BASE_XPUB: process.env.USDC_BASE_XPUB,
+        BASE_MNEMONIC: process.env.USDC_BASE_MNEMONIC,
+
+        ARBITRUM_XPUB: process.env.USDC_ARB_XPUB,
+        ARBITRUM_MNEMONIC: process.env.USDC_ARB_MNEMONIC,
+
+        OPTIMISM_XPUB: process.env.USDC_OP_XPUB,
+        OPTIMISM_MNEMONIC: process.env.USDC_OP_MNEMONIC,
+
+        BSC_XPUB: process.env.USDC_BSC_XPUB,
+        BSC_MNEMONIC: process.env.USDC_BSC_MNEMONIC,
+
+
+    },
+    USDT:{
+        ETH_XPUB: process.env.USDT_ETH_XPUB,
+        ETH_MNEMONIC: process.env.USDT_ETH_MNEMONIC,
+
+        TRON_XPUB: process.env.USDT_TRON_XPUB,
+        TRON_MNEMONIC: process.env.USDT_TRON_MNEMONIC,
+
+        POLYGON_XPUB: process.env.USDT_MATIC_XPUB,
+        POLYGON_MNEMONIC: process.env.USDT_MATIC_MNEMONIC,
+
+        BASE_XPUB: process.env.USDT_BASE_XPUB,
+        BASE_MNEMONIC: process.env.USDT_BASE_MNEMONIC,
+
+        ARBITRUM_XPUB: process.env.USDT_ARB_XPUB,
+        ARBITRUM_MNEMONIC: process.env.USDT_ARB_MNEMONIC,
+
+        OPTIMISM_XPUB: process.env.USDT_OP_XPUB,
+        OPTIMISM_MNEMONIC: process.env.USDT_OP_MNEMONIC,
+
+        BSC_XPUB: process.env.USDT_BSC_XPUB,
+        BSC_MNEMONIC: process.env.USDT_BSC_MNEMONIC,
+
+    }
 
     
 };
