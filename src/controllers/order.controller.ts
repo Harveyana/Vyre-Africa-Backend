@@ -14,13 +14,6 @@ import { subMinutes } from 'date-fns';
 import { hasSufficientBalance, amountSufficient } from '../utils';
 
 class OrderController {
-  paystack: Paystack;
-
-  constructor() {
-    this.paystack = new Paystack(
-      'sk_test_3425cf96b06b8ce98715964ed1255707871fc486',
-    );
-  }
 
 
   async createOrder(req: Request & Record<string, any>, res: Response) {
@@ -419,6 +412,55 @@ class OrderController {
     }
   }
 
+  async getRatebyPair(req: Request, res: Response) {
+    const { pairId } = req.query;
+
+    try {
+      console.log('query',req.query)
+
+      if (!pairId) {
+        return res.status(400).json({ 
+          success: false, 
+          msg: "Pair Id required." 
+        });
+      }
+
+      const pair = await prisma.pair.findUnique({
+        where:{id: pairId as string},
+        include:{
+          baseCurrency: true,
+          quoteCurrency: true
+        }
+      })
+
+      if (!pair) {
+        return res.status(400).json({ 
+          success: false, 
+          msg: "Pair not found." 
+        });
+      }
+  
+
+      const response = await walletService.getRate(pair?.baseCurrency?.ISO as string, pair?.quoteCurrency?.ISO as string)
+
+      // let convertedAmount: any | undefined;
+
+      
+
+      return res
+        .status(200)
+        .json({
+          msg:`rate fetched successfully`,
+          success: true,
+          rate: response
+        });
+
+
+    } catch (error) {
+      console.log(error);
+      res.status(500).send(error);
+    }
+  }
 
 
   async fetchOrder(req: Request | any, res: Response) {
@@ -494,6 +536,58 @@ class OrderController {
           msg: 'Successful',
           success: true,
           order,
+        });
+
+    } catch (error) {
+      console.error(error);
+      return res.status(500).send({ msg: 'Internal Server Error', success: false, error });
+    }
+  }
+
+  async cancelOrder(req: Request | any, res: Response) {
+    const orderId = req.params.id
+
+    if (!orderId) {
+      return res.status(400)
+        .json({
+          msg: 'order Id required',
+          success: false,
+        });
+    }
+
+    try {
+
+      const order = await prisma.order.findUnique({
+        where:{
+          id: orderId
+        },
+        select:{
+          id: true,
+          type: true,
+          amount: true
+        },
+      })
+
+      if (!order) {
+        return res.status(400)
+          .json({
+            msg: 'order not found',
+            success: false,
+          });
+      }
+
+      const canceledOrder = await prisma.order.update({
+        where:{id: order?.id},
+        data:{status:'CANCELED'}
+      })
+
+
+      return res
+        .status(200)
+        .json({
+          msg: 'Successful',
+          success: true,
+          order: canceledOrder,
         });
 
     } catch (error) {
@@ -603,7 +697,7 @@ class OrderController {
         success: false
       });
     }
-}
+  }
 
   async fetchPairs(req: Request | any, res: Response) {
     // const { limit, page, type, pairId } = req.query;

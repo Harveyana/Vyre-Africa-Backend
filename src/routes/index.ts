@@ -298,11 +298,23 @@ router.post(
   orderController.processOrder
 );
 
+router.post(
+  '/order/cancel/:id',
+  authMiddleware,
+  orderController.cancelOrder
+)
+
 router.get(
   '/orders/pairs',
   authMiddleware,
   orderController.fetchPairs
 );
+
+router.get(
+  '/orders/pairs/rate',
+  authMiddleware,
+  orderController.getRatebyPair
+)
 
 router.get(
   '/orders/getPairWallets',
