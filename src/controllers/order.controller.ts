@@ -790,12 +790,18 @@ class OrderController {
         where:{
           userId: user.id, 
           currencyId: pair?.baseCurrency?.id
+        },
+        include:{
+          currency: true
         }
       })
       quoteWallet = await prisma.wallet.findFirst({
         where:{
           userId: user.id, 
           currencyId: pair?.quoteCurrency?.id
+        },
+        include:{
+          currency: true
         }
       })
 
