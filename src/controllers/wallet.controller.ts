@@ -578,7 +578,7 @@ class WalletController {
       if(walletExists){
         return res.status(400)
           .json({
-            msg: `${currency} wallet already exists`,
+            msg: `${currency?.name} wallet already exists`,
             success: false,
           });
       }
