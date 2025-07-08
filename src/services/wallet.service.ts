@@ -1469,9 +1469,15 @@ class WalletService
             include:{
                 currency:{
                     select:{
-                      id:true,
-                      ISO:true,
-                      type:true
+                      id: true,
+                      name:true,
+                      ISO: true,
+                      type: true,
+                      imgUrl: true,
+                      chain: true,
+                      chainImgUrl: true,
+                      flagEmoji: true,
+                      isStablecoin: true
                     }
                 }
             }
