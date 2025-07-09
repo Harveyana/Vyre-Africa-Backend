@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { Paystack } from "paystack-sdk";
 import config from "../config/env.config";
 import prisma from '../config/prisma.config';
-import { Prisma } from "@prisma/client";
+// import { Prisma } from "@prisma/client";
 import axios from "axios";
 import { UserBank,UserStatus,SwapStatus } from "@prisma/client";
 import { generateRefCode,getISOByCountry } from "../utils";
@@ -276,7 +276,7 @@ class FernService {
   }
 
   async transaction_updated(status:string, transactionId:string){
-    
+    console.log("====================== transaction update hit",status, transactionId )
     const updatedTransaction = await prisma.swap.update({
       where:{id:transactionId},
       data:{

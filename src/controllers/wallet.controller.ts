@@ -217,7 +217,7 @@ class WalletController {
         case 'transaction.updated':
           const transaction = body.resource
 
-          console.log('case transaction updated', transaction)
+          console.log('case transaction update start', transaction)
 
           const transactionUpdated = await fernService.transaction_updated(
             transaction.transactionStatus,

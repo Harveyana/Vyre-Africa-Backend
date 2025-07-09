@@ -327,7 +327,8 @@ class SwapController {
         .json({
           msg: 'Quote generated Successfully',
           success: true,
-          quote
+          quote,
+          fee
         });
       }else{
 
