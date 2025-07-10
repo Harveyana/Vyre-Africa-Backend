@@ -83,7 +83,7 @@ class SwapController {
       pixCode,
       clearingCode,
 
-      currency,
+      // currency,
       // Address,
     } = req.body
       
@@ -138,16 +138,16 @@ class SwapController {
             locale: "en-US"
           },
 
-          ...(currency === 'USD' && { routingNumber }),
-          ...(currency === 'NGN' && { nubanNumber: accountNumber }),
-          ...(currency === 'GBP' && { sortCode }),
-          ...(currency === 'AUD' && { bsbNumber }),
-          ...(currency === 'CAD' && { institutionNumber }),
-          ...(currency === 'INR' && { ifscCode }),
-          ...(currency === 'MXN' && { clabeNumber }),
-          ...(currency === 'CNY' && { cnapsCode }),
-          ...(currency === 'BRL' && { pixCode }),
-          ...(currency === 'HKD' && { clearingCode }),
+          ...(bank?.currency === 'USD' && { routingNumber }),
+          ...(bank?.currency === 'NGN' && { nubanNumber: accountNumber }),
+          ...(bank?.currency === 'GBP' && { sortCode }),
+          ...(bank?.currency === 'AUD' && { bsbNumber }),
+          ...(bank?.currency === 'CAD' && { institutionNumber }),
+          ...(bank?.currency === 'INR' && { ifscCode }),
+          ...(bank?.currency === 'MXN' && { clabeNumber }),
+          ...(bank?.currency === 'CNY' && { cnapsCode }),
+          ...(bank?.currency === 'BRL' && { pixCode }),
+          ...(bank?.currency === 'HKD' && { clearingCode }),
           // ...(bicSwift && { bicSwift }),
           accountType: type,
           bankMethod: getPaymentMethodByCurrency(bank?.currency as string) || '',
