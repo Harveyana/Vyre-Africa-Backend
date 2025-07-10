@@ -166,7 +166,7 @@ class FernService {
     const accountData = {
         paymentAccountType: "EXTERNAL_BANK_ACCOUNT",
         customerId: user?.fernUserId,
-        nickname: `${payload.bankName} Account`,
+        nickname: `${payload.bankName} ${payload.currency} Account`,
         externalBankAccount: {
           accountNumber: payload.accountNumber,
           bankName: payload.bankName,
