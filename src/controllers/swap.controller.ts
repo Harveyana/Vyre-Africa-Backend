@@ -90,6 +90,8 @@ class SwapController {
 
     try {
 
+      console.log('bicSwift',bicSwift)
+
       if(!bankId ||!type){
         return res.status(400)
         .json({
