@@ -171,7 +171,6 @@ class FernService {
           accountNumber: payload.accountNumber,
           bankName: payload.bankName,
           bankAccountCurrency: payload.currency,
-          // bankAccountCurrency: {label: payload.currency},
 
           ...(routingNumber && { routingNumber }),
           ...(nubanNumber && { nubanNumber }),

@@ -368,7 +368,9 @@ type PaymentMethod =
     'Tunisia': 'TN',
     'Uganda': 'UG',
     'Zambia': 'ZM',
-    'Zimbabwe': 'ZW'
+    'Zimbabwe': 'ZW',
+    'Belgium': 'BE',
+    'United States':'US'
   };
 
   export const getISOByCountry = (countryName: string): string | undefined => {
