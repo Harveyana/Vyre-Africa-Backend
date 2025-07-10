@@ -49,6 +49,7 @@ interface fiatAccount {
     // optionals
     routingNumber?:string,
     nubanNumber?:string,
+    iban?:string,
     bicSwift?:string,
     sortCode?:string,
     bsbNumber?:string,
@@ -146,6 +147,7 @@ class FernService {
     const {
       routingNumber,
       nubanNumber,
+      iban,
       bicSwift,
       sortCode,
       bsbNumber,
@@ -164,14 +166,16 @@ class FernService {
     const accountData = {
         paymentAccountType: "EXTERNAL_BANK_ACCOUNT",
         customerId: user?.fernUserId,
-        nickname: `${payload.bankName} Savings Account`,
+        nickname: `${payload.bankName} Account`,
         externalBankAccount: {
           accountNumber: payload.accountNumber,
           bankName: payload.bankName,
           bankAccountCurrency: payload.currency,
+          // bankAccountCurrency: {label: payload.currency},
 
           ...(routingNumber && { routingNumber }),
           ...(nubanNumber && { nubanNumber }),
+          ...(iban && { iban }),
           ...(sortCode && { sortCode }),
           ...(bsbNumber && { bsbNumber }),
           ...(institutionNumber && { institutionNumber }),

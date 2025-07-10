@@ -140,6 +140,7 @@ class SwapController {
 
           ...(bank?.currency === 'USD' && { routingNumber }),
           ...(bank?.currency === 'NGN' && { nubanNumber: accountNumber }),
+          ...(bank?.currency === 'EUR' && { iban: accountNumber }),
           ...(bank?.currency === 'GBP' && { sortCode }),
           ...(bank?.currency === 'AUD' && { bsbNumber }),
           ...(bank?.currency === 'CAD' && { institutionNumber }),
