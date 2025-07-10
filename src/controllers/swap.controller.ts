@@ -149,7 +149,7 @@ class SwapController {
           ...(bank?.currency === 'CNY' && { cnapsCode }),
           ...(bank?.currency === 'BRL' && { pixCode }),
           ...(bank?.currency === 'HKD' && { clearingCode }),
-          // ...(bicSwift && { bicSwift }),
+          ...(bicSwift && { bicSwift }),
           accountType: type,
           bankMethod: getPaymentMethodByCurrency(bank?.currency as string) || '',
           isThirdParty: bank.country === userData?.country ? false : true
