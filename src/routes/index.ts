@@ -10,7 +10,7 @@ import userController from '../controllers/user.controller';
 import tripController from '../controllers/wallet.controller';
 import orderController from '../controllers/order.controller';
 import productController from '../controllers/product.controller';
-import storeController from '../controllers/store.controller';
+import storeController from '../controllers/account.controller';
 import organisationController from '../controllers/organisation.controller';
 import organisationValidator from '../validators/organisation.validator';
 import userValidator from '../validators/user.validator';
@@ -150,6 +150,12 @@ router.post(
   swapValidator.addCryptoAccount(),
   middleware.handleValidationError,
   swapController.addCryptoAccount
+);
+
+router.delete(
+  '/paymentAccount/:accountId',
+  authMiddleware,
+  swapController.deletePaymentAccount
 );
 
 router.get(

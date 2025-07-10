@@ -17,6 +17,7 @@ import * as crypto from 'crypto';
 import {createHmac} from 'node:crypto';
 import { getPaymentMethodByCurrency, getISOByCountry, calculateFee } from '../utils';
 import transactionService from '../services/transaction.service';
+import accountService from '../services/account.service';
 import fernService from '../services/fern.service';
 
 
@@ -562,6 +563,33 @@ class SwapController {
       res.status(500).send(error);
     }
   }
+
+  async deletePaymentAccount(req: Request & Record<string, any>, res: Response) {
+    const user = req.user
+    const accountId = req.params.accountId
+
+    try {
+
+      const success = await accountService.deleteAccountById(accountId)
+        
+      if(!success){
+        return res.status(400).json({
+          msg: 'Operation not successful',
+          success: false
+        });
+      }
+
+      return res.status(201).json({
+          msg: 'Payment Account deleted',
+          success: true,
+      });
+
+    } catch (error) {
+        return res
+            .status(500)
+            .json({ msg: 'Internal Server Error', success: false, error });
+    }
+}
 
   // async init_BankDeposit(req: Request & Record<string, any>, res: Response) {
   //   const { user } = req;
