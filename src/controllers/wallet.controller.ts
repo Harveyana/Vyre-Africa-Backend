@@ -29,9 +29,14 @@ class WalletController {
     const timestamp = req.header("x-api-timestamp");
     const rawBody = req.body.toString();//
 
-    console.log('webhook body',rawBody)
-    console.log('signature',signature)
-    console.log('timestamp',timestamp)
+    const body = JSON.parse(rawBody); // Explicit parsing
+
+    console.log('Webhook received:', {
+      type: body.type,
+      transactionId: body.resource?.transactionId,
+      signature,
+      timestamp
+    });
 
     if (!signature || !timestamp || !isValidSignature(rawBody, timestamp, signature, config.fern.Secret)) {
       console.error("Invalid webhook signature – request possibly forged!");
@@ -39,7 +44,7 @@ class WalletController {
     }
 
     try {
-      const { body } = req;
+      // const { body } = req;
       
 
       // Customer Events
