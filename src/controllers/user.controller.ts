@@ -29,6 +29,41 @@ import mobilePushService from '../services/mobilePush.service';
 import smsService from '../services/sms.service';
 import fernService from '../services/fern.service';
 
+interface KycDetails {
+    legalFirstName: string;
+    legalLastName: string;
+    phoneNumber: string;
+    dateOfBirth: string;
+    employmentStatus: string;
+    mostRecentOccupation?: string;
+    sourceOfFunds: string;
+    accountPurpose: string;
+    expectedMonthlyPaymentsUsd: number;
+    // isIntermediary?: boolean;
+    address: {
+      streetLine1: string;
+      city: string;
+      stateRegionProvince: string;
+      postalCode: string;
+      countryCode: string;
+    };
+    documents: {
+      governmentId: {
+        type: string;
+        countryCode: string;
+        documentIdNumber: string;
+        issuanceDate: string;
+        expirationDate: string;
+        frontIdImage: string;
+      };
+      proofOfAddress: {
+        type: string;
+        // description?: string;
+        proofOfAddressImage: string;
+      };
+    };
+  }
+
 class UserController {
     
     async register(req: Request, res: Response) {
@@ -65,14 +100,14 @@ class UserController {
 
             const result = await prisma.$transaction(async (prisma) => {
 
-                const customer = await fernService.customer({
-                    customerType:'INDIVIDUAL',
-                    firstName:DETAILS.firstName,
-                    lastName: DETAILS.lastName,
-                    email: DETAILS.email
-                })
+                // const customer = await fernService.customer({
+                //     customerType:'INDIVIDUAL',
+                //     firstName:DETAILS.firstName,
+                //     lastName: DETAILS.lastName,
+                //     email: DETAILS.email
+                // })
 
-                console.log('customer',customer)
+                // console.log('customer',customer)
 
                 const newUser = await prisma.user.create({
                     data: {
@@ -87,13 +122,13 @@ class UserController {
                         otpCodeExpiryTime: OTP_CODE_EXP,
                         photoUrl: config.defaultPhotoUrl,
 
-                        fernUserId: customer.customerId,
-                        fernKycLink: customer.kycLink,
-                        userStatus: customer.customerStatus
+                        // fernUserId: customer.customerId,
+                        // fernKycLink: customer.kycLink,
+                        // userStatus: customer.customerStatus
                     }
                 });
 
-                console.log('newUser',newUser,'customer',customer)
+                console.log('newUser',newUser)
 
                 return {
                   user: newUser
@@ -109,6 +144,171 @@ class UserController {
                 msg: 'An otp code sent to your email',
                 success: true,
                 user: result.user
+            });
+
+
+        } catch (error) {
+            return res
+                .status(500)
+                .json({ msg: 'Internal Server Error', success: false, error });
+        }
+    }
+
+    async register_Kyc(req: Request & Record<string, any>, res: Response) {
+        const user = req.user
+        const {
+            legalFirstName,
+            legalLastName,
+            phoneNumber,
+            dateOfBirth,
+            employmentStatus,
+            mostRecentOccupation,
+            sourceOfFunds,
+            accountPurpose,
+            expectedMonthlyPaymentsUsd,
+            address,
+            documents
+        } = req.body.DETAILS as KycDetails;
+
+        
+
+        console.log(req.body)
+
+        try {
+
+            // Basic validation
+            if (!legalFirstName || !legalLastName || !phoneNumber || !dateOfBirth) {
+                return res.status(400).json({ msg: 'Missing required fields',success: false });
+            }
+
+            const userData = await prisma.user.findUnique({
+                where: { id: user.id },
+            });
+
+            if (userData) {
+                return res.status(400).json({
+                    msg: 'User not found',
+                    success: false,
+                });
+            }
+
+
+
+            // Process the KYC submission in a transaction
+            const result = await prisma.$transaction(async (prisma) => {
+
+                const customer = await fernService.customer(
+                    {
+                        legalFirstName,
+                        legalLastName,
+                        phoneNumber,
+                        email: user?.email,
+                        dateOfBirth,
+                        employmentStatus,
+                        mostRecentOccupation,
+                        sourceOfFunds,
+                        accountPurpose,
+                        expectedMonthlyPaymentsUsd,
+                        address,
+                        documents
+                })
+
+                // 1. Create Address
+                const addressRecord = await prisma.address.create({
+                    data: {
+                        streetLine1: address.streetLine1,
+                        city: address.city,
+                        stateRegionProvince: address.stateRegionProvince,
+                        postalCode: address.postalCode,
+                        countryCode: address.countryCode
+                    }
+                });
+        
+                // 2. Create Government ID
+                const governmentId = await prisma.identity.create({
+                    data: {
+                        type: documents.governmentId.type,
+                        countryCode: documents.governmentId.countryCode,
+                        documentIdNumber: documents.governmentId.documentIdNumber,
+                        issuanceDate: new Date(documents.governmentId.issuanceDate),
+                        expirationDate: new Date(documents.governmentId.expirationDate),
+                        frontIdImage: documents.governmentId.frontIdImage
+                    }
+                });
+        
+                // 3. Create Proof of Address
+                const proofOfAddress = await prisma.proofOfAddress.create({
+                    data: {
+                        type: documents.proofOfAddress.type,
+                        description: `${documents.proofOfAddress.type} means of verification`,
+                        proofOfAddressImage: documents.proofOfAddress.proofOfAddressImage
+                    }
+                });
+        
+                // 4. Create Documents (linking both)
+                const documentsRecord = await prisma.documents.create({
+                    data: {
+                        identityId: governmentId.id,
+                        proofOfAddressId: proofOfAddress.id
+                    }
+                });
+        
+                // 5. Create UserKyc record
+                await prisma.userKyc.create({
+                    data: {
+                        firstName: legalFirstName,
+                        lastName: legalLastName,
+                        phoneNumber,
+                        dateOfBirth: new Date(dateOfBirth),
+                        employmentStatus,
+                        mostRecentOccupation,
+                        sourceOfFunds,
+                        accountPurpose,
+                        expectedMonthlyPayments: expectedMonthlyPaymentsUsd,
+                        // isIntermediary,
+                        addressId: addressRecord.id,
+                        documentsId: documentsRecord.id,
+                        userId: user.id // Assuming user is authenticated
+                    },
+                    include: {
+                        address: true,
+                        documents: {
+                        include: {
+                            identity: true,
+                            proofOfAddress: true
+                        }
+                        }
+                    }
+                });
+
+                return await prisma.user.update({
+                    where:{id: user.id},
+                    data:{
+                        fernUserId: customer.customerId,
+                        fernKycLink: customer.kycLink,
+                        userStatus: customer.customerStatus
+                    }
+                })
+
+            });
+
+
+
+
+
+            
+            // console.log('entered individual')
+            // console.log('PERSONAL', DETAILS)
+
+    
+
+            // await walletService.createWallet(newUser.id, 'NGN')
+
+            // await mailService.sendOtp(DETAILS.email, DETAILS.firstName, otpCode);
+
+            return res.status(201).json({
+                msg: 'An otp code sent to your email',
+                success: true,
             });
 
 

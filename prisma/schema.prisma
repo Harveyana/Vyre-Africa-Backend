@@ -148,6 +148,43 @@ enum AdvertStatus {
   DRAFTED
 }
 
+enum EmploymentStatus {
+  EMPLOYED
+  SELF_EMPLOYED
+  UNEMPLOYED
+  STUDENT
+  RETIRED
+}
+
+enum SourceOfFunds {
+  SALARY
+  INVESTMENTS
+  SAVINGS
+  FAMILY
+  OTHER
+}
+
+enum AccountPurpose {
+  PERSONAL_USE
+  BUSINESS
+  INVESTMENT
+  OTHER
+}
+
+enum GovernmentIdType {
+  PASSPORT
+  DRIVERS_LICENSE
+  NATIONAL_ID
+  RESIDENCE_PERMIT
+}
+
+enum ProofOfAddressType {
+  UTILITY_BILL
+  BANK_STATEMENT
+  GOVERNMENT_LETTER
+  LEASE_AGREEMENT
+}
+
 model Rating {
   id        Int      @id @default(autoincrement())
   stars     Int
@@ -159,6 +196,7 @@ model Rating {
 
 model User {
   id           String      @id @default(cuid())
+  authId       String?     @unique
   firstName    String      @db.VarChar(255)
   lastName     String      @db.VarChar(255)
   BusinessName String?
@@ -202,7 +240,86 @@ model User {
   fiatAccount                   fiatAccount[]
   cryptoAccount                 cryptoAccount[]
   Swap                          Swap[]
+  userKyc                       UserKyc[]    @relation("UserKycToUser")
+
 }
+
+model UserKyc {
+  id                      String    @id @default(uuid())
+  firstName               String
+  lastName                String
+  phoneNumber             String
+  dateOfBirth             DateTime
+  employmentStatus        String
+  mostRecentOccupation    String?
+  sourceOfFunds           String
+  accountPurpose          String
+  expectedMonthlyPayments Float
+  isIntermediary          Boolean   @default(false)
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  // Address relation (one-to-one)
+  addressId               String    @unique
+  address                 Address   @relation(fields: [addressId], references: [id], name: "UserKycToAddress")
+
+  // Documents relation (one-to-one)
+  documentsId             String    @unique
+  documents               Documents @relation(fields: [documentsId], references: [id], name: "UserKycToDocuments")
+
+  // User relation (many-to-one)
+  userId                  String
+  user                    User      @relation(fields: [userId], references: [id], name: "UserKycToUser")
+
+  @@index([userId])
+}
+
+model Address {
+  id                String  @id @default(uuid())
+  streetLine1       String
+  city              String
+  stateRegionProvince String
+  postalCode        String
+  countryCode       String  @db.Char(3)
+  userKyc           UserKyc? @relation("UserKycToAddress")
+}
+
+model Documents {
+  id                String     @id @default(uuid())
+
+  // Identity relation (one-to-one)
+  identityId        String     @unique
+  identity          Identity   @relation(fields: [identityId], references: [id], name: "DocumentsToIdentity")
+
+  // Proof of Address relation (one-to-one)
+  proofOfAddressId  String     @unique
+  proofOfAddress    ProofOfAddress @relation(fields: [proofOfAddressId], references: [id], name: "DocumentsToProofOfAddress")
+
+  // UserKyc relation (one-to-one)
+  userKyc           UserKyc?   @relation("UserKycToDocuments")
+}
+
+model Identity {
+  id                String  @id @default(uuid())
+  type              String
+  countryCode       String  @db.Char(3)
+  documentIdNumber  String
+  issuanceDate      DateTime
+  expirationDate    DateTime
+  frontIdImage      String?
+  documents         Documents? @relation("DocumentsToIdentity")
+}
+
+model ProofOfAddress {
+  id                String  @id @default(uuid())
+  type              String
+  description       String?
+  proofOfAddressImage String
+  documents         Documents? @relation("DocumentsToProofOfAddress")
+}
+
+
+
 
 model Swap {
   id        String     @id @default(cuid())

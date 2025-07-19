@@ -91,6 +91,7 @@ class SwapController {
     try {
 
       console.log('bicSwift',bicSwift)
+      console.log('routingNumber', routingNumber)
 
       if(!bankId ||!type){
         return res.status(400)

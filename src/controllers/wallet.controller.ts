@@ -219,6 +219,7 @@ class WalletController {
           }
   
           break;
+          
         case 'transaction.updated':
           const transaction = body.resource
 

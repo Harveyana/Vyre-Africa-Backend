@@ -1,5 +1,6 @@
 import * as bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import jwksClient from 'jwks-rsa';
 import prisma from './config/prisma.config';
 import moment from 'moment';
 import config from './config/env.config';
@@ -75,13 +76,30 @@ export const generateAccessToken = (user: User) => {
     return jwt.sign(user, config.jwt.secret, options);
 };
 
-export const verifyAccessToken = (token: string) => {
-    try {
-        const decoded = jwt.verify(token, config.jwt.secret);
-        return { success: true, data: decoded };
-    } catch (error: any) {
-        return { success: false, error: error.message };
-    }
+// 1. Initialize JWKS client
+const client = jwksClient({
+  jwksUri: `https://auth.vyre.africa/.well-known/jwks.json`
+});
+
+// 2. Key provider callback
+const getKey = (header:any, callback:any) => {
+  client.getSigningKey(header.kid, (err, key) => {
+    callback(err, key?.getPublicKey());
+  });
+};
+
+export const verifyAccessToken = (token: string): VerificationResult => {
+  try {
+    const decoded = jwt.verify(token, getKey, { // ← getKey passed as verifier
+      audience: 'https://api.vyre.africa',
+      issuer: 'https://auth.vyre.africa/',
+      algorithms: ['RS256']
+    });
+
+    return { success: true, data: (decoded as unknown) as Auth0JwtPayload };
+  } catch (error:any) {
+    return { success: false, error };
+  }
 };
 
 export const OTP_CODE_EXP: string = moment().add(45, 'minutes').toString();

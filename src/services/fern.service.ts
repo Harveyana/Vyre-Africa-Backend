@@ -90,9 +90,101 @@ interface QuotePayload {
   developerFee: DeveloperFee;
 }
 
+
+interface KycDetails {
+  legalFirstName: string;
+  legalLastName: string;
+  phoneNumber: string;
+  email:string;
+  dateOfBirth: string;
+  employmentStatus: string;
+  mostRecentOccupation?: string;
+  sourceOfFunds: string;
+  accountPurpose: string;
+  expectedMonthlyPaymentsUsd: number;
+  // isIntermediary?: boolean;
+  address: {
+    streetLine1: string;
+    city: string;
+    stateRegionProvince: string;
+    postalCode: string;
+    countryCode: string;
+  };
+  documents: {
+    governmentId: {
+      type: string;
+      countryCode: string;
+      documentIdNumber: string;
+      issuanceDate: string;
+      expirationDate: string;
+      frontIdImage: string;
+    };
+    proofOfAddress: {
+      type: string;
+      // description?: string;
+      proofOfAddressImage: string;
+    };
+  };
+}
+
+
 class FernService {
 
-  async customer(payload:{customerType:string,firstName:string,lastName:string,email:string}){
+  async customer(payload:KycDetails){
+
+    const {
+      legalFirstName,
+      legalLastName,
+      phoneNumber,
+      email,
+      dateOfBirth,
+      employmentStatus,
+      mostRecentOccupation,
+      sourceOfFunds,
+      accountPurpose,
+      expectedMonthlyPaymentsUsd,
+      address,
+      documents
+    } = payload as KycDetails;
+
+    const customerData = {
+      customerType: "INDIVIDUAL",
+      firstName: legalFirstName,
+      lastName: legalLastName,
+      email,
+      kycData:{
+        legalFirstName,
+        legalLastName,
+        phoneNumber,
+        dateOfBirth,
+
+        address,
+        taxIdNumber: documents.governmentId.documentIdNumber,
+        documents: [
+          {
+            type: "GOVERNMENT_ID",
+            subtype: documents.governmentId.type,
+            countryCode: documents.governmentId.countryCode,
+            documentIdNumber: documents.governmentId.documentIdNumber,
+            issuanceDate: documents.governmentId.issuanceDate,
+            expirationDate: documents.governmentId.expirationDate,
+            frontIdImage: documents.governmentId.frontIdImage,
+            // backIdImage: "text",
+            proofOfAddressImage: documents.proofOfAddress.proofOfAddressImage,
+            description: `${documents.proofOfAddress.type} means of verification`
+          }
+        ],
+        employmentStatus,
+        mostRecentOccupation,
+        sourceOfFunds,
+        accountPurpose,
+        // accountPurposeOther: "Real estate transactions",
+        expectedMonthlyPaymentsUsd,
+        isIntermediary: false,
+
+      }
+    }
+    
     
     const response = await fernAxios.post('/customers', payload)
     const result = response.data
@@ -100,6 +192,17 @@ class FernService {
 
     return result
   }
+
+  // async customer(payload:{customerType:string,firstName:string,lastName:string,email:string}){
+
+    
+    
+  //   const response = await fernAxios.post('/customers', payload)
+  //   const result = response.data
+  //   console.log(result)
+
+  //   return result
+  // }
 
   async customer_Created(payload:{customerId:string, status:string, kycLink:string, email:string}){
 
