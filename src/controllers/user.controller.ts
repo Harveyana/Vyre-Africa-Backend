@@ -1021,6 +1021,7 @@ class UserController {
 
     async getProfile(req: Request & Record<string, any>, res: Response) {
         const user = req.user
+        const isNewUser = req.isNewUser
 
         try {
 
@@ -1043,6 +1044,7 @@ class UserController {
                 msg: 'Profile fetched successfully',
                 success: true,
                 user: userData,
+                isNewUser,
                 hasAnyPaymentMethod
             });
 

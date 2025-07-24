@@ -3,102 +3,101 @@ import { UserInfoClient } from 'auth0';
 import { NextFunction, Request, Response } from 'express';
 import { verifyAccessToken } from '../utils';
 import prisma from '../config/prisma.config';
+
 dotenv.config();
 
 const userInfoClient = new UserInfoClient({
-    domain: 'auth.vyre.africa', // Your Auth0 domain
+  domain: 'auth.vyre.africa',
 });
-  
 
-export const authMiddleware = async(
-    req: Request & Record<string, any>,
-    res: Response,
-    next: NextFunction,
+export const authMiddleware = async (
+  req: Request & { user?: any, isNewUser?:boolean },
+  res: Response,
+  next: NextFunction
 ) => {
+  // 1. Extract Token
+  const { authorization } = req.headers;
+  if (!authorization) {
+    return res.status(401).json({ 
+      success: false,
+      error: 'Missing authorization token' 
+    });
+  }
 
-    console.log(req.headers)
+  const token = authorization.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({
+      success: false,
+      error: 'Malformed authorization header'
+    });
+  }
 
-    const { authorization } = req.headers;
-    if (!authorization) {
-        return res
-            .status(401)
-            .json({ msg: 'Authentication token required', success: false });
+  try {
+    // 2. Validate Token (choose ONE approach)
+    
+    // OPTION A: Local verification (recommended)
+    const { success, data } = await verifyAccessToken(token);
+    if (!success || !data?.sub) {
+        console.log('token data',data?.sub)
+        
+      return res.status(403).json({
+        success: false,
+        error: 'Invalid or expired token'
+      });
     }
-    const token = authorization.split(' ')[1];
 
-    console.log(token)
+    // OPTION B: Remote verification (if you need fresh claims)
+    // const userInfo = await userInfoClient.getUserInfo(token);
+    // if (!userInfo.data?.sub) {
+    //   return res.status(403).json(...);
+    // }
+    // const authId = userInfo.data.sub;
 
-    // const result = verifyAccessToken(token as string);
-    const { success, data, error } = await verifyAccessToken(token);
-    console.log(success)
-    let user;
+    // 3. Find/Create User
+    let user = await prisma.user.findUnique({
+      where: { authId: data.sub }, // Using just authId
+      select: {
+        id: true,
+        authId: true,
+        firstName: true,
+        lastName: true,
+        email: true
+      }
+    });
 
-    if (success) {
-        console.log(data?.sub);      // "auth0|123456"
-        // console.log(data?.email);    // "user@example.com"
-
-
-        try{
-            const userDetails = await userInfoClient.getUserInfo(token);
-            console.log('userDetails',userDetails.data)
-            user = await prisma.user.findUnique({
-                where: {
-                  authId: userDetails.data?.sub as string, // Assuming you store Auth0 ID in fernUserId,
-                  email: userDetails.data?.email
-                },
-                select:{
-                    id:true,
-                    authId:true,
-                    firstName:true,
-                    lastName:true,
-                    email:true
-                }
-            })
-            // create new user if not exist
-            if(!user){
-                return res.status(401).json({ msg: 'User not found', success: false });
-                // const result = await prisma.$transaction(async (prisma) => {
-    
-                //     const newUser = await prisma.user.create({
-                //         data: {
-                //             firstName: userDetails.data?.given_name as string,
-                //             lastName: userDetails.data?.family_name as string,
-                //             authId: userDetails.data?.sub,
-                //             email: userDetails.data?.email,
-                //             emailVerified: userDetails.data?.email_verified,
-                //             photoUrl: userDetails.data?.picture,
-                //             phoneNumber: userDetails.data?.phone_number
-                //         }
-                //     });
-    
-                //     console.log('newUser',newUser)
-    
-                //     return {
-                //       user: newUser
-                //     };
-    
-                // });
-
-                // return res.status(201).json({
-                //     msg: 'User Registered Successfully',
-                //     success: true,
-                //     newUser: true,
-                //     user: result.user
-                // });
-            }
-
-        } catch (error) {
-            console.error('user retrieval error:', error)
-            return res.status(401).json({ msg: 'User not found', success: false });
+    // 4. Create new user if not exists
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          authId: data.sub,
+          email: data.email as string,
+          firstName: data.given_name || '',
+          lastName: data.family_name || '',
+          emailVerified: data.email_verified || false,
+          photoUrl: data.picture,
+        },
+        select: {
+          id: true,
+          authId: true,
+          firstName: true,
+          lastName: true,
+          email: true
         }
+      });
 
-
-    }else{
-       return res.status(403).json({ error });
+      // Optionally return 201 for new users
+      req.isNewUser = true;
     }
 
-
+    // 5. Attach user and proceed
     req.user = user;
-
     next();
+
+  } catch (error) {
+    console.error('Authentication error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Authentication failed'
+    });
+  }
 };
