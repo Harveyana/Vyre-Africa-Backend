@@ -56,34 +56,35 @@ export const authMiddleware = async(
             })
             // create new user if not exist
             if(!user){
-                const result = await prisma.$transaction(async (prisma) => {
+                return res.status(401).json({ msg: 'User not found', success: false });
+                // const result = await prisma.$transaction(async (prisma) => {
     
-                    const newUser = await prisma.user.create({
-                        data: {
-                            firstName: userDetails.data?.given_name as string,
-                            lastName: userDetails.data?.family_name as string,
-                            authId: userDetails.data?.sub,
-                            email: userDetails.data?.email,
-                            emailVerified: userDetails.data?.email_verified,
-                            photoUrl: userDetails.data?.picture,
-                            phoneNumber: userDetails.data?.phone_number
-                        }
-                    });
+                //     const newUser = await prisma.user.create({
+                //         data: {
+                //             firstName: userDetails.data?.given_name as string,
+                //             lastName: userDetails.data?.family_name as string,
+                //             authId: userDetails.data?.sub,
+                //             email: userDetails.data?.email,
+                //             emailVerified: userDetails.data?.email_verified,
+                //             photoUrl: userDetails.data?.picture,
+                //             phoneNumber: userDetails.data?.phone_number
+                //         }
+                //     });
     
-                    console.log('newUser',newUser)
+                //     console.log('newUser',newUser)
     
-                    return {
-                      user: newUser
-                    };
+                //     return {
+                //       user: newUser
+                //     };
     
-                });
+                // });
 
-                return res.status(201).json({
-                    msg: 'User Registered Successfully',
-                    success: true,
-                    newUser: true,
-                    user: result.user
-                });
+                // return res.status(201).json({
+                //     msg: 'User Registered Successfully',
+                //     success: true,
+                //     newUser: true,
+                //     user: result.user
+                // });
             }
 
         } catch (error) {
