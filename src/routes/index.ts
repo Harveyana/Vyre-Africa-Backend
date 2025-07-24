@@ -6,6 +6,7 @@ import tripValidator from '../validators/wallet.validator';
 import middleware from '../middleware';
 import { Actions, RESOURCES } from '../globals';
 import { authMiddleware } from '../services/auth';
+import { registerMiddleware } from '../services/register';
 import userController from '../controllers/user.controller';
 import tripController from '../controllers/wallet.controller';
 import orderController from '../controllers/order.controller';
@@ -31,7 +32,7 @@ const router = Router();
 router.use(adminRouter)
 
 router.get('/', (req: Request, res: Response) => {
-  res.send(`Welcome to the Qaya Backend API! ${config.nodeEnv}`);
+  res.send(`Welcome to the vyre Africa Backend API! ${config.nodeEnv}`);
 });
 
 // roles
@@ -39,17 +40,11 @@ router.get('/', (req: Request, res: Response) => {
 //User
 router.post(
   '/register',
-  userValidator.register(),
-  middleware.handleValidationError,
+  registerMiddleware,
   userController.register
 );
 
-// router.post(
-//   '/rider/register',
-//   userValidator.register(),
-//   middleware.handleValidationError,
-//   userController.registerRider
-// );
+
 
 router.post(
   '/webhook',

@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import { verifyAccessToken } from '../utils';
 dotenv.config();
 
-export const adminAuthMiddleware = (
+export const adminAuthMiddleware = async(
     req: Request & Record<string, any>,
     res: Response,
     next: NextFunction,
@@ -16,7 +16,7 @@ export const adminAuthMiddleware = (
     }
     const token = authorization.split(' ')[1];
 
-    const result = verifyAccessToken(token as string);
+    const result = await verifyAccessToken(token as string);
 
     if (!result.success) {
         return res.status(403).json({ error: result.error });

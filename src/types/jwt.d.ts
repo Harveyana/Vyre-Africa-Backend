@@ -13,5 +13,5 @@ interface Auth0JwtPayload {
   interface VerificationResult {
     success: boolean;
     data?: Auth0JwtPayload;
-    error?: string;
+    error?: any;
   }

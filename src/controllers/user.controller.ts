@@ -66,23 +66,36 @@ interface KycDetails {
 
 class UserController {
     
-    async register(req: Request, res: Response) {
-        const { DETAILS} = req.body;
-        console.log(req.body)
+    async register(req: Request & Record<string, any>, res: Response) {
+        // const { DETAILS} = req.body;
+        const {
+            sub, 
+            given_name, 
+            family_name, 
+            picture, 
+            email, 
+            email_verified 
+        } = req.user;
+
+
+        // console.log(req.body)
 
         try {
 
-            let referree:any;
+            // let referree:any;
 
             const userExist = await prisma.user.findUnique({
-              where: { email: DETAILS.email },
+              where: { 
+                authId: sub,
+                email
+               },
             });
 
-            if(DETAILS.referreeId){
-                referree = await prisma.user.findFirst({
-                    where:{referralId: DETAILS.referreeId}
-                })
-            }
+            // if(DETAILS.referreeId){
+            //     referree = await prisma.user.findFirst({
+            //         where:{referralId: DETAILS.referreeId}
+            //     })
+            // }
 
             
             if (userExist) {
@@ -94,9 +107,9 @@ class UserController {
             }
             
             console.log('entered individual')
-            console.log('PERSONAL', DETAILS)
+            // console.log('PERSONAL', DETAILS)
 
-            const otpCode = generateOtp();
+            // const otpCode = generateOtp();
 
             const result = await prisma.$transaction(async (prisma) => {
 
@@ -111,16 +124,12 @@ class UserController {
 
                 const newUser = await prisma.user.create({
                     data: {
-                        firstName: DETAILS.firstName,
-                        lastName: DETAILS.lastName,
-                        email: DETAILS.email,
-                        phoneNumber: DETAILS.phoneNumber,
-                        // country: DETAILS.country,
-                        ...(referree && { referreeId: referree.referralId }),
-
-                        otpCode: otpCode,
-                        otpCodeExpiryTime: OTP_CODE_EXP,
-                        photoUrl: config.defaultPhotoUrl,
+                        firstName: given_name,
+                        lastName: family_name,
+                        authId: sub,
+                        email,
+                        emailVerified: email_verified,
+                        photoUrl: picture,
 
                         // fernUserId: customer.customerId,
                         // fernKycLink: customer.kycLink,
@@ -138,10 +147,10 @@ class UserController {
 
             // await walletService.createWallet(newUser.id, 'NGN')
 
-            await mailService.sendOtp(DETAILS.email, DETAILS.firstName, otpCode);
+            // await mailService.sendOtp(DETAILS.email, DETAILS.firstName, otpCode);
 
             return res.status(201).json({
-                msg: 'An otp code sent to your email',
+                msg: 'Registration Sucessful',
                 success: true,
                 user: result.user
             });

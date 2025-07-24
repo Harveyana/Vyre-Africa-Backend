@@ -84,22 +84,40 @@ const client = jwksClient({
 // 2. Key provider callback
 const getKey = (header:any, callback:any) => {
   client.getSigningKey(header.kid, (err, key) => {
+    console.log('the key',key)
     callback(err, key?.getPublicKey());
   });
 };
 
-export const verifyAccessToken = (token: string): VerificationResult => {
-  try {
-    const decoded = jwt.verify(token, getKey, { // ← getKey passed as verifier
-      audience: 'https://api.vyre.africa',
-      issuer: 'https://auth.vyre.africa/',
-      algorithms: ['RS256']
-    });
 
-    return { success: true, data: (decoded as unknown) as Auth0JwtPayload };
-  } catch (error:any) {
-    return { success: false, error };
-  }
+export const verifyAccessToken = (token: string): Promise<VerificationResult> => {
+  return new Promise((resolve) => {
+    jwt.verify(
+      token,
+      getKey,
+      {
+        audience: 'https://api.vyre.africa',
+        issuer: 'https://auth.vyre.africa/',
+        algorithms: ['RS256']
+      },
+      (err, decoded) => {
+        if (err) {
+          console.error('Token verification failed:', err);
+          return resolve({ success: false, error: 'verification failed' });
+        }
+        
+        if (!decoded) {
+          return resolve({ success: false, error: 'Token decoded as empty' });
+        }
+
+        console.log('Token successfully verified:', decoded);
+        resolve({ 
+          success: true, 
+          data: decoded as Auth0JwtPayload 
+        });
+      }
+    );
+  });
 };
 
 export const OTP_CODE_EXP: string = moment().add(45, 'minutes').toString();
