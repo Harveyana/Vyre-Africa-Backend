@@ -1,17 +1,30 @@
 interface Auth0JwtPayload {
-    sub: string;               // "auth0|123456" or "google|123456"
-    email?: string;
-    email_verified?: boolean;
-    name?: string;
-    given_name?: string;
-    family_name?: string;
-    picture?: string;
-    // Add other claims you expect
-    [key: string]: any;        // For custom claims
-  }
-  
-  interface VerificationResult {
-    success: boolean;
-    data?: Auth0JwtPayload;
-    error?: any;
-  }
+  email: string;
+  userId: string;
+  lastName: string;
+  photoUrl?: string;
+  firstName: string;
+  phoneNumber?: string;
+  lastSignedIn?: string;
+  emailVerified: boolean;
+  userCreatedAt: string;
+  // Standard JWT claims
+  iss?: string;
+  sub?: string;
+  aud?: string | string[];
+  iat?: number;
+  exp?: number;
+  nbf?: number;
+  // For any additional custom claims
+  [key: string]: any;
+}
+
+interface VerificationResult {
+  success: boolean;
+  data?: Auth0JwtPayload;
+  error?: {
+    message: string;
+    code?: string;
+    details?: any;
+  };
+}

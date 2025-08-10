@@ -5,6 +5,16 @@ const config = {
     host: process.env.HOST || '',
     port: process.env.PORT || '5000',
     nodeEnv: process.env.NODE_ENV || '',
+    
+    redisHost: process.env.REDIS_HOST || 'redis',
+    redisPort: process.env.REDIS_PORT || '6379',
+    redisPassWord: process.env.REDIS_PASSWORD || '',
+
+    queueConcurrency: process.env.ORDER_QUEUE_CONCURRENCY || '5',
+    queueRetryAttempts: process.env.ORDER_QUEUE_RETRY_ATTEMPTS || '5',
+
+
+
 
     dialect: process.env.DB_DIALECT || 'postgres',
     dbCreds: {
@@ -20,6 +30,10 @@ const config = {
     jwt: {
         secret: process.env.JWT_SECRET || '',
         expiry: process.env.JWT_EXPIRY || '',
+    },
+
+    clerk: {
+        jwtPublicKey: process.env.clerk_JWT_PUBLICKEY || '',
     },
 
     refreshJwt: {

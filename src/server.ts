@@ -1,6 +1,8 @@
 import * as http from "http";
 import app from "./app";
 import env from "./config/env.config";
+import './workers/order.worker';
+// import logger from "./config/logger";
 import cron from 'node-cron';
 import adminBroadcastController from "./controllers/admin/admin.broadcast.controller";
 import orderController from "./controllers/order.controller";
@@ -37,4 +39,5 @@ const server = http.createServer(app);
 
 server.listen(env.port, () => {
 	console.log(`Listening on port ${env.port}`);
+	// logger.info(`Server running on port ${env.port}`);
 });

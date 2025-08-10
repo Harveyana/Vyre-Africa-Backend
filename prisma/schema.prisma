@@ -137,6 +137,14 @@ enum TransactionType {
   EXCHANGE_SELL
 }
 
+enum AwaitingStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  REFUNDED
+  FAILED
+}
+
 enum TwoFactorAuthenticationMethod {
   EMAIL_OTP
   SMS_OTP
@@ -240,12 +248,14 @@ model User {
   fiatAccount                   fiatAccount[]
   cryptoAccount                 cryptoAccount[]
   Swap                          Swap[]
-  userKyc                       UserKyc[]    @relation("UserKycToUser")
+  userKyc                       UserKyc[]                     @relation("UserKycToUser")
 
+  Awaiting    Awaiting[]
+  postDetails postDetails[]
 }
 
 model UserKyc {
-  id                      String    @id @default(uuid())
+  id                      String   @id @default(uuid())
   firstName               String
   lastName                String
   phoneNumber             String
@@ -255,71 +265,68 @@ model UserKyc {
   sourceOfFunds           String
   accountPurpose          String
   expectedMonthlyPayments Float
-  isIntermediary          Boolean   @default(false)
-  createdAt               DateTime  @default(now())
-  updatedAt               DateTime  @updatedAt
+  isIntermediary          Boolean  @default(false)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
 
   // Address relation (one-to-one)
-  addressId               String    @unique
-  address                 Address   @relation(fields: [addressId], references: [id], name: "UserKycToAddress")
+  addressId String  @unique
+  address   Address @relation(fields: [addressId], references: [id], name: "UserKycToAddress")
 
   // Documents relation (one-to-one)
-  documentsId             String    @unique
-  documents               Documents @relation(fields: [documentsId], references: [id], name: "UserKycToDocuments")
+  documentsId String    @unique
+  documents   Documents @relation(fields: [documentsId], references: [id], name: "UserKycToDocuments")
 
   // User relation (many-to-one)
-  userId                  String
-  user                    User      @relation(fields: [userId], references: [id], name: "UserKycToUser")
+  userId String
+  user   User   @relation(fields: [userId], references: [id], name: "UserKycToUser")
 
   @@index([userId])
 }
 
 model Address {
-  id                String  @id @default(uuid())
-  streetLine1       String
-  city              String
+  id                  String   @id @default(uuid())
+  streetLine1         String
+  city                String
   stateRegionProvince String
-  postalCode        String
-  countryCode       String  @db.Char(3)
-  userKyc           UserKyc? @relation("UserKycToAddress")
+  postalCode          String
+  countryCode         String   @db.Char(3)
+  userKyc             UserKyc? @relation("UserKycToAddress")
 }
 
 model Documents {
-  id                String     @id @default(uuid())
+  id String @id @default(uuid())
 
   // Identity relation (one-to-one)
-  identityId        String     @unique
-  identity          Identity   @relation(fields: [identityId], references: [id], name: "DocumentsToIdentity")
+  identityId String   @unique
+  identity   Identity @relation(fields: [identityId], references: [id], name: "DocumentsToIdentity")
 
   // Proof of Address relation (one-to-one)
-  proofOfAddressId  String     @unique
-  proofOfAddress    ProofOfAddress @relation(fields: [proofOfAddressId], references: [id], name: "DocumentsToProofOfAddress")
+  proofOfAddressId String         @unique
+  proofOfAddress   ProofOfAddress @relation(fields: [proofOfAddressId], references: [id], name: "DocumentsToProofOfAddress")
 
   // UserKyc relation (one-to-one)
-  userKyc           UserKyc?   @relation("UserKycToDocuments")
+  userKyc UserKyc? @relation("UserKycToDocuments")
 }
 
 model Identity {
-  id                String  @id @default(uuid())
-  type              String
-  countryCode       String  @db.Char(3)
-  documentIdNumber  String
-  issuanceDate      DateTime
-  expirationDate    DateTime
-  frontIdImage      String?
-  documents         Documents? @relation("DocumentsToIdentity")
+  id               String     @id @default(uuid())
+  type             String
+  countryCode      String     @db.Char(3)
+  documentIdNumber String
+  issuanceDate     DateTime
+  expirationDate   DateTime
+  frontIdImage     String?
+  documents        Documents? @relation("DocumentsToIdentity")
 }
 
 model ProofOfAddress {
-  id                String  @id @default(uuid())
-  type              String
-  description       String?
+  id                  String     @id @default(uuid())
+  type                String
+  description         String?
   proofOfAddressImage String
-  documents         Documents? @relation("DocumentsToProofOfAddress")
+  documents           Documents? @relation("DocumentsToProofOfAddress")
 }
-
-
-
 
 model Swap {
   id        String     @id @default(cuid())
@@ -436,12 +443,16 @@ model Currency {
   imgUrl      String?
   chainImgUrl String?
   flagEmoji   String?
- 
-  isStablecoin  Boolean   @default(false)
-  createdAt   DateTime     @default(now())
-  Wallet     Wallet[]
-  basePairs    Pair[]     @relation("baseCurrency")
-  quotePairs   Pair[]     @relation("quoteCurrency")
+
+  tatumChain String?
+
+  isStablecoin Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  Wallet       Wallet[]
+  basePairs    Pair[]        @relation("baseCurrency")
+  quotePairs   Pair[]        @relation("quoteCurrency")
+  Awaiting     Awaiting[]
+  postDetails  postDetails[]
 }
 
 model Wallet {
@@ -468,6 +479,8 @@ model Wallet {
   Block       Block[]
   basePairs   Pair[]        @relation("BaseWallet") // Reverse relation for `baseWallet`
   quotePairs  Pair[]        @relation("QuoteWallet") // Reverse relation for `quoteWallet`
+  Awaiting    Awaiting[]
+  postDetails postDetails[]
 }
 
 model Order {
@@ -487,26 +500,27 @@ model Order {
   status              OrderStatus @default(OPEN)
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt
+  Awaiting            Awaiting[]
 }
 
 model Pair {
-  id            String    @id @default(cuid())
-  name          String
-  createdAt     DateTime  @default(now())
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
 
   // Currency Relations
-  baseId        String?
-  baseCurrency  Currency? @relation("baseCurrency", fields: [baseId], references: [id])
-  
+  baseId       String?
+  baseCurrency Currency? @relation("baseCurrency", fields: [baseId], references: [id])
+
   quoteId       String?
   quoteCurrency Currency? @relation("quoteCurrency", fields: [quoteId], references: [id])
 
   // Wallet Relations
-  baseWalletId  String?
-  baseWallet    Wallet?   @relation("BaseWallet", fields: [baseWalletId], references: [id])
-  
+  baseWalletId String?
+  baseWallet   Wallet? @relation("BaseWallet", fields: [baseWalletId], references: [id])
+
   quoteWalletId String?
-  quoteWallet   Wallet?   @relation("QuoteWallet", fields: [quoteWalletId], references: [id])
+  quoteWallet   Wallet? @relation("QuoteWallet", fields: [quoteWalletId], references: [id])
   Order         Order[]
 
   @@index([baseId])
@@ -514,7 +528,6 @@ model Pair {
   @@index([baseWalletId])
   @@index([quoteWalletId])
   @@index([createdAt])
-  
 }
 
 model Block {
@@ -538,6 +551,56 @@ model PendingActivity {
   status      ActivityStatus @default(OPEN)
   createdAt   DateTime       @default(now())
   executedAt  DateTime
+}
+
+model Awaiting {
+  id             String         @id @default(cuid())
+  triggerAddress String?
+  reference      String?
+  walletId       String?
+  userId         String?
+  orderId        String?
+  amount         Decimal
+  orderType      OrderType
+  status         AwaitingStatus @default(PENDING)
+  currencyId     String?
+
+  bank_Name           String?
+  bank_Account_Number String?
+  bank_Account_Name   String?
+  bank_expires_At     DateTime?
+
+  currency Currency? @relation(fields: [currencyId], references: [id])
+  user     User?     @relation(fields: [userId], references: [id])
+  wallet   Wallet?   @relation(fields: [walletId], references: [id])
+  order    Order?    @relation(fields: [orderId], references: [id])
+
+  createdAt   DateTime      @default(now())
+  postDetails postDetails[]
+}
+
+model postDetails {
+  id         String  @id @default(cuid())
+  awaitingId String?
+  walletId   String?
+  userId     String?
+  orderId    String?
+  amount     Decimal
+  currencyId String?
+
+  bankCode       String?
+  accountNumber  String?
+  recipient_Name String?
+
+  chain   String?
+  address String?
+
+  awaiting Awaiting? @relation(fields: [awaitingId], references: [id])
+  currency Currency? @relation(fields: [currencyId], references: [id])
+  user     User?     @relation(fields: [userId], references: [id])
+  wallet   Wallet?   @relation(fields: [walletId], references: [id])
+
+  createdAt DateTime @default(now())
 }
 
 model Card {

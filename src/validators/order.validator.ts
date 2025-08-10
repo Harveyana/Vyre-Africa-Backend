@@ -31,6 +31,27 @@ class OrderValidator {
     ];
   }
 
+  initializeAnon() {
+    return [
+      body('amount').notEmpty().withMessage('Amount is required').isFloat().withMessage('Invalid amount'),
+
+      body('orderId').notEmpty().withMessage('order ID is required').isString().withMessage('order Id is invalid'),
+      body('currencyId').notEmpty().withMessage('currency ID is required').isString().withMessage('currency Id is invalid'),
+      body('email').notEmpty().withMessage('user email is required').isEmail().withMessage('user email is invalid'),
+
+      // user bank details
+      body('bank').isObject().optional(),
+          body('bank.accountNumber').notEmpty().withMessage('bank accountNumber is required').isString().withMessage('bank accountNumber is invalid'),
+          body('bank.bankCode').notEmpty().withMessage('bank code is required').isString().withMessage('bank code is invalid'),
+          body('bank.recipient').notEmpty().withMessage('recipient name is required').isString().withMessage('recipient name is invalid'),
+          
+      // user crypto wallet details
+      body('crypto').isObject().optional(),
+          body('crypto.address').notEmpty().withMessage('crypto address is required').isString().withMessage('crypto address is invalid'),
+
+    ];
+  }
+
   processOrder() {
     return [
       body('amount').notEmpty().withMessage('amount is required'),

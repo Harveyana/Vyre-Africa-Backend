@@ -25,6 +25,7 @@ import mobileAdvertController from '../controllers/mobile/mobile.advert.controll
 import walletController from '../controllers/wallet.controller';
 import swapController from '../controllers/swap.controller';
 import swapValidator from '../validators/swap.validator';
+import eventController from '../controllers/event.controller';
 
 const router = Router();
 
@@ -48,17 +49,17 @@ router.post(
 
 router.post(
   '/webhook',
-  walletController.qorepay_WebHook
+  eventController.qorepay_WebHook
 );
 
 router.post(
   '/webhook/fern',
-  walletController.fern_WebHook
+  eventController.fern_WebHook
 );
 
 router.post(
   '/tatum/events',
-  walletController.tatum_WebHook
+  eventController.tatum_WebHook
 );
 
 // router.post(

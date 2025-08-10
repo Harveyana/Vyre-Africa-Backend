@@ -6,9 +6,6 @@ import prisma from '../config/prisma.config';
 
 dotenv.config();
 
-const userInfoClient = new UserInfoClient({
-  domain: 'auth.vyre.africa',
-});
 
 export const authMiddleware = async (
   req: Request & { user?: any, isNewUser?:boolean },
@@ -37,8 +34,8 @@ export const authMiddleware = async (
     
     // OPTION A: Local verification (recommended)
     const { success, data } = await verifyAccessToken(token);
-    if (!success || !data?.sub) {
-        console.log('token data',data?.sub)
+    if (!success || !data?.userId) {
+      console.log('token data',data)
         
       return res.status(403).json({
         success: false,
@@ -55,10 +52,10 @@ export const authMiddleware = async (
 
     // 3. Find/Create User
     let user = await prisma.user.findUnique({
-      where: { authId: data.sub }, // Using just authId
+      where: { id: data.userId }, // Using just authId
       select: {
         id: true,
-        authId: true,
+        // authId: true,
         firstName: true,
         lastName: true,
         email: true
@@ -69,16 +66,15 @@ export const authMiddleware = async (
     if (!user) {
       user = await prisma.user.create({
         data: {
-          authId: data.sub,
+          id: data.userId,
           email: data.email as string,
-          firstName: data.given_name || '',
-          lastName: data.family_name || '',
-          emailVerified: data.email_verified || false,
-          photoUrl: data.picture,
+          firstName: data.firstName || '',
+          lastName: data.lastName || '',
+          emailVerified: data.emailVerified || false,
+          photoUrl: data.photoUrl
         },
         select: {
           id: true,
-          authId: true,
           firstName: true,
           lastName: true,
           email: true

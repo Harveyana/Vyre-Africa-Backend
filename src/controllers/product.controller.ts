@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../config/prisma.config';
 import { generateRefCode, generateSku } from '../utils';
-import productService from '../services/product.service';
+// import productService from '../services/product.service';
 // import { ProductStatus } from '@prisma/client';
 
 class ProductController {

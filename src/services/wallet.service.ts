@@ -2,12 +2,23 @@ import { Request, Response } from 'express';
 import prisma from '../config/prisma.config';
 import config from '../config/env.config';
 import axios from "axios";
+import stablecoinService from './stablecoin.service';
+import nativecoinService from './nativecoin.service';
 // import {Currency,walletType} from '@prisma/client';
 // import { currency as baseCurrency } from '../globals';
+import qorepayService from './qorepay.service';
 import { hasSufficientBalance } from '../utils';
 
     const tatumAxios = axios.create({
         baseURL: 'https://api.tatum.io/v3',
+        headers: {
+            'x-api-key': config.TATUM_LIVE_KEY,
+            'Content-Type': 'application/json'
+        }
+    });
+
+    const tatumAxiosV4 = axios.create({
+        baseURL: 'https://api.tatum.io/v4',
         headers: {
             'x-api-key': config.TATUM_LIVE_KEY,
             'Content-Type': 'application/json'
@@ -25,40 +36,6 @@ import { hasSufficientBalance } from '../utils';
 
 class WalletService
 {    
-
-    private generate_Address = async(Account_ID:string)=>{
-    
-        const response = await tatumAxios.post(`/offchain/account/${Account_ID}/address`)
-        const result = response.data
-        console.log(result)
-
-        return result
-    }
-
-    private subscribe_events = async(
-        accountId: string
-    )=>{
-
-        const data = {
-            type:"ACCOUNT_INCOMING_BLOCKCHAIN_TRANSACTION",
-            attr:{
-               id: accountId, // The Virtual_Account_ID
-               url:"https://vyre-a33d9c003be3.herokuapp.com/api/v1/tatum/events" //The URL of the webhook listener you are using
-               }
-            }
-
-        const subscribed = await tatumAxios.post('/subscription', data)
-
-        // const subcribed = await prisma.transaction.update({
-        //     where:{id: withdrawal_Id },
-        //     data:{
-        //       status:'SUCCESSFUL',
-        //     }
-        // })
-
-        return subscribed.data.id
-
-    }
 
     private complete_Withdrawal = async(
         withdrawal_Id: string,
@@ -78,255 +55,6 @@ class WalletService
 
     }
 
-
-
-    private Withdraw_Bitcoin = async(
-        userId: string, 
-        account_ID: string,
-        address: string,
-        amount: number,
-    )=>{
-        const data = {
-            senderAccountId: account_ID,
-            mnemonic: config.BTC_MNEMONIC,
-            xpub: config.BTC_XPUB,
-            address,
-            amount
-        };
-
-        let transaction;
-
-        const response = await tatumAxios.post('/offchain/bitcoin/transfer', data)
-        console.log(response)
-        const result = response.data
-
-        transaction = await prisma.transaction.create({
-            data:{
-                id: result.id,
-                userId: userId,
-                currency: 'BTC',
-                amount,
-                status: result.completed ? 'SUCCESSFUL' : 'PENDING',
-                walletId: account_ID,
-                type:'DEBIT_PAYMENT',
-                description:'Bitcoin transfer'
-            }
-        })
-
-        if(!result.completed){
-            transaction = await this.complete_Withdrawal(result.id, result.txId)
-        }
-
-        return transaction
-
-    }
-
-    private Withdraw_Ethereum = async(
-        userId: string, 
-        account_ID: string,
-        address: string,
-        amount: number,
-    )=>{
-        const data = {
-            senderAccountId: account_ID,
-            mnemonic: config.ETH_MNEMONIC,
-            index: 1,
-            address,
-            amount
-        };
-
-        let transaction;
-
-        const response = await tatumAxios.post('/offchain/ethereum/transfer', data)
-        console.log(response)
-        const result = response.data
-
-        transaction = await prisma.transaction.create({
-            data:{
-                id: result.id,
-                userId: userId,
-                currency: 'ETH',
-                amount,
-                status: result.completed ? 'SUCCESSFUL' : 'PENDING',
-                walletId: account_ID,
-                type:'DEBIT_PAYMENT',
-                description:'Ethereum transfer'
-            }
-        })
-
-        if(!result.completed){
-            transaction = await this.complete_Withdrawal(result.id, result.txId)
-        }
-
-        return transaction
-
-        
-    }
-
-    private Withdraw_Litecoin = async(
-        userId: string, 
-        account_ID: string,
-        address: string,
-        amount: number,
-    )=>{
-        const data = {
-            senderAccountId: account_ID,
-            mnemonic: config.LTC_MNEMONIC,
-            xpub: config.LTC_XPUB,
-            address,
-            amount
-        };
-
-        let transaction;
-
-        const response = await tatumAxios.post('/offchain/litecoin/transfer', data)
-        console.log(response)
-        const result = response.data
-
-        transaction = await prisma.transaction.create({
-            data:{
-                id: result.id,
-                userId: userId,
-                currency: 'LTC',
-                amount,
-                status: result.completed ? 'SUCCESSFUL' : 'PENDING',
-                walletId: account_ID,
-                type:'DEBIT_PAYMENT',
-                description:'Litecoin transfer'
-            }
-        })
-
-        if(!result.completed){
-           transaction = await this.complete_Withdrawal(result.id, result.txId)
-        }
-        return transaction
-        
-    }
-    
-    private Withdraw_Tron = async(
-        userId: string, 
-        account_ID: string,
-        address: string,
-        amount: number,
-    )=>{
-        const data = {
-            senderAccountId: account_ID,
-            mnemonic: config.TRON_MNEMONIC,
-            index: 1,
-            address,
-            amount
-        };
-
-        let transaction;
-
-        const response = await tatumAxios.post('/offchain/tron/transfer', data)
-        console.log(response)
-        const result = response.data
-
-        transaction = await prisma.transaction.create({
-            data:{
-                id: result.id,
-                userId: userId,
-                currency: 'TRON',
-                amount,
-                status: result.completed ? 'SUCCESSFUL' : 'PENDING',
-                walletId: account_ID,
-                type:'DEBIT_PAYMENT',
-                description:'Tron transfer'
-            }
-        })
-
-        if(!result.completed){
-           transaction = await this.complete_Withdrawal(result.id, result.txId)
-        }
-
-        return transaction
-
-        
-    }
-
-    private Withdraw_BNB = async(
-        userId: string, 
-        account_ID: string,
-        address: string,
-        amount: number,
-    )=>{
-        const data = {
-            senderAccountId: account_ID,
-            fromPrivateKey: config.BNB_KEY,
-            address,
-            amount
-        };
-
-        let transaction;
-
-        const response = await tatumAxios.post('/offchain/bnb/transfer', data)
-        console.log(response)
-        const result = response.data
-
-        transaction = await prisma.transaction.create({
-            data:{
-                id: result.id,
-                userId: userId,
-                currency: 'BNB',
-                amount,
-                status: result.completed ? 'SUCCESSFUL' : 'PENDING',
-                walletId: account_ID,
-                type:'DEBIT_PAYMENT',
-                description:'BNB transfer'
-            }
-        })
-
-        if(!result.completed){
-           transaction = await this.complete_Withdrawal(result.id, result.txId)
-        }
-
-        return transaction
-
-    }
-
-    private Withdraw_XRP = async(
-        userId: string, 
-        account_ID: string,
-        address: string,
-        amount: number,
-        destination_Tag: number,
-    )=>{
-        const data = {
-            senderAccountId: account_ID,
-            account: config.XRP_ADDRESS,
-            secret: config.XRP_SECRET,
-            attr: destination_Tag,
-            address,
-            amount
-        };
-
-        let transaction;
-
-        const response = await tatumAxios.post('/offchain/xrp/transfer', data)
-        console.log(response)
-        const result = response.data
-
-        transaction = await prisma.transaction.create({
-            data:{
-                id: result.id,
-                userId: userId,
-                currency: 'XRP',
-                amount,
-                status: result.completed ? 'SUCCESSFUL' : 'PENDING',
-                walletId: account_ID,
-                type:'DEBIT_PAYMENT',
-                description:'Ripple transfer'
-            }
-        })
-
-        if(!result.completed){
-           transaction = await this.complete_Withdrawal(result.id, result.txId)
-        }
-
-        return transaction
-
-    }
 
     private Withdraw_USDC_ETH = async(
         userId: string, 
@@ -372,681 +100,31 @@ class WalletService
 
     
 
+    async subscribe_address(payload:{
+        address: string,
+        chain: string
+    }){
 
-
-    private create_Naira_wallet = async(userId:string,currencyId:string)=>{
         const data = {
-            currency: "VC_NGN",
-            customer:{
-               accountingCurrency: "NGN",
-               externalId: userId
+            type:"ADDRESS_EVENT",
+            attr:{
+               address: payload.address,
+               chain: payload.chain,
+               url:"https://api.vyre.africa/api/v1/tatum/events" //The URL of the webhook listener you are using
+               }
             }
-        };
-        const response = await tatumAxios.post('/ledger/account', data)
-        console.log(response)
-        const result = response.data
 
-        const newWallet = await prisma.wallet.create({
-            data:{
-                id: result.id,
-                currencyId,
-                userId,
-                Tatum_customerId: result.customerId,
-                accountingCurrency: result.accountingCurrency,
-                frozen: result.frozen
-            }
-        })
+        const subscribed = await tatumAxiosV4.post('/subscription', data)
 
-        return newWallet
-    }
+        // const subcribed = await prisma.transaction.update({
+        //     where:{id: withdrawal_Id },
+        //     data:{
+        //       status:'SUCCESSFUL',
+        //     }
+        // })
 
-    private create_Dollar_wallet = async(userId:string, currencyId:string)=>{
-        const data = {
-            currency: "VC_USD",
-            customer:{
-               accountingCurrency: "USD",
-               externalId: userId
-            }
-        };
-        const response = await tatumAxios.post('/ledger/account', data)
-        console.log(response)
-        const result = response.data
+        return subscribed.data.id
 
-        const newWallet = await prisma.wallet.create({
-            data:{
-                id: result.id,
-                currencyId,
-                userId,
-                Tatum_customerId: result.customerId,
-                accountingCurrency: result.accountingCurrency,
-                frozen: result.frozen
-            }
-        })
-
-        return newWallet
-    }
-
-    private create_Bitcoin_wallet = async(userId:string, currencyId:string)=>{
-        const data = {
-            currency: "BTC",
-            xpub: config.BTC_XPUB,
-            customer:{
-               accountingCurrency: "USD",
-               externalId: userId
-            }
-        };
-        const response = await tatumAxios.post('/ledger/account', data)
-        console.log(response)
-        const result = response.data
-
-        const deposit = await this.generate_Address(result.id)
-
-        const newWallet = await prisma.wallet.create({
-            data:{
-                id: result.id,
-                currencyId,
-                userId,
-                depositAddress: deposit.address,
-                derivationKey: deposit.derivationKey,
-                Tatum_customerId: result.customerId,
-                accountingCurrency: result.accountingCurrency,
-                frozen: result.frozen
-            }
-        })
-
-        return newWallet
-    }
-
-    private create_Ethereum_wallet = async(userId:string, currencyId:string)=>{
-        const data = {
-            currency: "ETH",
-            xpub: config.ETH_XPUB,
-            customer:{
-               accountingCurrency: "USD",
-               externalId: userId
-            }
-        };
-        const response = await tatumAxios.post('/ledger/account', data)
-        console.log(response)
-        const result = response.data
-
-        const deposit = await this.generate_Address(result.id)
-
-        const newWallet = await prisma.wallet.create({
-            data:{
-                id: result.id,
-                currencyId,
-                userId,
-                depositAddress: deposit.address,
-                derivationKey: deposit.derivationKey,
-                Tatum_customerId: result.customerId,
-                accountingCurrency: result.accountingCurrency,
-                frozen: result.frozen
-            }
-        })
-
-        return newWallet
-    }
-
-    private create_Litecoin_wallet = async(userId:string, currencyId:string)=>{
-        const data = {
-            currency: "LTC",
-            xpub: config.LTC_XPUB,
-            customer:{
-               accountingCurrency: "USD",
-               externalId: userId
-            }
-        };
-        const response = await tatumAxios.post('/ledger/account', data)
-        console.log(response)
-        const result = response.data
-        const deposit = await this.generate_Address(result.id)
-
-        const newWallet = await prisma.wallet.create({
-            data:{
-                id: result.id,
-                currencyId,
-                userId,
-                depositAddress: deposit.address,
-                derivationKey: deposit.derivationKey,
-                Tatum_customerId: result.customerId,
-                accountingCurrency: result.accountingCurrency,
-                frozen: result.frozen
-            }
-        })
-
-        return newWallet
-    }
-
-    private create_Tron_wallet = async(userId:string, currencyId:string)=>{
-        const data = {
-            currency: "TRON",
-            xpub: config.TRON_XPUB,
-            customer:{
-               accountingCurrency: "USD",
-               externalId: userId
-            }
-        };
-        const response = await tatumAxios.post('/ledger/account', data)
-        console.log(response)
-        const result = response.data
-        const deposit = await this.generate_Address(result.id)
-
-        const newWallet = await prisma.wallet.create({
-            data:{
-                id: result.id,
-                currencyId,
-                userId,
-                depositAddress: deposit.address,
-                derivationKey: deposit.derivationKey,
-                Tatum_customerId: result.customerId,
-                accountingCurrency: result.accountingCurrency,
-                frozen: result.frozen
-            }
-        })
-
-        return newWallet
-    }
-
-    private create_Bnb_wallet = async(userId:string, currencyId:string)=>{
-        const data = {
-            currency: "BNB",
-            xpub: config.BNB_ADDRESS,
-            customer:{
-               accountingCurrency: "USD",
-               externalId: userId
-            }
-        };
-        const response = await tatumAxios.post('/ledger/account', data)
-        console.log(response)
-        const result = response.data
-        const deposit = await this.generate_Address(result.id)
-
-        const newWallet = await prisma.wallet.create({
-            data:{
-                id: result.id,
-                currencyId,
-                userId,
-                depositAddress: deposit.address,
-                derivationKey: deposit.derivationKey,
-                Tatum_customerId: result.customerId,
-                accountingCurrency: result.accountingCurrency,
-                frozen: result.frozen
-            }
-        })
-
-        return newWallet
-    }
-
-    private create_Ripple_wallet = async(userId:string, currencyId:string)=>{
-        const data = {
-            currency: "XRP",
-            xpub: config.XRP_ADDRESS,
-            customer:{
-               accountingCurrency: "USD",
-               externalId: userId
-            }
-        };
-        const response = await tatumAxios.post('/ledger/account', data)
-        console.log(response)
-        const result = response.data
-        const deposit = await this.generate_Address(result.id)
-
-        const newWallet = await prisma.wallet.create({
-            data:{
-                id: result.id,
-                currencyId,
-                userId,
-                depositAddress: deposit.address,
-                derivationKey: deposit.derivationKey,
-                destinationTag: deposit.destinationTag,
-
-                Tatum_customerId: result.customerId,
-                accountingCurrency: result.accountingCurrency,
-                frozen: result.frozen
-            }
-        })
-
-        return newWallet
-    }
-// USDC
-    private create_USDC_Eth_wallet = async(userId:string, currencyId:string)=>{
-        const data = {
-            currency: "USDC",
-            xpub: config.USDC.ETH_XPUB,
-            customer:{
-               accountingCurrency: "USD",
-               externalId: userId
-            }
-        };
-        const response = await tatumAxios.post('/ledger/account', data)
-        console.log(response)
-        const result = response.data
-        const deposit = await this.generate_Address(result.id)
-
-        const newWallet = await prisma.wallet.create({
-            data:{
-                id: result.id,
-                currencyId,
-                userId,
-                depositAddress: deposit.address,
-                derivationKey: deposit.derivationKey,
-                Tatum_customerId: result.customerId,
-                accountingCurrency: result.accountingCurrency,
-                frozen: result.frozen
-            }
-        })
-
-        return newWallet
-    }
-
-    private create_USDC_Base_wallet = async(userId:string, currencyId:string)=>{
-        const data = {
-            currency: "USDC_BASE",
-            xpub: config.USDC.BASE_XPUB,
-            customer:{
-               accountingCurrency: "USD",
-               externalId: userId
-            }
-        };
-        const response = await tatumAxios.post('/ledger/account', data)
-        console.log(response)
-        const result = response.data
-        const deposit = await this.generate_Address(result.id)
-
-        const newWallet = await prisma.wallet.create({
-            data:{
-                id: result.id,
-                currencyId,
-                userId,
-                depositAddress: deposit.address,
-                derivationKey: deposit.derivationKey,
-                Tatum_customerId: result.customerId,
-                accountingCurrency: result.accountingCurrency,
-                frozen: result.frozen
-            }
-        })
-
-        return newWallet
-    }
-
-    private create_USDC_BSC_wallet = async(userId:string, currencyId:string)=>{
-        const data = {
-            currency: "USDC_BSC",
-            xpub: config.USDC.BSC_XPUB,
-            customer:{
-               accountingCurrency: "USD",
-               externalId: userId
-            }
-        };
-        const response = await tatumAxios.post('/ledger/account', data)
-        console.log(response)
-        const result = response.data
-        const deposit = await this.generate_Address(result.id)
-
-        const newWallet = await prisma.wallet.create({
-            data:{
-                id: result.id,
-                currencyId,
-                userId,
-                depositAddress: deposit.address,
-                derivationKey: deposit.derivationKey,
-                Tatum_customerId: result.customerId,
-                accountingCurrency: result.accountingCurrency,
-                frozen: result.frozen
-            }
-        })
-
-        return newWallet
-    }
-
-    private create_USDC_Matic_wallet = async(userId:string, currencyId:string)=>{
-        const data = {
-            currency: "USDC_MATIC",
-            xpub: config.USDC.POLYGON_XPUB,
-            customer:{
-               accountingCurrency: "USD",
-               externalId: userId
-            }
-        };
-        const response = await tatumAxios.post('/ledger/account', data)
-        console.log(response)
-        const result = response.data
-        const deposit = await this.generate_Address(result.id)
-
-        const newWallet = await prisma.wallet.create({
-            data:{
-                id: result.id,
-                currencyId,
-                userId,
-                depositAddress: deposit.address,
-                derivationKey: deposit.derivationKey,
-                Tatum_customerId: result.customerId,
-                accountingCurrency: result.accountingCurrency,
-                frozen: result.frozen
-            }
-        })
-
-        return newWallet
-    }
-
-    private create_USDC_Arb_wallet = async(userId:string, currencyId:string)=>{
-        const data = {
-            currency: "USDC_ARB",
-            xpub: config.USDC.ARBITRUM_XPUB,
-            customer:{
-               accountingCurrency: "USD",
-               externalId: userId
-            }
-        };
-        const response = await tatumAxios.post('/ledger/account', data)
-        console.log(response)
-        const result = response.data
-        const deposit = await this.generate_Address(result.id)
-
-        const newWallet = await prisma.wallet.create({
-            data:{
-                id: result.id,
-                currencyId,
-                userId,
-                depositAddress: deposit.address,
-                derivationKey: deposit.derivationKey,
-                Tatum_customerId: result.customerId,
-                accountingCurrency: result.accountingCurrency,
-                frozen: result.frozen
-            }
-        })
-
-        return newWallet
-    }
-
-    private create_USDC_OP_wallet = async(userId:string, currencyId:string)=>{
-        const data = {
-            currency: "USDC_OP",
-            xpub: config.USDC.OPTIMISM_XPUB,
-            customer:{
-               accountingCurrency: "USD",
-               externalId: userId
-            }
-        };
-        const response = await tatumAxios.post('/ledger/account', data)
-        console.log(response)
-        const result = response.data
-        const deposit = await this.generate_Address(result.id)
-
-        const newWallet = await prisma.wallet.create({
-            data:{
-                id: result.id,
-                currencyId,
-                userId,
-                depositAddress: deposit.address,
-                derivationKey: deposit.derivationKey,
-                Tatum_customerId: result.customerId,
-                accountingCurrency: result.accountingCurrency,
-                frozen: result.frozen
-            }
-        })
-
-        return newWallet
-    }
-// USDT
-    private create_TetherErc_wallet = async(userId:string, currencyId:string)=>{
-        const data = {
-            currency: "USDT",
-            xpub: config.USDT.ETH_XPUB,
-            customer:{
-               accountingCurrency: "USD",
-               externalId: userId
-            }
-        };
-        const response = await tatumAxios.post('/ledger/account', data)
-        console.log(response)
-        const result = response.data
-        const deposit = await this.generate_Address(result.id)
-
-        const newWallet = await prisma.wallet.create({
-            data:{
-                id: result.id,
-                currencyId,
-                userId,
-                depositAddress: deposit.address,
-                derivationKey: deposit.derivationKey,
-                Tatum_customerId: result.customerId,
-                accountingCurrency: result.accountingCurrency,
-                frozen: result.frozen
-            }
-        })
-
-        return newWallet
-    }
-
-    private create_TetherTrc_wallet = async(userId:string, currencyId:string)=>{
-        const data = {
-            currency: "USDT_TRON",
-            xpub: config.USDT.TRON_XPUB,
-            customer:{
-               accountingCurrency: "USD",
-               externalId: userId
-            }
-        };
-        const response = await tatumAxios.post('/ledger/account', data)
-        console.log(response)
-        const result = response.data
-        const deposit = await this.generate_Address(result.id)
-
-        const newWallet = await prisma.wallet.create({
-            data:{
-                id: result.id,
-                currencyId,
-                userId,
-                depositAddress: deposit.address,
-                derivationKey: deposit.derivationKey,
-                Tatum_customerId: result.customerId,
-                accountingCurrency: result.accountingCurrency,
-                frozen: result.frozen
-            }
-        })
-
-        return newWallet
-    }
-
-    private create_TetherBase_wallet = async(userId:string, currencyId:string)=>{
-        const data = {
-            currency: "USDT_BASE",
-            xpub: config.USDT.BASE_XPUB,
-            customer:{
-               accountingCurrency: "USD",
-               externalId: userId
-            }
-        };
-        const response = await tatumAxios.post('/ledger/account', data)
-        console.log(response)
-        const result = response.data
-        const deposit = await this.generate_Address(result.id)
-
-        const newWallet = await prisma.wallet.create({
-            data:{
-                id: result.id,
-                currencyId,
-                userId,
-                depositAddress: deposit.address,
-                derivationKey: deposit.derivationKey,
-                Tatum_customerId: result.customerId,
-                accountingCurrency: result.accountingCurrency,
-                frozen: result.frozen
-            }
-        })
-
-        return newWallet
-    }
-
-    private create_TetherBSC_wallet = async(userId:string, currencyId:string)=>{
-        const data = {
-            currency: "USDT_BSC",
-            xpub: config.USDT.BSC_XPUB,
-            customer:{
-               accountingCurrency: "USD",
-               externalId: userId
-            }
-        };
-        const response = await tatumAxios.post('/ledger/account', data)
-        console.log(response)
-        const result = response.data
-        const deposit = await this.generate_Address(result.id)
-
-        const newWallet = await prisma.wallet.create({
-            data:{
-                id: result.id,
-                currencyId,
-                userId,
-                depositAddress: deposit.address,
-                derivationKey: deposit.derivationKey,
-                Tatum_customerId: result.customerId,
-                accountingCurrency: result.accountingCurrency,
-                frozen: result.frozen
-            }
-        })
-
-        return newWallet
-    }
-
-    private create_TetherARB_wallet = async(userId:string, currencyId:string)=>{
-        const data = {
-            currency: "USDT_ARB",
-            xpub: config.USDT.ARBITRUM_XPUB,
-            customer:{
-               accountingCurrency: "USD",
-               externalId: userId
-            }
-        };
-        const response = await tatumAxios.post('/ledger/account', data)
-        console.log(response)
-        const result = response.data
-        const deposit = await this.generate_Address(result.id)
-
-        const newWallet = await prisma.wallet.create({
-            data:{
-                id: result.id,
-                currencyId,
-                userId,
-                depositAddress: deposit.address,
-                derivationKey: deposit.derivationKey,
-                Tatum_customerId: result.customerId,
-                accountingCurrency: result.accountingCurrency,
-                frozen: result.frozen
-            }
-        })
-
-        return newWallet
-    }
-
-    private create_TetherOP_wallet = async(userId:string, currencyId:string)=>{
-        const data = {
-            currency: "USDT_OP",
-            xpub: config.USDT.OPTIMISM_XPUB,
-            customer:{
-               accountingCurrency: "USD",
-               externalId: userId
-            }
-        };
-        const response = await tatumAxios.post('/ledger/account', data)
-        console.log(response)
-        const result = response.data
-        const deposit = await this.generate_Address(result.id)
-
-        const newWallet = await prisma.wallet.create({
-            data:{
-                id: result.id,
-                currencyId,
-                userId,
-                depositAddress: deposit.address,
-                derivationKey: deposit.derivationKey,
-                Tatum_customerId: result.customerId,
-                accountingCurrency: result.accountingCurrency,
-                frozen: result.frozen
-            }
-        })
-
-        return newWallet
-    }
-
-    async create_Tether_wallet(chain:string, userId:string, currencyId:string){
-        let result;
-        switch (chain) {
-
-            case 'ETHEREUM':
-             result = await this.create_TetherErc_wallet(userId, currencyId)
-            return result
-            break;
-
-            case 'TRON':
-             result = await this.create_TetherTrc_wallet(userId, currencyId)
-            return result
-            break;
-
-            case 'BASE':
-            result = await this.create_TetherBase_wallet(userId, currencyId)
-            return result
-            break;
-
-            case 'BSC':
-            result = await this.create_TetherBSC_wallet(userId, currencyId)
-            return result
-            break;
-
-            case 'ARBITRUM':
-            result = await this.create_TetherARB_wallet(userId, currencyId)
-            return result
-            break;
-
-            case 'OPTIMISM':
-            result = await this.create_TetherOP_wallet(userId, currencyId)
-            return result
-            break;
-
-            default:
-            return
-        }
-
-    }
-
-    async create_USDC_wallet(chain:string, userId:string, currencyId:string){
-        let result;
-        switch (chain) {
-
-            case 'ETHEREUM':
-             result = await this.create_USDC_Eth_wallet(userId, currencyId)
-            return result
-            break;
-
-            case 'POLYGON':
-             result = await this.create_USDC_Matic_wallet(userId, currencyId)
-            return result
-            break;
-
-            case 'BASE':
-            result = await this.create_USDC_Base_wallet(userId, currencyId)
-            return result
-            break;
-
-            case 'BSC':
-            result = await this.create_USDC_BSC_wallet(userId, currencyId)
-            return result
-            break;
-
-            case 'ARBITRUM':
-            result = await this.create_USDC_Arb_wallet(userId, currencyId)
-            return result
-            break;
-
-            case 'OPTIMISM':
-            result = await this.create_USDC_OP_wallet(userId, currencyId)
-            return result
-            break;
-
-            default:
-            return
-        }
     }
 
 
@@ -1080,12 +158,12 @@ class WalletService
             switch (currency.ISO) {
 
                 case 'USDC':
-                 result = await this.create_USDC_wallet(currency.chain!, userId, currency.id)
+                 result = await stablecoinService.create_USDC_wallet(currency.chain!, userId, currency.id)
                 return result
                 break;
 
                 case 'USDT':
-                 result = await this.create_Tether_wallet(currency.chain!, userId, currency.id)
+                 result = await stablecoinService.create_Tether_wallet(currency.chain!, userId, currency.id)
                 return result
                 break;
 
@@ -1095,51 +173,7 @@ class WalletService
 
         }else{
 
-            switch (currency.ISO) {
-
-                case 'NGN':
-                result = await this.create_Naira_wallet(userId, currency.id)
-                return result
-                break;
-
-                case 'USD':
-                result = await this.create_Dollar_wallet(userId, currency.id)
-                return result
-                break;
-                
-                case 'BTC':
-                result = await this.create_Bitcoin_wallet(userId, currency.id)
-                return result
-                break;
-                
-                case 'ETH':
-                result = await this.create_Ethereum_wallet(userId, currency.id)
-                return result
-                break;
-
-                case 'LTC':
-                result = await this.create_Litecoin_wallet(userId, currency.id)
-                return result
-                break;
-                
-                case 'TRON':
-                result = await this.create_Tron_wallet(userId, currency.id)
-                return result
-                break;
-
-                case 'BNB':
-                result = await this.create_Bnb_wallet(userId, currency.id)
-                return result
-                break;
-
-                case 'XRP':
-                result = await this.create_Ripple_wallet(userId, currency.id)
-                return result
-                break;
-
-                default:
-                return
-            }
+          result = await nativecoinService.createWallet(currency.ISO, userId, currency.id)
 
         }
 
@@ -1163,7 +197,8 @@ class WalletService
               type: true,
               name: true,
               ISO: true,
-              chain: true 
+              chain: true,
+              isStablecoin: true
             }
               
         })
@@ -1184,82 +219,55 @@ class WalletService
         if(!wallet)return
         let result;
 
+        if(currency.isStablecoin){
 
-        switch (currency.ISO) {
-            
-            case 'BTC':
-              result = await this.Withdraw_Bitcoin(
+            switch (currency.ISO) {
+
+                case 'USDC':
+
+                    result = await stablecoinService.Transfer_USDC({
+                        chain: currency?.chain as string, 
+                        userId, 
+                        walletId: wallet.id,
+                        amount,
+                        index: wallet?.derivationKey as number,
+                        address
+                    })
+
+                return result
+                break;
+
+                case 'USDT':
+
+                    result = await stablecoinService.Transfer_Tether({
+                        chain: currency?.chain as string, 
+                        userId, 
+                        walletId: wallet.id,
+                        amount,
+                        index: wallet?.derivationKey as number,
+                        address
+                    })
+
+                return result
+                break;
+
+                default:
+                return
+            }
+
+
+        }else{
+
+            result = await nativecoinService.blockchain_Transfer({
+                ISO:currency.ISO, 
                 userId, 
-                wallet.id,
+                walletId: wallet?.id,
+                amount,
+                index: wallet?.derivationKey as number,
                 address,
-                amount
-              )
-              return result
-              break;
-            
-            case 'ETH':
-                result = await this.Withdraw_Ethereum(
-                    userId, 
-                    wallet.id,
-                    address,
-                    amount
-                )
-                return result
-              break;
+                destination_Tag
+            })
 
-            case 'LTC':
-                result = await this.Withdraw_Litecoin(
-                    userId, 
-                    wallet.id,
-                    address,
-                    amount
-                )
-                return result
-              break;
-            
-            case 'TRON':
-                result = await this.Withdraw_Tron(
-                    userId, 
-                    wallet.id,
-                    address,
-                    amount
-                )
-                return result
-              break;
-
-            case 'BNB':
-                result = await this.Withdraw_BNB(
-                    userId, 
-                    wallet.id,
-                    address,
-                    amount
-                )
-                return result
-              break;
-
-            case 'XRP':
-                result = await this.Withdraw_XRP(
-                    userId, 
-                    wallet.id,
-                    address,
-                    amount,
-                    destination_Tag!
-                )
-                return result
-              break;
-
-            case 'USDC':
-                result = await this.Withdraw_USDC_ETH(
-                    userId, 
-                    wallet.id,
-                    address,
-                    amount
-                )
-                return result
-              break;
-
-            default:
-             return
         }
 
 
@@ -1389,58 +397,43 @@ class WalletService
         return result
     }
 
+    async direct_bank_Transfer(payload:{
+        currency: string,
+        amount:number,
+        email:string, 
+        phone:string,
+     
+        account_number: string,
+        bank_code: string, 
+        recipient_name: string
+     
+    })
+    {
+        // const {account_number,bank_code,recipient_name,currency} = payload
+
+        const result = await qorepayService.bank_Transfer(payload)
+        return result
+    }
+
     async depositFiat(payload:{
         currency: string,
         amount: number, 
-        email:string,
-        userId:string,
-        walletId:string
+        email: string,
+        userId: string,
+        walletId: string
     })
     {
         const { currency, amount, email, userId, walletId } = payload
         
-        const data = {
-            client: {
-                email
-              },
-              purchase: {
-                currency,
-                products: [
-                  {
-                    name: "Deposit",
-                    quantity: 1,
-                    price: amount * 100
-                  }
-                ]
-              },
-              brand_id: config.QOREPAY_BRAND_ID,
-              failure_redirect: `${config.urls.userDashboard}/failed`,
-              success_redirect: `${config.urls.userDashboard}/successful`
-        }
-        const response = await qorepayAxios.post(`/purchases/`, data)
-        console.log(response.data)
-        const result = response.data
-
-        // create transaction record
-        const transaction = await prisma.transaction.create({
-            data:{
-                userId,
-                currency,
-                amount,
-                reference: result.id,
-                status: 'PENDING',
-                walletId,
-                type:'FIAT_DEPOSIT',
-                description:`${currency} deposit`
-            }
+        const details = await qorepayService.deposit_via_Bank({
+            currency,
+            amount, 
+            email,
+            userId,
+            walletId
         })
-        const paymentDetails ={
-            id: result.id,
-            url:result.checkout_url,
-            success_redirect:result.success_redirect,
-            failure_redirect:result.failure_redirect,
-        }
-        return paymentDetails
+    
+        return details
     }
 
     async getRate(currency: string,basePair: string)
@@ -1682,45 +675,7 @@ class WalletService
         // })
     }
 
-    // async fundStoreWallet(amount: number, storeId: string){
-    //     const wallet =  await prisma.wallet.findUnique({
-    //         where: {storeId},
-    //     })
-
-    //     if(!wallet){
-    //         return false;
-    //     }
-
-    //     const balance: number = Number(wallet.balance);
-
-    //     return await prisma.wallet.update({
-    //         where: {storeId},
-    //         data: {
-    //             balance: balance + amount
-    //         }
-    //     })
-    // }
-
     
-
-    // async debitStoreWallet(amount: number, storeId: string){
-    //     const wallet =  await prisma.wallet.findFirst({
-    //         where: {storeId},
-    //     })
-
-    //     if(!wallet){
-    //         return false;
-    //     }
-
-    //     const balance: number = Number(wallet.balance);
-
-    //     return await prisma.wallet.update({
-    //         where: {storeId},
-    //         data: {
-    //             balance: balance - amount
-    //         }
-    //     })
-    // }
 }
 
 export default new WalletService()

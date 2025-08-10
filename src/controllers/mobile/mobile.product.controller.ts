@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../../config/prisma.config';
 import { endOfDay, startOfDay, subHours } from 'date-fns';
-import productService from '../../services/product.service';
+// import productService from '../../services/product.service';
 import { create } from 'qrcode';
 
 class MobileProductController {

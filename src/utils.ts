@@ -1,5 +1,5 @@
 import * as bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import jwt, { Secret } from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 import prisma from './config/prisma.config';
 import moment from 'moment';
@@ -11,6 +11,8 @@ import crypto from 'crypto';
 const algorithm: string = 'aes-256-cbc';
 const key: Buffer = crypto.randomBytes(32);
 const iv: Buffer = crypto.randomBytes(16);
+
+const jwtPublicKey = config.clerk.jwtPublicKey
 
 
 export const generateSignature = (
@@ -76,6 +78,8 @@ export const generateAccessToken = (user: User) => {
     return jwt.sign(user, config.jwt.secret, options);
 };
 
+
+
 // 1. Initialize JWKS client
 const client = jwksClient({
   jwksUri: `https://auth.vyre.africa/.well-known/jwks.json`
@@ -90,35 +94,90 @@ const getKey = (header:any, callback:any) => {
 };
 
 
-export const verifyAccessToken = (token: string): Promise<VerificationResult> => {
-  return new Promise((resolve) => {
-    jwt.verify(
-      token,
-      getKey,
-      {
-        audience: 'https://api.vyre.africa',
-        issuer: 'https://auth.vyre.africa/',
-        algorithms: ['RS256']
-      },
-      (err, decoded) => {
-        if (err) {
-          console.error('Token verification failed:', err);
-          return resolve({ success: false, error: 'verification failed' });
-        }
+// export const verifyAccessToken = (token: string): Promise<VerificationResult> => {
+//   return new Promise((resolve) => {
+//     jwt.verify(
+//       token,
+//       getKey,
+//       {
+//         audience: 'https://api.vyre.africa',
+//         issuer: 'https://auth.vyre.africa/',
+//         algorithms: ['RS256']
+//       },
+//       (err, decoded) => {
+//         if (err) {
+//           console.error('Token verification failed:', err);
+//           return resolve({ success: false, error: 'verification failed' });
+//         }
         
-        if (!decoded) {
-          return resolve({ success: false, error: 'Token decoded as empty' });
-        }
+//         if (!decoded) {
+//           return resolve({ success: false, error: 'Token decoded as empty' });
+//         }
 
-        console.log('Token successfully verified:', decoded);
-        resolve({ 
-          success: true, 
-          data: decoded as Auth0JwtPayload 
-        });
+//         console.log('Token successfully verified:', decoded);
+//         resolve({ 
+//           success: true, 
+//           data: decoded as Auth0JwtPayload 
+//         });
+//       }
+//     );
+//   });
+// };
+
+
+export const verifyAccessToken = (token: string): VerificationResult => {
+  const options: jwt.VerifyOptions = { 
+    algorithms: ['RS256'],
+    // Add other verification options as needed:
+    // issuer: 'https://your-auth0-domain.auth0.com/',
+    // audience: 'your-api-identifier',
+  };
+
+  try {
+    const decoded = jwt.verify(token, jwtPublicKey as Secret, options) as unknown as Auth0JwtPayload;
+
+    // Additional manual validation
+    const currentTime = Math.floor(Date.now() / 1000);
+    
+    if (decoded.exp && decoded.exp < currentTime) {
+      throw new Error('Token has expired');
+    }
+    
+    if (decoded.nbf && decoded.nbf > currentTime) {
+      throw new Error('Token is not yet valid');
+    }
+
+    return { 
+      success: true, 
+      data: decoded 
+    };
+  } catch (error) {
+    let errorMessage = 'Token verification failed';
+    let errorCode = 'TOKEN_VERIFICATION_ERROR';
+    
+    if (error instanceof jwt.TokenExpiredError) {
+      errorMessage = 'Token has expired';
+      errorCode = 'TOKEN_EXPIRED';
+    } else if (error instanceof jwt.NotBeforeError) {
+      errorMessage = 'Token is not yet valid';
+      errorCode = 'TOKEN_EARLY';
+    } else if (error instanceof jwt.JsonWebTokenError) {
+      errorMessage = error.message;
+      errorCode = 'JWT_ERROR';
+    }
+
+    return {
+      success: false,
+      error: {
+        message: errorMessage,
+        code: errorCode,
+        details: error
       }
-    );
-  });
+    };
+  }
 };
+
+
 
 export const OTP_CODE_EXP: string = moment().add(45, 'minutes').toString();
 
