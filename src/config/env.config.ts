@@ -3,7 +3,7 @@ dotenv.config();
 
 const config = {
     host: process.env.HOST || '',
-    port: process.env.PORT || '5000',
+    port: process.env.PORT || 5000,
     nodeEnv: process.env.NODE_ENV || '',
     
     redisHost: process.env.REDIS_HOST || 'redis',
@@ -34,6 +34,7 @@ const config = {
 
     clerk: {
         jwtPublicKey: process.env.clerk_JWT_PUBLICKEY || '',
+        PEM_PUBLICKEY: process.env.PEM_PUBLICKEY || ''
     },
 
     refreshJwt: {

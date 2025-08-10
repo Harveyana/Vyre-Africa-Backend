@@ -33,7 +33,7 @@ export const authMiddleware = async (
     // 2. Validate Token (choose ONE approach)
     
     // OPTION A: Local verification (recommended)
-    const { success, data } = await verifyAccessToken(token);
+    const { success, data } = verifyAccessToken(token);
     if (!success || !data?.userId) {
       console.log('token data',data)
         

@@ -1,0 +1,34 @@
+2025-08-10 10:10:45 [info] Server running on port 5000 
+2025-08-10 10:13:06 [info] Server running on port 5000 
+2025-08-10 10:19:17 [info] Server running on port 5000 
+2025-08-10 10:20:04 [info] Server running on port 5000 
+2025-08-10 10:34:51 [info] Server running on port 5000 
+2025-08-10 10:36:11 [info] Server running on port 5000 
+2025-08-10 10:37:10 [info] Server running on port 5000 
+2025-08-10 10:40:50 [info] Server running on port 5000 
+2025-08-10 10:41:10 [info] Server running on port 5000 
+2025-08-10 10:41:20 [info] Server running on port 5000 
+2025-08-10 10:42:24 [info] Server running on port 5000 
+2025-08-10 10:43:13 [info] Server running on port 5000 
+2025-08-10 10:43:32 [info] Server running on port 5000 
+2025-08-10 10:49:30 [info] Server running on port 5000 
+2025-08-10 10:54:59 [info] Server running on port 5000 
+2025-08-10 10:56:44 [info] Server running on port 5000 
+2025-08-10 10:58:48 [info] Server running on port 5000 
+2025-08-10 11:00:20 [error] UNHANDLED REJECTION: logger is not defined 
+ReferenceError: logger is not defined
+    at Server.<anonymous> (/Users/mac/Vyre-Africa-Backend/build/server.js:55:5)
+    at Object.onceWrapper (node:events:634:28)
+    at Server.emit (node:events:532:35)
+    at emitListeningNT (node:net:1945:10)
+    at process.processTicksAndRejections (node:internal/process/task_queues:89:21)
+2025-08-10 11:00:38 [info] Server running on port 5000 
+2025-08-10 11:00:38 [info] Server running on port 5000 
+2025-08-10 11:03:28 [info] Server running on port 5000 
+2025-08-10 11:06:41 [info] Server running on port 5000 
+2025-08-10 11:10:45 [info] Server running on port 5000 
+2025-08-10 11:24:31 [info] Server running on port 5000 
+2025-08-10 11:30:49 [info] Server running on port 5000 
+2025-08-10 11:58:02 [info] Server running on port 5000 
+2025-08-10 12:07:25 [info] Server running on port 5000 
+2025-08-10 12:08:04 [info] Server running on port 5000 

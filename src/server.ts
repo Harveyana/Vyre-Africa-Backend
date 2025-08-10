@@ -1,8 +1,8 @@
 import * as http from "http";
 import app from "./app";
 import env from "./config/env.config";
-import './workers/order.worker';
-// import logger from "./config/logger";
+// import './workers/order.worker';
+import logger from "./config/logger";
 import cron from 'node-cron';
 import adminBroadcastController from "./controllers/admin/admin.broadcast.controller";
 import orderController from "./controllers/order.controller";
@@ -37,7 +37,18 @@ const server = http.createServer(app);
 // });
 
 
-server.listen(env.port, () => {
+server.listen(env.port, async() => {
 	console.log(`Listening on port ${env.port}`);
-	// logger.info(`Server running on port ${env.port}`);
+	logger.info(`Server running on port ${env.port}`);
+
+	// if (process.env.NODE_ENV !== 'dev') {
+		try {
+		  await import('./workers/order.worker');
+		//   await startWorker();
+		  console.log('Order worker started successfully');
+		} catch (err) {
+		  console.error('Failed to start worker:', err);
+		  // Don't crash the server if worker fails
+		}
+	//   }
 });

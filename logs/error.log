@@ -1,0 +1,7 @@
+2025-08-10 11:00:20 [error] UNHANDLED REJECTION: logger is not defined 
+ReferenceError: logger is not defined
+    at Server.<anonymous> (/Users/mac/Vyre-Africa-Backend/build/server.js:55:5)
+    at Object.onceWrapper (node:events:634:28)
+    at Server.emit (node:events:532:35)
+    at emitListeningNT (node:net:1945:10)
+    at process.processTicksAndRejections (node:internal/process/task_queues:89:21)

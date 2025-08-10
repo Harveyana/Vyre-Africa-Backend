@@ -9,7 +9,9 @@ const connection = new IORedis({
     host: config.redisHost,
     port: parseInt(config.redisPort),
     username: "default",
-    password: config.redisPassWord
+    password: config.redisPassWord,
+    maxRetriesPerRequest: null,
+    enableReadyCheck: false
 });
 
 const worker = new Worker('order-processing', 

@@ -12,8 +12,7 @@ const algorithm: string = 'aes-256-cbc';
 const key: Buffer = crypto.randomBytes(32);
 const iv: Buffer = crypto.randomBytes(16);
 
-const jwtPublicKey = config.clerk.jwtPublicKey
-
+ 
 
 export const generateSignature = (
     body: string,       // raw JSON string of the request body
@@ -126,6 +125,9 @@ const getKey = (header:any, callback:any) => {
 
 
 export const verifyAccessToken = (token: string): VerificationResult => {
+  // console.log('jwtPublicKey',jwtPublicKey)
+  console.log('token',token)
+
   const options: jwt.VerifyOptions = { 
     algorithms: ['RS256'],
     // Add other verification options as needed:
@@ -134,7 +136,9 @@ export const verifyAccessToken = (token: string): VerificationResult => {
   };
 
   try {
-    const decoded = jwt.verify(token, jwtPublicKey as Secret, options) as unknown as Auth0JwtPayload;
+    const decoded = jwt.verify(token, config.clerk.PEM_PUBLICKEY, options) as unknown as Auth0JwtPayload;
+     
+    //  console.log('decoded',decoded)
 
     // Additional manual validation
     const currentTime = Math.floor(Date.now() / 1000);

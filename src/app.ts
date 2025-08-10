@@ -23,7 +23,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.get('/', (req, res) => res.send('Vyre Backend!'));
 
-initializeAdmin();
+// initializeAdmin();
 
 app.use(compression());
 app.use(morgan('dev'));
@@ -38,29 +38,28 @@ app.use(function (req, res, next) {
     next();
 });
 
-// const corsOptions = {
-//     origin: [
-//       'http://localhost:3000', 
-//       'http://localhost:3001', 
+const corsOptions = {
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'https://app.vyre.africa',
+      'https://p2p.vyre.africa',
+      'https://payments.vyre.africa',
+      'https://swap.vyre.africa'
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+      'Origin',
+      'X-Requested-With',
+      'Content-Type',
+      'Accept',
+      'Authorization'
+    ],
+    credentials: true,
+    optionsSuccessStatus: 200 // For legacy browsers
+};
 
-//       'https://app.vyre.africa',
-//       'https://p2p.vyre.africa',
-//       'https://payments.vyre.africa',
-//       'https://swap.vyre.africa'
-
-//     ],
-//     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-//     allowedHeaders: [
-//       'Origin', 
-//       'X-Requested-With', 
-//       'Content-Type', 
-//       'Accept',
-//       'Authorization'  // ← Must include for Auth0
-//     ],
-//     credentials: true  // ← Required for cookies/auth
-// };
-
-app.use(cors());
+app.use(cors(corsOptions));
 
 app.use('/api/v1', router);
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
