@@ -25,37 +25,37 @@ class UserValidator {
 
     uploadKyc() {
         return [
-            body('DETAILS').isObject().withMessage('DETAILS must be an object'),
+            // body('DETAILS').isObject().withMessage('DETAILS must be an object'),
             // Personal Information
-                body('DETAILS.legalFirstName').notEmpty().withMessage('Legal first name is required').isString().withMessage('Legal first name must be a string').trim().isLength({ max: 100 }).withMessage('Legal first name cannot exceed 100 characters'),
-                body('DETAILS.legalLastName').notEmpty().withMessage('Legal last name is required').isString().withMessage('Legal last name must be a string').trim().isLength({ max: 100 }).withMessage('Legal last name cannot exceed 100 characters'),
-                body('DETAILS.phoneNumber').notEmpty().withMessage('Phone number is required').isString().withMessage('Phone number must be a string').trim().isMobilePhone('any').withMessage('Invalid phone number format'),
-                body('DETAILS.dateOfBirth').notEmpty().withMessage('Date of birth is required').isISO8601().withMessage('Date of birth must be in ISO8601 format (YYYY-MM-DD)').toDate(),
+                body('legalFirstName').notEmpty().withMessage('Legal first name is required').isString().withMessage('Legal first name must be a string').trim().isLength({ max: 100 }).withMessage('Legal first name cannot exceed 100 characters'),
+                body('legalLastName').notEmpty().withMessage('Legal last name is required').isString().withMessage('Legal last name must be a string').trim().isLength({ max: 100 }).withMessage('Legal last name cannot exceed 100 characters'),
+                body('phoneNumber').notEmpty().withMessage('Phone number is required').isString().withMessage('Phone number must be a string').trim().isMobilePhone('any').withMessage('Invalid phone number format'),
+                body('dateOfBirth').notEmpty().withMessage('Date of birth is required').isISO8601().withMessage('Date of birth must be in ISO8601 format (YYYY-MM-DD)').toDate(),
 
                 // Address Validation
-                body('DETAILS.address').isObject().withMessage('Address must be an object'),
-                    body('DETAILS.address.streetLine1').notEmpty().withMessage('Street address is required').isString().withMessage('Street address must be a string').trim().isLength({ max: 200 }).withMessage('Street address cannot exceed 200 characters'),
-                    body('DETAILS.address.city').notEmpty().withMessage('City is required').isString().withMessage('City must be a string').trim().isLength({ max: 100 }).withMessage('City cannot exceed 100 characters'),
-                    body('DETAILS.address.stateRegionProvince').notEmpty().withMessage('State/Region/Province is required').isString().withMessage('State/Region/Province must be a string').trim().isLength({ max: 100 }).withMessage('State/Region/Province cannot exceed 100 characters'),
-                    body('DETAILS.address.postalCode').notEmpty().withMessage('Postal code is required').isString().withMessage('Postal code must be a string').trim().isLength({ max: 20 }).withMessage('Postal code cannot exceed 20 characters'),
-                    body('DETAILS.address.countryCode').notEmpty().withMessage('Country code is required').isString().withMessage('Country code must be a string').trim().isLength({ min: 2, max: 3 }).withMessage('Country code must be 2-3 characters').isAlpha().withMessage('Country code must contain only letters'),
+                body('address').isObject().withMessage('Address must be an object'),
+                    body('address.streetLine1').notEmpty().withMessage('Street address is required').isString().withMessage('Street address must be a string').trim().isLength({ max: 200 }).withMessage('Street address cannot exceed 200 characters'),
+                    body('address.city').notEmpty().withMessage('City is required').isString().withMessage('City must be a string').trim().isLength({ max: 100 }).withMessage('City cannot exceed 100 characters'),
+                    body('address.stateRegionProvince').notEmpty().withMessage('State/Region/Province is required').isString().withMessage('State/Region/Province must be a string').trim().isLength({ max: 100 }).withMessage('State/Region/Province cannot exceed 100 characters'),
+                    body('address.postalCode').notEmpty().withMessage('Postal code is required').isString().withMessage('Postal code must be a string').trim().isLength({ max: 20 }).withMessage('Postal code cannot exceed 20 characters'),
+                    body('address.countryCode').notEmpty().withMessage('Country code is required').isString().withMessage('Country code must be a string').trim().isLength({ min: 2, max: 3 }).withMessage('Country code must be 2-3 characters').isAlpha().withMessage('Country code must contain only letters'),
 
                 
-                body('DETAILS.documents').isObject().withMessage('Documents must be an object'),
+                body('documents').isObject().withMessage('Documents must be an object'),
     
                     // Government ID Validation
-                    body('DETAILS.documents.governmentId').isObject().withMessage('Government ID must be an object'),
-                        body('DETAILS.documents.governmentId.type').notEmpty().withMessage('Government ID type is required').isString().withMessage('Government ID type must be a string')
+                    body('documents.governmentId').isObject().withMessage('Government ID must be an object'),
+                        body('documents.governmentId.type').notEmpty().withMessage('Government ID type is required').isString().withMessage('Government ID type must be a string')
                             .isIn([
                                 "NATIONAL_ID",
                                 "DRIVERS_LICENSE", 
                                 "PASSPORT"
                             ]).withMessage('Invalid government ID type'),
-                        body('DETAILS.documents.governmentId.countryCode').notEmpty().withMessage('Government ID country code is required').isString().withMessage('Country code must be a string').trim().isLength({ min: 2, max: 3 }).withMessage('Country code must be 2-3 characters').isAlpha().withMessage('Country code must contain only letters'),
-                        body('DETAILS.documents.governmentId.documentIdNumber').notEmpty().withMessage('Document ID number is required').isString().withMessage('Document ID number must be a string').trim().isLength({ max: 50 }).withMessage('Document ID number cannot exceed 50 characters'),
+                        body('documents.governmentId.countryCode').notEmpty().withMessage('Government ID country code is required').isString().withMessage('Country code must be a string').trim().isLength({ min: 2, max: 3 }).withMessage('Country code must be 2-3 characters').isAlpha().withMessage('Country code must contain only letters'),
+                        body('documents.governmentId.documentIdNumber').notEmpty().withMessage('Document ID number is required').isString().withMessage('Document ID number must be a string').trim().isLength({ max: 50 }).withMessage('Document ID number cannot exceed 50 characters'),
                       
-                        body('DETAILS.documents.governmentId.issuanceDate').notEmpty().withMessage('Issuance date is required').isISO8601().withMessage('Issuance date must be in ISO8601 format (YYYY-MM-DD)').toDate(),
-                        // body('DETAILS.documents.governmentId.expirationDate').notEmpty().withMessage('Expiration date is required').isISO8601().withMessage('Expiration date must be in ISO8601 format (YYYY-MM-DD)').toDate()
+                        body('documents.governmentId.issuanceDate').notEmpty().withMessage('Issuance date is required').isISO8601().withMessage('Issuance date must be in ISO8601 format (YYYY-MM-DD)').toDate(),
+                        // body('documents.governmentId.expirationDate').notEmpty().withMessage('Expiration date is required').isISO8601().withMessage('Expiration date must be in ISO8601 format (YYYY-MM-DD)').toDate()
                         // .custom((value, { req }) => {
                         //     if (new Date(value) <= new Date()) {
                         //     throw new Error('Expiration date must be in the future');
@@ -63,7 +63,7 @@ class UserValidator {
                         //     return true;
                         // }),
                       
-                        body('DETAILS.documents.governmentId.frontIdImage')
+                        body('documents.governmentId.frontIdImage')
                         .notEmpty().withMessage('Front ID image is required')
                         .custom((value) => {
                             if (!value || !(typeof value === 'string' || value instanceof Buffer)) {
@@ -73,9 +73,9 @@ class UserValidator {
                         }),
                       
                     // Proof of Address Validation
-                    body('DETAILS.documents.proof_of_Address').isObject().withMessage('Proof of Address must be an object'),
-                        body('DETAILS.documents.proof_of_Address.type').notEmpty().withMessage('Proof of Address type is required').isString().withMessage('Proof of Address type must be a string'),
-                        body('DETAILS.documents.proof_of_Address.proofOfAddressImage').notEmpty().withMessage('Proof of Address image is required')
+                    body('documents.proof_of_Address').isObject().withMessage('Proof of Address must be an object'),
+                        body('documents.proof_of_Address.type').notEmpty().withMessage('Proof of Address type is required').isString().withMessage('Proof of Address type must be a string'),
+                        body('documents.proof_of_Address.proofOfAddressImage').notEmpty().withMessage('Proof of Address image is required')
                         .custom((value) => {
                             if (!value || !(typeof value === 'string' || value instanceof Buffer)) {
                             throw new Error('Proof of Address must be a PDF or image file');
@@ -84,7 +84,7 @@ class UserValidator {
                         }),
 
                 // Employment Information
-                body('DETAILS.employmentStatus').notEmpty().withMessage('Employment status is required').isString().withMessage('Employment status must be a string')
+                body('employmentStatus').notEmpty().withMessage('Employment status is required').isString().withMessage('Employment status must be a string')
                 .isIn([
                     "EMPLOYED",
                     "SELF_EMPLOYED",
@@ -94,9 +94,9 @@ class UserValidator {
                     "HOMEMAKER"
                   ]).withMessage('Invalid employment status'),
                             
-                body('DETAILS.mostRecentOccupation').optional().isString().withMessage('Most recent occupation must be a string').trim().isLength({ max: 100 }).withMessage('Most recent occupation cannot exceed 100 characters'),
+                body('mostRecentOccupation').optional().isString().withMessage('Most recent occupation must be a string').trim().isLength({ max: 100 }).withMessage('Most recent occupation cannot exceed 100 characters'),
                 // Financial Information
-                body('DETAILS.sourceOfFunds').notEmpty().withMessage('Source of funds is required').isString().withMessage('Source of funds must be a string')
+                body('sourceOfFunds').notEmpty().withMessage('Source of funds is required').isString().withMessage('Source of funds must be a string')
                     .isIn([
                         "COMPANY_FUNDS",
                         "E_COMMERCE_RESELLER",
@@ -124,7 +124,7 @@ class UserValidator {
                         "TREASURY_RESERVES"
                     ]).withMessage('Invalid source of funds'),
                             
-                body('DETAILS.accountPurpose').notEmpty().withMessage('Account purpose is required').isString().withMessage('Account purpose must be a string')
+                body('accountPurpose').notEmpty().withMessage('Account purpose is required').isString().withMessage('Account purpose must be a string')
                     .isIn([
                         "CHARITABLE_DONATIONS",
                         "COMPANY_OPERATIONS",
@@ -144,7 +144,7 @@ class UserValidator {
                         "TREASURY_MANAGEMENT"
                     ]).withMessage('Invalid account purpose'),
                             
-                body('DETAILS.expectedMonthlyPaymentsUsd').notEmpty().withMessage('Expected monthly payments is required').isString().withMessage('Expected monthly payments must be a string')
+                body('expectedMonthlyPaymentsUsd').notEmpty().withMessage('Expected monthly payments is required').isString().withMessage('Expected monthly payments must be a string')
                     .isIn([
                         "LESS_THAN_5000",
                         "BETWEEN_5000_9999",
