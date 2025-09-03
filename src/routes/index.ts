@@ -63,14 +63,14 @@ router.post(
 );
 
 router.post(
-  'user/upload_kyc',
+  '/user/upload_kyc',
   userValidator.uploadKyc(),
   middleware.handleValidationError,
   userController.register_Kyc
 );
 
 router.post(
-  'user/login',
+  '/user/login',
   userValidator.login(),
   middleware.handleValidationError,
   userController.loginUser,
