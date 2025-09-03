@@ -265,7 +265,7 @@ model UserKyc {
   mostRecentOccupation    String?
   sourceOfFunds           String
   accountPurpose          String
-  expectedMonthlyPayments Float
+  expectedMonthlyPayments String
   isIntermediary          Boolean  @default(false)
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt

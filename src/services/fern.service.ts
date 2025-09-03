@@ -101,7 +101,7 @@ interface KycDetails {
   mostRecentOccupation?: string;
   sourceOfFunds: string;
   accountPurpose: string;
-  expectedMonthlyPaymentsUsd: number;
+  expectedMonthlyPaymentsUsd: string;
   // isIntermediary?: boolean;
   address: {
     streetLine1: string;

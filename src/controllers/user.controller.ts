@@ -38,7 +38,7 @@ interface KycDetails {
     mostRecentOccupation?: string;
     sourceOfFunds: string;
     accountPurpose: string;
-    expectedMonthlyPaymentsUsd: number;
+    expectedMonthlyPaymentsUsd: string;
     // isIntermediary?: boolean;
     address: {
       streetLine1: string;
@@ -177,6 +177,7 @@ class UserController {
             expectedMonthlyPaymentsUsd,
             address,
             documents
+
         } = req.body as KycDetails;
 
         
@@ -185,26 +186,28 @@ class UserController {
 
         try {
 
+            console.log('in block')
+
             // Basic validation
-            if (!legalFirstName || !legalLastName || !phoneNumber || !dateOfBirth) {
-                return res.status(400).json({ msg: 'Missing required fields',success: false });
-            }
+            // if (!legalFirstName || !legalLastName || !phoneNumber || !dateOfBirth) {
+            //     return res.status(400).json({ msg: 'Missing required fields',success: false });
+            // }
 
-            const userData = await prisma.user.findUnique({
-                where: { id: user.id },
-            });
+            // const userData = await prisma.user.findUnique({
+            //     where: { id: user.id },
+            // });
 
-            if (userData) {
-                return res.status(400).json({
-                    msg: 'User not found',
-                    success: false,
-                });
-            }
+            // if (userData) {
+            //     return res.status(400).json({
+            //         msg: 'User not found',
+            //         success: false,
+            //     });
+            // }
 
-
+            console.log('about to start transaction')
 
             // Process the KYC submission in a transaction
-            const result = await prisma.$transaction(async (prisma) => {
+            // const result = await prisma.$transaction(async (prisma) => {
 
                 const customer = await fernService.customer(
                     {
@@ -212,14 +215,21 @@ class UserController {
                         legalLastName,
                         phoneNumber,
                         email: user?.email,
-                        dateOfBirth,
+                        dateOfBirth: dateOfBirth.toString(),
                         employmentStatus,
                         mostRecentOccupation,
                         sourceOfFunds,
                         accountPurpose,
                         expectedMonthlyPaymentsUsd,
                         address,
-                        documents
+                        documents:{
+                            governmentId:{
+                                ...documents.governmentId,
+                                issuanceDate: documents.governmentId.issuanceDate.toString(),
+                                expirationDate: documents.governmentId.expirationDate.toString()
+                            },
+                            proofOfAddress:documents.proofOfAddress
+                        }
                 })
 
                 // 1. Create Address
@@ -290,7 +300,7 @@ class UserController {
                     }
                 });
 
-                return await prisma.user.update({
+                await prisma.user.update({
                     where:{id: user.id},
                     data:{
                         fernUserId: customer.customerId,
@@ -299,7 +309,7 @@ class UserController {
                     }
                 })
 
-            });
+            // });
 
 
 
