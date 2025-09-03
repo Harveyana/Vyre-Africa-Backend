@@ -277,15 +277,15 @@ class UserController {
                         // isIntermediary,
                         addressId: addressRecord.id,
                         documentsId: documentsRecord.id,
-                        userId: user.id // Assuming user is authenticated
+                        userId: user.id
                     },
                     include: {
                         address: true,
                         documents: {
-                        include: {
-                            identity: true,
-                            proofOfAddress: true
-                        }
+                            include: {
+                                identity: true,
+                                proofOfAddress: true
+                            }
                         }
                     }
                 });
@@ -316,7 +316,7 @@ class UserController {
             // await mailService.sendOtp(DETAILS.email, DETAILS.firstName, otpCode);
 
             return res.status(201).json({
-                msg: 'An otp code sent to your email',
+                msg: 'KYC initiated Successfully',
                 success: true,
             });
 

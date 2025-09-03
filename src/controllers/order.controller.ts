@@ -421,6 +421,7 @@ class OrderController {
           },
           amount: true,
           amountProcessed: true, // Amount of the order that has been filled
+          amountMinimum: true,
           percentageProcessed: true, // Percentage of the order that has been filled
           price: true,
           status: true,

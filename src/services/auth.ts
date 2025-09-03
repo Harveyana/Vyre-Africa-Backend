@@ -52,10 +52,9 @@ export const authMiddleware = async (
 
     // 3. Find/Create User
     let user = await prisma.user.findUnique({
-      where: { id: data.userId }, // Using just authId
+      where: { id: data?.userId },
       select: {
         id: true,
-        // authId: true,
         firstName: true,
         lastName: true,
         email: true

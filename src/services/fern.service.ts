@@ -159,7 +159,7 @@ class FernService {
         dateOfBirth,
 
         address,
-        taxIdNumber: documents.governmentId.documentIdNumber,
+        nationalIdNumber: documents.governmentId.documentIdNumber,
         documents: [
           {
             type: "GOVERNMENT_ID",
@@ -170,8 +170,14 @@ class FernService {
             expirationDate: documents.governmentId.expirationDate,
             frontIdImage: documents.governmentId.frontIdImage,
             // backIdImage: "text",
+            // proofOfAddressImage: documents.proofOfAddress.proofOfAddressImage,
+            // description: `${documents.proofOfAddress.type} means of verification`
+          },
+          {
+            type: "PROOF_OF_ADDRESS",
+            subtype: documents.proofOfAddress.type,
+            description: `${documents.proofOfAddress.type} means of verification`,
             proofOfAddressImage: documents.proofOfAddress.proofOfAddressImage,
-            description: `${documents.proofOfAddress.type} means of verification`
           }
         ],
         employmentStatus,
