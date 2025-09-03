@@ -177,7 +177,7 @@ class UserController {
             expectedMonthlyPaymentsUsd,
             address,
             documents
-        } = req.body.DETAILS as KycDetails;
+        } = req.body as KycDetails;
 
         
 
