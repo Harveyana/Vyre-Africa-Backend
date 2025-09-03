@@ -55,13 +55,13 @@ class UserValidator {
                         body('DETAILS.documents.governmentId.documentIdNumber').notEmpty().withMessage('Document ID number is required').isString().withMessage('Document ID number must be a string').trim().isLength({ max: 50 }).withMessage('Document ID number cannot exceed 50 characters'),
                       
                         body('DETAILS.documents.governmentId.issuanceDate').notEmpty().withMessage('Issuance date is required').isISO8601().withMessage('Issuance date must be in ISO8601 format (YYYY-MM-DD)').toDate(),
-                        body('DETAILS.documents.governmentId.expirationDate').notEmpty().withMessage('Expiration date is required').isISO8601().withMessage('Expiration date must be in ISO8601 format (YYYY-MM-DD)').toDate()
-                        .custom((value, { req }) => {
-                            if (new Date(value) <= new Date()) {
-                            throw new Error('Expiration date must be in the future');
-                            }
-                            return true;
-                        }),
+                        // body('DETAILS.documents.governmentId.expirationDate').notEmpty().withMessage('Expiration date is required').isISO8601().withMessage('Expiration date must be in ISO8601 format (YYYY-MM-DD)').toDate()
+                        // .custom((value, { req }) => {
+                        //     if (new Date(value) <= new Date()) {
+                        //     throw new Error('Expiration date must be in the future');
+                        //     }
+                        //     return true;
+                        // }),
                       
                         body('DETAILS.documents.governmentId.frontIdImage')
                         .notEmpty().withMessage('Front ID image is required')
