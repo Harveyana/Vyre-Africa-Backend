@@ -243,7 +243,7 @@ class FernService {
         address,
         nationalIdNumber: documents?.governmentId?.documentIdNumber,
         nationalIdIssuingCountry: documents?.governmentId?.countryCode,
-        nationalIdType: documents?.governmentId?.type,
+        nationalIdType: documents?.governmentId?.type, /// Must be one of the following values: tin, nin, bvn",
         nationality: documents?.governmentId?.countryCode,
         documents: [
           {
@@ -254,13 +254,15 @@ class FernService {
             issuanceDate: documents?.governmentId?.issuanceDate,
             expirationDate: documents?.governmentId?.expirationDate,
             frontIdImage: documents?.governmentId?.frontIdImage,
-          },
-          {
-            type: "PROOF_OF_ADDRESS",
-            subtype: documents?.proof_of_Address?.type,
             description: `${documents?.proof_of_Address?.type} means of verification`,
-            proofOfAddressImage: documents?.proof_of_Address?.proofOfAddressImage,
+            proofOfAddressImage: documents?.proof_of_Address?.proofOfAddressImage
           }
+          // {
+          //   type: "PROOF_OF_ADDRESS",
+          //   subtype: documents?.proof_of_Address?.type,
+          //   description: `${documents?.proof_of_Address?.type} means of verification`,
+          //   proofOfAddressImage: documents?.proof_of_Address?.proofOfAddressImage
+          // }
         ],
         employmentStatus,
         mostRecentOccupation,
