@@ -206,6 +206,7 @@ class UserController {
 
             console.log('about to start transaction')
             console.log('user',user)
+            console.log('occupation',mostRecentOccupation)
 
             // Process the KYC submission in a transaction
             // const result = await prisma.$transaction(async (prisma) => {
