@@ -130,8 +130,88 @@ interface KycDetails {
 
 class FernService {
 
-  async customer(payload:KycDetails){
+  // async customer(payload:KycDetails){
 
+  //   console.log('in fern customer')
+
+  //   const {
+  //     legalFirstName,
+  //     legalLastName,
+  //     phoneNumber,
+  //     email,
+  //     dateOfBirth,
+  //     employmentStatus,
+  //     mostRecentOccupation,
+  //     sourceOfFunds,
+  //     accountPurpose,
+  //     expectedMonthlyPaymentsUsd,
+  //     address,
+  //     documents
+  //   } = payload as KycDetails;
+
+  //   const customerData = {
+  //     customerType: "INDIVIDUAL",
+  //     firstName: legalFirstName,
+  //     lastName: legalLastName,
+  //     email,
+  //     kycData:{
+  //       legalFirstName,
+  //       legalLastName,
+  //       phoneNumber,
+  //       dateOfBirth,
+
+  //       address,
+  //       nationalIdNumber: documents.governmentId.documentIdNumber,
+  //       documents: [
+  //         {
+  //           type: "GOVERNMENT_ID",
+  //           subtype: documents.governmentId.type,
+  //           countryCode: documents.governmentId.countryCode,
+  //           documentIdNumber: documents.governmentId.documentIdNumber,
+  //           issuanceDate: documents.governmentId.issuanceDate,
+  //           expirationDate: documents.governmentId.expirationDate,
+  //           frontIdImage: documents.governmentId.frontIdImage,
+  //           // backIdImage: "text",
+  //           // proofOfAddressImage: documents.proofOfAddress.proofOfAddressImage,
+  //           // description: `${documents.proofOfAddress.type} means of verification`
+  //         },
+  //         {
+  //           type: "PROOF_OF_ADDRESS",
+  //           subtype: documents.proofOfAddress.type,
+  //           description: `${documents.proofOfAddress.type} means of verification`,
+  //           proofOfAddressImage: documents.proofOfAddress.proofOfAddressImage,
+  //         }
+  //       ],
+  //       employmentStatus,
+  //       mostRecentOccupation,
+  //       sourceOfFunds,
+  //       accountPurpose,
+  //       // accountPurposeOther: "Real estate transactions",
+  //       expectedMonthlyPaymentsUsd,
+  //       // isIntermediary: false,
+
+  //     }
+  //   }
+
+  //   try {
+
+  //     console.log('in fern axios')
+  //     const response = await fernAxios.post('/customers', customerData)
+  //     const result = response.data
+  //     console.log(result)
+
+  //     return result
+      
+  //   } catch (error) {
+  //     console.log(error,'error')
+  //   }
+    
+    
+  // }
+
+  async customer(payload: any) {
+    console.log('Starting Fern customer creation');
+  
     const {
       legalFirstName,
       legalLastName,
@@ -145,58 +225,68 @@ class FernService {
       expectedMonthlyPaymentsUsd,
       address,
       documents
-    } = payload as KycDetails;
-
+    } = payload;
+  
     const customerData = {
       customerType: "INDIVIDUAL",
       firstName: legalFirstName,
       lastName: legalLastName,
       email,
-      kycData:{
+      kycData: {
         legalFirstName,
         legalLastName,
         phoneNumber,
         dateOfBirth,
-
         address,
-        nationalIdNumber: documents.governmentId.documentIdNumber,
+        nationalIdNumber: documents?.governmentId?.documentIdNumber,
         documents: [
           {
             type: "GOVERNMENT_ID",
-            subtype: documents.governmentId.type,
-            countryCode: documents.governmentId.countryCode,
-            documentIdNumber: documents.governmentId.documentIdNumber,
-            issuanceDate: documents.governmentId.issuanceDate,
-            expirationDate: documents.governmentId.expirationDate,
-            frontIdImage: documents.governmentId.frontIdImage,
-            // backIdImage: "text",
-            // proofOfAddressImage: documents.proofOfAddress.proofOfAddressImage,
-            // description: `${documents.proofOfAddress.type} means of verification`
+            subtype: documents?.governmentId?.type,
+            countryCode: documents?.governmentId?.countryCode,
+            documentIdNumber: documents?.governmentId?.documentIdNumber,
+            issuanceDate: documents?.governmentId?.issuanceDate,
+            expirationDate: documents?.governmentId?.expirationDate,
+            frontIdImage: documents?.governmentId?.frontIdImage,
           },
           {
             type: "PROOF_OF_ADDRESS",
-            subtype: documents.proofOfAddress.type,
-            description: `${documents.proofOfAddress.type} means of verification`,
-            proofOfAddressImage: documents.proofOfAddress.proofOfAddressImage,
+            subtype: documents?.proofOfAddress?.type,
+            description: `${documents?.proofOfAddress?.type} means of verification`,
+            proofOfAddressImage: documents?.proofOfAddress?.proofOfAddressImage,
           }
         ],
         employmentStatus,
         mostRecentOccupation,
         sourceOfFunds,
         accountPurpose,
-        // accountPurposeOther: "Real estate transactions",
         expectedMonthlyPaymentsUsd,
-        isIntermediary: false,
-
       }
+    };
+  
+    // Debug: log the payload being sent
+    // console.log('Request payload:', JSON.stringify(payload, null, 2));
+  
+    try {
+      console.log('Making request to Fern API...');
+      const response = await fernAxios.post('/customers', customerData);
+      console.log('Fern API response:', response.data);
+      return response.data;
+    } catch (error) {
+      // Comprehensive error handling
+      if (axios.isAxiosError(error)) {
+        console.error('Fern API Error:');
+        console.error('URL:', error.config?.url);
+        console.error('Method:', error.config?.method);
+        console.error('Status:', error.response?.status);
+        console.error('Response Data:', error.response?.data);
+        console.error('Response Data:', error.response?.data.details.issues);
+        console.error('Request Headers:', error.config?.headers);
+      } else {
+        console.error('Unexpected Error:', error);
+      }
+      throw error; // Re-throw to see the full stack trace
     }
-    
-    
-    const response = await fernAxios.post('/customers', payload)
-    const result = response.data
-    console.log(result)
-
-    return result
   }
 
   // async customer(payload:{customerType:string,firstName:string,lastName:string,email:string}){

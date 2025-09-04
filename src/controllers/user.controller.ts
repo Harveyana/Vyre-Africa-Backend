@@ -182,7 +182,7 @@ class UserController {
 
         
 
-        console.log(req.body)
+        // console.log(req.body)
 
         try {
 
@@ -209,27 +209,19 @@ class UserController {
             // Process the KYC submission in a transaction
             // const result = await prisma.$transaction(async (prisma) => {
 
-                const customer = await fernService.customer(
-                    {
+                const customer = await fernService.customer({
                         legalFirstName,
                         legalLastName,
                         phoneNumber,
                         email: user?.email,
-                        dateOfBirth: dateOfBirth.toString(),
+                        dateOfBirth,
                         employmentStatus,
                         mostRecentOccupation,
                         sourceOfFunds,
                         accountPurpose,
                         expectedMonthlyPaymentsUsd,
                         address,
-                        documents:{
-                            governmentId:{
-                                ...documents.governmentId,
-                                issuanceDate: documents.governmentId.issuanceDate.toString(),
-                                expirationDate: documents.governmentId.expirationDate.toString()
-                            },
-                            proofOfAddress:documents.proofOfAddress
-                        }
+                        documents
                 })
 
                 // 1. Create Address

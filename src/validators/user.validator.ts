@@ -30,7 +30,7 @@ class UserValidator {
                 body('legalFirstName').notEmpty().withMessage('Legal first name is required').isString().withMessage('Legal first name must be a string').trim().isLength({ max: 100 }).withMessage('Legal first name cannot exceed 100 characters'),
                 body('legalLastName').notEmpty().withMessage('Legal last name is required').isString().withMessage('Legal last name must be a string').trim().isLength({ max: 100 }).withMessage('Legal last name cannot exceed 100 characters'),
                 body('phoneNumber').notEmpty().withMessage('Phone number is required').isString().withMessage('Phone number must be a string').trim().isMobilePhone('any').withMessage('Invalid phone number format'),
-                body('dateOfBirth').notEmpty().withMessage('Date of birth is required').isISO8601().withMessage('Date of birth must be in ISO8601 format (YYYY-MM-DD)').toDate(),
+                body('dateOfBirth').notEmpty().withMessage('Date of birth is required'),
 
                 // Address Validation
                 body('address').isObject().withMessage('Address must be an object'),
@@ -54,7 +54,7 @@ class UserValidator {
                         body('documents.governmentId.countryCode').notEmpty().withMessage('Government ID country code is required').isString().withMessage('Country code must be a string').trim().isLength({ min: 2, max: 3 }).withMessage('Country code must be 2-3 characters').isAlpha().withMessage('Country code must contain only letters'),
                         body('documents.governmentId.documentIdNumber').notEmpty().withMessage('Document ID number is required').isString().withMessage('Document ID number must be a string').trim().isLength({ max: 50 }).withMessage('Document ID number cannot exceed 50 characters'),
                       
-                        body('documents.governmentId.issuanceDate').notEmpty().withMessage('Issuance date is required').isISO8601().withMessage('Issuance date must be in ISO8601 format (YYYY-MM-DD)').toDate(),
+                        body('documents.governmentId.issuanceDate').notEmpty().withMessage('Issuance date is required'),
                         // body('documents.governmentId.expirationDate').notEmpty().withMessage('Expiration date is required').isISO8601().withMessage('Expiration date must be in ISO8601 format (YYYY-MM-DD)').toDate()
                         // .custom((value, { req }) => {
                         //     if (new Date(value) <= new Date()) {
