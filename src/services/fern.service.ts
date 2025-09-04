@@ -272,7 +272,7 @@ class FernService {
       const response = await fernAxios.post('/customers', customerData);
       console.log('Fern API response:', response.data);
       return response.data;
-    } catch (error) {
+    } catch (error:any) {
       // Comprehensive error handling
       if (axios.isAxiosError(error)) {
         console.error('Fern API Error:');
@@ -285,7 +285,8 @@ class FernService {
       } else {
         console.error('Unexpected Error:', error);
       }
-      throw error; // Re-throw to see the full stack trace
+      const mainError = error?.response?.data.details.issues
+      throw mainError; // Re-throw to see the full stack trace
     }
   }
 
