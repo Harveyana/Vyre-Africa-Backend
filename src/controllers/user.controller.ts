@@ -53,7 +53,7 @@ interface KycDetails {
     documents: {
       governmentId: {
         type: string;
-        countryCode: string;
+        // countryCode: string;
         documentIdNumber: string;
         issuanceDate: string;
         expirationDate: string;
@@ -249,7 +249,7 @@ class UserController {
                 const governmentId = await prisma.identity.create({
                     data: {
                         type: documents.governmentId.type,
-                        countryCode: documents.governmentId.countryCode,
+                        countryCode: address.countryCode,
                         documentIdNumber: documents.governmentId.documentIdNumber,
                         issuanceDate: new Date(documents.governmentId.issuanceDate),
                         expirationDate: new Date(documents.governmentId.expirationDate),

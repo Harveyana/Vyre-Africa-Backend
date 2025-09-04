@@ -116,7 +116,7 @@ interface KycDetails {
   documents: {
     governmentId: {
       type: string;
-      countryCode: string;
+      // countryCode: string;
       documentIdNumber: string;
       issuanceDate: string;
       expirationDate: string;
@@ -233,7 +233,7 @@ class FernService {
     } = payload;
 
     console.log('nationalIdNumber', nationalIdNumber)
-    console.log('countryCode', documents?.governmentId?.countryCode)
+    console.log('countryCode', address.countryCode)
     console.log('nationalIdType', nationalIdType)
   
     const customerData = {
@@ -248,14 +248,14 @@ class FernService {
         dateOfBirth,
         address,
         nationalIdNumber,
-        nationalIdIssuingCountry: documents?.governmentId?.countryCode,
+        nationalIdIssuingCountry: address?.countryCode,
         nationalIdType,
-        // nationality: documents?.governmentId?.countryCode,
+        nationality: address?.countryCode,
         documents: [
           {
             type: "GOVERNMENT_ID",
             subtype: documents?.governmentId?.type,
-            countryCode: documents?.governmentId?.countryCode,
+            countryCode: address?.countryCode,
             documentIdNumber: documents?.governmentId?.documentIdNumber,
             issuanceDate: documents?.governmentId?.issuanceDate,
             expirationDate: documents?.governmentId?.expirationDate,
