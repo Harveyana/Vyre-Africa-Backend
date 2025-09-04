@@ -243,7 +243,7 @@ class FernService {
         address,
         nationalIdNumber: documents?.governmentId?.documentIdNumber,
         nationalIdIssuingCountry: documents?.governmentId?.countryCode,
-        nationalIdType: documents?.governmentId?.type, /// Must be one of the following values: tin, nin, bvn",
+        nationalIdType: 'nin', /// Must be one of the following values: tin, nin, bvn",
         nationality: documents?.governmentId?.countryCode,
         documents: [
           {
