@@ -103,6 +103,9 @@ interface KycDetails {
   accountPurpose: string;
   expectedMonthlyPaymentsUsd: string;
   // isIntermediary?: boolean;
+  nationalIdType: string;
+  nationalIdNumber: string;
+
   address: {
     streetLine1: string;
     city: string;
@@ -209,7 +212,7 @@ class FernService {
     
   // }
 
-  async customer(payload: any) {
+  async customer(payload: KycDetails) {
     console.log('Starting Fern customer creation');
   
     const {
@@ -217,6 +220,8 @@ class FernService {
       legalLastName,
       phoneNumber,
       email,
+      nationalIdType,
+      nationalIdNumber,
       dateOfBirth,
       employmentStatus,
       mostRecentOccupation,
@@ -241,9 +246,9 @@ class FernService {
         phoneNumber,
         dateOfBirth,
         address,
-        nationalIdNumber: documents?.governmentId?.documentIdNumber,
+        nationalIdNumber,
         nationalIdIssuingCountry: documents?.governmentId?.countryCode,
-        nationalIdType: 'nin', /// Must be one of the following values: tin, nin, bvn",
+        nationalIdType,
         nationality: documents?.governmentId?.countryCode,
         documents: [
           {
@@ -280,6 +285,20 @@ class FernService {
       const response = await fernAxios.post('/customers', customerData);
       console.log('Fern API response:', response.data);
       return response.data;
+
+      // Fern API response: {
+      //   customerId: '067bf433-12c2-45ad-98fc-d48e79cf9aaa',
+      //   customerStatus: 'CREATED',
+      //   email: 'vyreafrica@gmail.com',
+      //   customerType: 'INDIVIDUAL',
+      //   name: 'Harvey Anafuwe',
+      //   verificationLink: 'https://app.fernhq.com/verify-customer/067bf433-12c2-45ad-98fc-d48e79cf9aaa',
+      //   updatedAt: '2025-09-04T04:44:13.478Z',
+      //   organizationId: 'afa84494-b334-4bf1-987d-67494e2b2f3f',
+      //   kycLink: 'https://app.fernhq.com/verify-customer/067bf433-12c2-45ad-98fc-d48e79cf9aaa'
+      // }
+
+
     } catch (error:any) {
       // Comprehensive error handling
       if (axios.isAxiosError(error)) {
@@ -338,7 +357,8 @@ class FernService {
     const updatedUser = await prisma.user.update({
       where:{email},
       data:{
-        userStatus: status as UserStatus
+        userStatus: status as UserStatus,
+        accountVerified: status ==='ACTIVE'? true : false
       }
     })
     console.log(updatedUser)

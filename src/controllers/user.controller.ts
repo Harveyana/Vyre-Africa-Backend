@@ -40,6 +40,9 @@ interface KycDetails {
     accountPurpose: string;
     expectedMonthlyPaymentsUsd: string;
     // isIntermediary?: boolean;
+
+    nationalIdType: string;
+    nationalIdNumber: string;
     address: {
       streetLine1: string;
       city: string;
@@ -170,6 +173,9 @@ class UserController {
             legalLastName,
             phoneNumber,
             dateOfBirth,
+
+            nationalIdType,
+            nationalIdNumber,
             employmentStatus,
             mostRecentOccupation,
             sourceOfFunds,
@@ -205,16 +211,18 @@ class UserController {
             // }
 
             console.log('about to start transaction')
-            console.log('user',user)
-            console.log('occupation',mostRecentOccupation)
+            console.log('nationalIdType',nationalIdType)
+            console.log('nationalIdNumber',nationalIdNumber)
 
             // Process the KYC submission in a transaction
-            // const result = await prisma.$transaction(async (prisma) => {
+            const result = await prisma.$transaction(async (prisma) => {
 
                 const customer = await fernService.customer({
                         legalFirstName,
                         legalLastName,
                         phoneNumber,
+                        nationalIdType,
+                        nationalIdNumber,
                         email: user?.email,
                         dateOfBirth,
                         employmentStatus,
@@ -294,16 +302,16 @@ class UserController {
                     }
                 });
 
-                await prisma.user.update({
+               return await prisma.user.update({
                     where:{id: user.id},
                     data:{
                         fernUserId: customer.customerId,
                         fernKycLink: customer.kycLink,
-                        userStatus: customer.customerStatus
+                        userStatus: 'PENDING'
                     }
                 })
 
-            // });
+            });
 
 
 

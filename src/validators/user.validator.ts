@@ -31,6 +31,9 @@ class UserValidator {
                 body('legalLastName').notEmpty().withMessage('Legal last name is required').isString().withMessage('Legal last name must be a string').trim().isLength({ max: 100 }).withMessage('Legal last name cannot exceed 100 characters'),
                 body('phoneNumber').notEmpty().withMessage('Phone number is required').isString().withMessage('Phone number must be a string').trim().isMobilePhone('any').withMessage('Invalid phone number format'),
                 body('dateOfBirth').notEmpty().withMessage('Date of birth is required'),
+                body('nationalIdType').notEmpty().withMessage('National Id Type is required'),
+                body('nationalIdNumber').notEmpty().withMessage('National Id Number is required'),
+
 
                 // Address Validation
                 body('address').isObject().withMessage('Address must be an object'),

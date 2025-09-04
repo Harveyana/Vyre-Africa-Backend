@@ -212,7 +212,7 @@ model User {
   referralId   String?
   referreeId   String?
   email        String      @unique @db.VarChar(255)
-  userStatus   UserStatus  @default(ACTIVE)
+  userStatus   UserStatus  @default(CREATED)
   type         AccountType @default(INDIVIDUAL)
   photoUrl     String?     @db.VarChar(500)
   phoneNumber  String?
