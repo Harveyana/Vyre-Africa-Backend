@@ -226,6 +226,9 @@ class FernService {
       address,
       documents
     } = payload;
+
+    console.log('the email', email)
+    console.log('the type', documents?.proofOfAddress?.type)
   
     const customerData = {
       customerType: "INDIVIDUAL",
