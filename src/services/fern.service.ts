@@ -232,8 +232,9 @@ class FernService {
       documents
     } = payload;
 
-    console.log('the email', email)
-    console.log('the type', documents?.proof_of_Address?.type)
+    console.log('nationalIdNumber', nationalIdNumber)
+    console.log('countryCode', documents?.governmentId?.countryCode)
+    console.log('nationalIdType', nationalIdType)
   
     const customerData = {
       customerType: "INDIVIDUAL",
@@ -248,7 +249,7 @@ class FernService {
         address,
         nationalIdNumber,
         nationalIdIssuingCountry: documents?.governmentId?.countryCode,
-        nationalIdType:'nin',
+        nationalIdType,
         // nationality: documents?.governmentId?.countryCode,
         documents: [
           {
