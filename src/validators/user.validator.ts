@@ -54,7 +54,7 @@ class UserValidator {
                                 "DRIVERS_LICENSE", 
                                 "PASSPORT"
                             ]).withMessage('Invalid government ID type'),
-                        body('documents.governmentId.countryCode').notEmpty().withMessage('Government ID country code is required').isString().withMessage('Country code must be a string').trim().isLength({ min: 2, max: 3 }).withMessage('Country code must be 2-3 characters').isAlpha().withMessage('Country code must contain only letters'),
+                        // body('documents.governmentId.countryCode').notEmpty().withMessage('Government ID country code is required').isString().withMessage('Country code must be a string').trim().isLength({ min: 2, max: 3 }).withMessage('Country code must be 2-3 characters').isAlpha().withMessage('Country code must contain only letters'),
                         body('documents.governmentId.documentIdNumber').notEmpty().withMessage('Document ID number is required').isString().withMessage('Document ID number must be a string').trim().isLength({ max: 50 }).withMessage('Document ID number cannot exceed 50 characters'),
                       
                         body('documents.governmentId.issuanceDate').notEmpty().withMessage('Issuance date is required'),
