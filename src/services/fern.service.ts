@@ -241,10 +241,10 @@ class FernService {
         phoneNumber,
         dateOfBirth,
         address,
-        // nationalIdNumber: documents?.governmentId?.documentIdNumber,
-        // nationalIdIssuingCountry: documents?.governmentId?.countryCode,
-        // "nationalIdType": "ssn",
-        // nationality: documents?.governmentId?.countryCode,
+        nationalIdNumber: documents?.governmentId?.documentIdNumber,
+        nationalIdIssuingCountry: documents?.governmentId?.countryCode,
+        nationalIdType: documents?.governmentId?.type,
+        nationality: documents?.governmentId?.countryCode,
         documents: [
           {
             type: "GOVERNMENT_ID",
