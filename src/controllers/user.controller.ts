@@ -56,7 +56,7 @@ interface KycDetails {
         expirationDate: string;
         frontIdImage: string;
       };
-      proofOfAddress: {
+      proof_of_Address: {
         type: string;
         // description?: string;
         proofOfAddressImage: string;
@@ -205,6 +205,7 @@ class UserController {
             // }
 
             console.log('about to start transaction')
+            console.log('user',user)
 
             // Process the KYC submission in a transaction
             // const result = await prisma.$transaction(async (prisma) => {
@@ -250,9 +251,9 @@ class UserController {
                 // 3. Create Proof of Address
                 const proofOfAddress = await prisma.proofOfAddress.create({
                     data: {
-                        type: documents.proofOfAddress.type,
-                        description: `${documents.proofOfAddress.type} means of verification`,
-                        proofOfAddressImage: documents.proofOfAddress.proofOfAddressImage
+                        type: documents.proof_of_Address.type,
+                        description: `${documents.proof_of_Address.type} means of verification`,
+                        proofOfAddressImage: documents.proof_of_Address.proofOfAddressImage
                     }
                 });
         

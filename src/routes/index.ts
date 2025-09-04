@@ -64,6 +64,7 @@ router.post(
 
 router.post(
   '/user/upload_kyc',
+  authMiddleware,
   userValidator.uploadKyc(),
   middleware.handleValidationError,
   userController.register_Kyc

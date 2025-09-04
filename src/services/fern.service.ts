@@ -119,7 +119,7 @@ interface KycDetails {
       expirationDate: string;
       frontIdImage: string;
     };
-    proofOfAddress: {
+    proof_of_Address: {
       type: string;
       // description?: string;
       proofOfAddressImage: string;
@@ -228,7 +228,7 @@ class FernService {
     } = payload;
 
     console.log('the email', email)
-    console.log('the type', documents?.proofOfAddress?.type)
+    console.log('the type', documents?.proof_of_Address?.type)
   
     const customerData = {
       customerType: "INDIVIDUAL",
@@ -254,9 +254,9 @@ class FernService {
           },
           {
             type: "PROOF_OF_ADDRESS",
-            subtype: documents?.proofOfAddress?.type,
-            description: `${documents?.proofOfAddress?.type} means of verification`,
-            proofOfAddressImage: documents?.proofOfAddress?.proofOfAddressImage,
+            subtype: documents?.proof_of_Address?.type,
+            description: `${documents?.proof_of_Address?.type} means of verification`,
+            proofOfAddressImage: documents?.proof_of_Address?.proofOfAddressImage,
           }
         ],
         employmentStatus,
