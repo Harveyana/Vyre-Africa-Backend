@@ -247,7 +247,7 @@ class FernService {
         dateOfBirth,
         address,
         nationalIdNumber,
-        nationalIdIssuingCountry: documents?.governmentId?.countryCode,
+        // nationalIdIssuingCountry: documents?.governmentId?.countryCode,
         nationalIdType,
         nationality: documents?.governmentId?.countryCode,
         documents: [
