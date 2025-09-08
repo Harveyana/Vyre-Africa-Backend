@@ -9,7 +9,12 @@ import orderValidator from '../validators/order.validator';
     orderId: string;
     currencyId: string;
     amount: string;
-    email: string;
+    userDetails:{
+      firstName: string; 
+      lastName: string; 
+      phoneNumber: string;
+      email: string;
+    }
     bank:{
       accountNumber: string;
       bank_code: string;
@@ -24,9 +29,15 @@ import orderValidator from '../validators/order.validator';
 class AnonService {
 
     
-  async setUpUser (payload:{email:string; orderId:string}) {
+  async setUpUser (payload:{
+    firstName:string,
+    lastName:string,
+    phoneNumber:string,
+    email:string; 
+    orderId:string
+  }) {
 
-    const {email, orderId} = payload
+    const {firstName,lastName,phoneNumber,email, orderId} = payload
 
     const order = await prisma.order.findUnique({
       where:{id: orderId}
@@ -58,8 +69,9 @@ class AnonService {
 
           const user = await prisma.user.create({
               data: {
-                  firstName: `anonymous|${orderId}|${email}`,
-                  lastName: `anonymous|${orderId}|${email}lastName`,
+                  firstName,
+                  lastName,
+                  phoneNumber,
                   email,
                   // emailVerified: email_verified,
               }
@@ -103,7 +115,7 @@ class AnonService {
   }
 
   async preActions(payload: PreAction) {
-    const { orderId, currencyId, amount, email, bank, crypto } = payload;
+    const { orderId, currencyId, amount, userDetails, bank, crypto} = payload;
   
     try {
 
@@ -123,7 +135,13 @@ class AnonService {
         throw new Error('Currency not found');
       }
   
-      const userSetup = await this.setUpUser({ email, orderId });
+      const userSetup = await this.setUpUser({
+        firstName: userDetails.firstName,
+        lastName: userDetails.lastName,
+        phoneNumber: userDetails.phoneNumber,
+        email: userDetails.email, 
+        orderId
+      });
       
       if (!userSetup) {
         throw new Error('Failed to set up user');
@@ -142,7 +160,7 @@ class AnonService {
         payments = await walletService.depositFiat({
           currency: currency.ISO,
           amount: parseFloat(amount),
-          email: email,
+          email: user.email,
           userId: user.id, 
           walletId: quoteWallet.id
         });

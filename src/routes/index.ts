@@ -294,6 +294,14 @@ router.post(
 );
 
 router.post(
+  '/orders/anonymous/initiate',
+  // authMiddleware,
+  orderValidator.initializeAnon(),
+  middleware.handleValidationError,
+  orderController.initiateAnonymous
+);
+
+router.post(
   '/orders/process',
   authMiddleware,
   orderValidator.processOrder(),

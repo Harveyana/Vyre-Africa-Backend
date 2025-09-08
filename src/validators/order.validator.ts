@@ -34,10 +34,16 @@ class OrderValidator {
   initializeAnon() {
     return [
       body('amount').notEmpty().withMessage('Amount is required').isFloat().withMessage('Invalid amount'),
+    
+      body('user').isObject().withMessage('User must be an object'),
+          body('user.firstName').notEmpty().withMessage('first name is required'),
+          body('user.lastName').notEmpty().withMessage('last name is required'),
+          body('user.phoneNumber').notEmpty().withMessage('phone number is required'),
+          body('user.email').notEmpty().withMessage('user email is required').isEmail().withMessage('user email is invalid'),
 
       body('orderId').notEmpty().withMessage('order ID is required').isString().withMessage('order Id is invalid'),
       body('currencyId').notEmpty().withMessage('currency ID is required').isString().withMessage('currency Id is invalid'),
-      body('email').notEmpty().withMessage('user email is required').isEmail().withMessage('user email is invalid'),
+      
 
       // user bank details
       body('bank').isObject().optional(),

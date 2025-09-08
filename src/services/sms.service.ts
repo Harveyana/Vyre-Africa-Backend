@@ -13,8 +13,18 @@ class SMSService{
         this.provider = 'termii'
     }
 
-    async send(data:{})
+    async send(token:string,number:string)
     {
+        const data = {
+            api_key: config.termiiLiveKey,
+            to: number,
+            from:'Vyre Africa',
+            sms:`${token}`,
+            type:'plain',
+            channel:'whatsapp', //It is either dnd, whatsapp, or generic
+
+        }
+
         return await termiiAxios.post('/api/sms/send', data)
     }
 

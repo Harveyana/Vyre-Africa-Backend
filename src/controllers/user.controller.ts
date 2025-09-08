@@ -1331,7 +1331,7 @@ class UserController {
         }
 
         return res.status(201).json({
-            msg: 'Account details verified successfully',
+            msg: 'Bank Account verified successfully',
             success: true,
             data: {
                 accountNumber: verifyDetails.data?.account_number,

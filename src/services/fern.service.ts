@@ -261,7 +261,7 @@ class FernService {
             expirationDate: documents?.governmentId?.expirationDate,
             frontIdImage: documents?.governmentId?.frontIdImage,
             description: `${documents?.proof_of_Address?.type} means of verification`,
-            proofOfAddressImage: documents?.proof_of_Address?.proofOfAddressImage
+            // proofOfAddressImage: documents?.proof_of_Address?.proofOfAddressImage
           }
           // {
           //   type: "PROOF_OF_ADDRESS",
@@ -317,17 +317,6 @@ class FernService {
       throw mainError; // Re-throw to see the full stack trace
     }
   }
-
-  // async customer(payload:{customerType:string,firstName:string,lastName:string,email:string}){
-
-    
-    
-  //   const response = await fernAxios.post('/customers', payload)
-  //   const result = response.data
-  //   console.log(result)
-
-  //   return result
-  // }
 
   async customer_Created(payload:{customerId:string, status:string, kycLink:string, email:string}){
 

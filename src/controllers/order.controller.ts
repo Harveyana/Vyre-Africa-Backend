@@ -226,7 +226,7 @@ class OrderController {
 
   async initiateAnonymous(req: Request & Record<string, any>, res: Response) {
     // const { user } = req;
-    const { orderId, currencyId, amount, email, bank, crypto } = req.body;
+    const { orderId, currencyId, amount, user, bank, crypto } = req.body;
 
     try {
 
@@ -282,7 +282,7 @@ class OrderController {
         orderId,
         currencyId,
         amount,
-        email,
+        userDetails: user,
         bank:{
           accountNumber: bank.accountNumber,
           bank_code: bank.bankCode,
@@ -298,7 +298,7 @@ class OrderController {
       return res
         .status(200)
         .json({
-          msg: 'Anonymous initialization Successful',
+          msg: 'Order initialization Successful',
           success: true,
           details: transferDetails
         });
