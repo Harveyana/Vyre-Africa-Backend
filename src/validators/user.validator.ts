@@ -76,15 +76,15 @@ class UserValidator {
                         }),
                       
                     // Proof of Address Validation
-                    body('documents.proof_of_Address').isObject().withMessage('Proof of Address must be an object'),
-                        body('documents.proof_of_Address.type').notEmpty().withMessage('Proof of Address type is required').isString().withMessage('Proof of Address type must be a string'),
-                        body('documents.proof_of_Address.proofOfAddressImage').notEmpty().withMessage('Proof of Address image is required')
-                        .custom((value) => {
-                            if (!value || !(typeof value === 'string' || value instanceof Buffer)) {
-                            throw new Error('Proof of Address must be a PDF or image file');
-                            }
-                            return true;
-                        }),
+                    // body('documents.proof_of_Address').isObject().withMessage('Proof of Address must be an object'),
+                    //     body('documents.proof_of_Address.type').notEmpty().withMessage('Proof of Address type is required').isString().withMessage('Proof of Address type must be a string'),
+                    //     body('documents.proof_of_Address.proofOfAddressImage').notEmpty().withMessage('Proof of Address image is required')
+                    //     .custom((value) => {
+                    //         if (!value || !(typeof value === 'string' || value instanceof Buffer)) {
+                    //         throw new Error('Proof of Address must be a PDF or image file');
+                    //         }
+                    //         return true;
+                    //     }),
 
                 // Employment Information
                 body('employmentStatus').notEmpty().withMessage('Employment status is required').isString().withMessage('Employment status must be a string')

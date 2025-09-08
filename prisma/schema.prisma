@@ -302,10 +302,6 @@ model Documents {
   identityId String   @unique
   identity   Identity @relation(fields: [identityId], references: [id], name: "DocumentsToIdentity")
 
-  // Proof of Address relation (one-to-one)
-  proofOfAddressId String         @unique
-  proofOfAddress   ProofOfAddress @relation(fields: [proofOfAddressId], references: [id], name: "DocumentsToProofOfAddress")
-
   // UserKyc relation (one-to-one)
   userKyc UserKyc? @relation("UserKycToDocuments")
 }
@@ -321,13 +317,6 @@ model Identity {
   documents        Documents? @relation("DocumentsToIdentity")
 }
 
-model ProofOfAddress {
-  id                  String     @id @default(uuid())
-  type                String
-  description         String?
-  proofOfAddressImage String
-  documents           Documents? @relation("DocumentsToProofOfAddress")
-}
 
 model Swap {
   id        String     @id @default(cuid())

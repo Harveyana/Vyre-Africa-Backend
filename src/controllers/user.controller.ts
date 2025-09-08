@@ -210,10 +210,6 @@ class UserController {
             //     });
             // }
 
-            console.log('about to start transaction')
-            console.log('nationalIdType',nationalIdType)
-            console.log('nationalIdNumber',nationalIdNumber)
-
             // Process the KYC submission in a transaction
             const result = await prisma.$transaction(async (prisma) => {
 
@@ -258,19 +254,18 @@ class UserController {
                 });
         
                 // 3. Create Proof of Address
-                const proofOfAddress = await prisma.proofOfAddress.create({
-                    data: {
-                        type: documents.proof_of_Address.type,
-                        description: `${documents.proof_of_Address.type} means of verification`,
-                        proofOfAddressImage: documents.proof_of_Address.proofOfAddressImage
-                    }
-                });
+                // const proofOfAddress = await prisma.proofOfAddress.create({
+                //     data: {
+                //         type: documents.proof_of_Address.type,
+                //         description: `${documents.proof_of_Address.type} means of verification`,
+                //         proofOfAddressImage: documents.proof_of_Address.proofOfAddressImage
+                //     }
+                // });
         
                 // 4. Create Documents (linking both)
                 const documentsRecord = await prisma.documents.create({
                     data: {
-                        identityId: governmentId.id,
-                        proofOfAddressId: proofOfAddress.id
+                        identityId: governmentId.id
                     }
                 });
         
@@ -290,15 +285,6 @@ class UserController {
                         addressId: addressRecord.id,
                         documentsId: documentsRecord.id,
                         userId: user.id
-                    },
-                    include: {
-                        address: true,
-                        documents: {
-                            include: {
-                                identity: true,
-                                proofOfAddress: true
-                            }
-                        }
                     }
                 });
 

@@ -122,11 +122,11 @@ interface KycDetails {
       expirationDate: string;
       frontIdImage: string;
     };
-    proof_of_Address: {
-      type: string;
-      // description?: string;
-      proofOfAddressImage: string;
-    };
+    // proof_of_Address: {
+    //   type: string;
+    //   // description?: string;
+    //   proofOfAddressImage: string;
+    // };
   };
 }
 
@@ -260,7 +260,7 @@ class FernService {
             issuanceDate: documents?.governmentId?.issuanceDate,
             expirationDate: documents?.governmentId?.expirationDate,
             frontIdImage: documents?.governmentId?.frontIdImage,
-            description: `${documents?.proof_of_Address?.type} means of verification`,
+            description: `${documents?.governmentId?.type} means of verification`,
             // proofOfAddressImage: documents?.proof_of_Address?.proofOfAddressImage
           }
           // {
