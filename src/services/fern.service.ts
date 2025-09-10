@@ -34,6 +34,7 @@ interface fiatAccount {
     userId:string,
     bankName:string,
     accountNumber:string,
+    accountName:string,
     currency:string,
 
     bankAddress: {
@@ -381,6 +382,8 @@ class FernService {
       where:{id:payload.userId}
     })
 
+    const directNameParts = payload.accountName.trim().split(' ');
+
     const accountData = {
         paymentAccountType: "EXTERNAL_BANK_ACCOUNT",
         customerId: user?.fernUserId,
@@ -410,8 +413,8 @@ class FernService {
 
           bankAccountOwner: {
             email: user?.email,
-            firstName: user?.firstName,
-            lastName: user?.lastName,
+            firstName: directNameParts[0],
+            lastName: directNameParts.slice(1).join(' '),
             address: {
               country: getISOByCountry(user?.country as string),
               addressLine1: user?.address,
@@ -425,7 +428,7 @@ class FernService {
           }
           
         },
-        isThirdParty: payload.isThirdParty
+        isThirdParty: true
     }
     
     const response = await fernAxios.post('/payment-accounts', accountData)

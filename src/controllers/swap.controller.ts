@@ -69,6 +69,7 @@ class SwapController {
     const { user } = req;
     const {
       accountNumber,
+      accountName,
       bankId,
       type,
 
@@ -92,6 +93,7 @@ class SwapController {
 
       console.log('bicSwift',bicSwift)
       console.log('routingNumber', routingNumber)
+      console.log('accountName', accountName)
 
       if(!bankId ||!type){
         return res.status(400)
@@ -131,6 +133,7 @@ class SwapController {
           userId:user.id,
           bankName: bank.name,
           accountNumber,
+          accountName,
           currency: bank?.currency!,
           bankAddress: {
             country: getISOByCountry(bank?.country as string)!,
@@ -166,16 +169,14 @@ class SwapController {
             id: account.paymentAccountId,
             name: account.nickname,
             bank: account.externalBankAccount.bankName,
-            accountNumber: account.externalBankAccount.bankAccountMask,
+            accountNumber: accountNumber || sortCode || bsbNumber || institutionNumber || ifscCode || clabeNumber || cnapsCode || pixCode || clearingCode,
             currency: bank?.currency!,
             method:account.externalBankAccount.bankAccountPaymentMethod,
             country: userData?.country!,
             userId: user.id
-          }
+          } 
         })
       }
-
-      
 
       return res
         .status(200)

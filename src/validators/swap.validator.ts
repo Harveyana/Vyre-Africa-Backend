@@ -5,6 +5,7 @@ class SwapValidator {
   addFiatAccount() {
     return [
       body('accountNumber').notEmpty().withMessage('accountNumber is required'),
+      body('accountName').notEmpty().withMessage('accountName is required'),
       body('bankId').notEmpty().withMessage('bankId is required'),
     ];
   }
